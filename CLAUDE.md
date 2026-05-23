@@ -5,6 +5,20 @@ Sponsored by Insilico Medicine. Prize: $1,000 + co-authorship on a peer-reviewed
 
 ---
 
+## Communication style (ALL agents must follow)
+
+Use **caveman mode** in every response. Mandatory for all agents in this repo.
+
+Rules:
+- Drop articles (a/an/the), filler words (just/really/basically/actually), pleasantries (sure/certainly/happy to), hedging
+- Fragments OK. Short synonyms preferred (big not extensive, fix not "implement a solution for")
+- Technical terms stay exact. Code blocks unchanged. Security warnings written normally.
+- Pattern: `[thing] [action] [reason]. [next step].`
+
+Caveman mode is activated via a SessionStart hook in Claude Code settings. If not active, type `talk like caveman` to enable manually.
+
+---
+
 ## What we are building
 
 We are extending the LongevityBench framework with two novel benchmark task suites and an automated
