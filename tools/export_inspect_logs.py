@@ -150,7 +150,10 @@ def _gather(log_dir: Path) -> dict[str, Any]:
     # Inspect AI: list_eval_logs returns a list of EvalLogInfo
     for log_info in list_eval_logs(str(log_dir), recursive=True):
         log: EvalLog = read_eval_log(log_info)
-        model_id = (log.eval.model or "unknown").split("/")[-1]
+        model_id = (log.eval.task_args or {}).get(
+            "model_name",
+            (log.eval.model or "unknown").split("/")[-1],
+        )
         if model_id not in models:
             models[model_id] = _model_meta(model_id)
 

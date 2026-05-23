@@ -92,6 +92,34 @@ Logs include raw response, parsed answer, gold answer, usage, latency, and score
 
 ---
 
+## Dashboard (static React UI)
+
+Full pipeline: run eval → export → open browser.
+
+```bash
+# 1. Run eval (produces outputs/inspect/<model>/*.eval)
+.venv/bin/python -m src.eval.run_inspect \
+  --lb-id LB-0038 \
+  --limit 50 \
+  --models longevity_llm,majority_baseline,random_baseline
+
+# 2. Export logs → dashboard JSON
+.venv/bin/python -m tools.export_inspect_logs \
+  --log-dir outputs/inspect \
+  --out "LongevityBench Design System/ui_kits/longevity_bench/public/data.json"
+
+# 3. Serve dashboard (must serve from this exact directory)
+cd "LongevityBench Design System/ui_kits/longevity_bench"
+python3 -m http.server 8765
+# open http://localhost:8765/
+```
+
+The dashboard loads `public/data.json` on page load — no backend needed. It is read-only; it never touches Inspect AI internals.
+
+**Important:** serve from `LongevityBench Design System/ui_kits/longevity_bench/`, not a parent directory. The CSS design tokens (`design-tokens.css`) and data file (`public/data.json`) are resolved relative to that root.
+
+---
+
 ## Fallback smoke runner (legacy)
 
 The original `longebench_runner.py` calls the HF endpoint directly via the OpenAI SDK and is kept as a quick smoke-test tool:

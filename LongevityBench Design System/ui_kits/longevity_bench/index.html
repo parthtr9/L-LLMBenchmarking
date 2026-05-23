@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>LongevityBench — Trust & Reasoning</title>
-<link rel="icon" href="../../assets/insilico-badge.svg">
-<link rel="stylesheet" href="../../colors_and_type.css">
+<link rel="stylesheet" href="design-tokens.css">
 <link rel="stylesheet" href="styles.css">
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
@@ -28,13 +27,23 @@
 
 <script type="text/babel" data-presets="env,react">
 function App() {
-  const [view, setView] = React.useState('trust');           // default to trust
+  const [view, setView] = React.useState('trust');
   const [runs, setRuns] = React.useState(SEED_RUNS);
+  const [records, setRecords] = React.useState(SEED_RECORDS);
   const [openRun, setOpenRun] = React.useState(null);
   const [openRecord, setOpenRecord] = React.useState(null);
   const [showModal, setShowModal] = React.useState(false);
   const [toast, setToast] = React.useState(null);
   const liveCount = runs.filter(r => r.status === 'running').length;
+
+  React.useEffect(() => {
+    loadDashboardData().then(data => {
+      if (data && data.runs.length > 0) {
+        setRuns(data.runs);
+        setRecords(data.records);
+      }
+    });
+  }, []);
 
   const handleOpenRun = (run) => {
     setOpenRun(run);
@@ -93,9 +102,9 @@ function App() {
   // Body
   let content;
   if (view === 'run-detail' && openRun) {
-    content = <RunDetail run={openRun} records={SEED_RECORDS} onOpenRecord={setOpenRecord} />;
+    content = <RunDetail run={openRun} records={records} onOpenRecord={setOpenRecord} />;
   } else if (view === 'trust') {
-    content = <TrustView records={SEED_RECORDS} onOpenRecord={setOpenRecord} />;
+    content = <TrustView records={records} onOpenRecord={setOpenRecord} />;
   } else if (view === 'matrix') {
     content = <ResultsMatrix onOpenRecord={setOpenRecord} />;
   } else if (view === 'compare') {

@@ -91,17 +91,20 @@ const EntityVerification = () => {
 
 const FeaturedTrace = ({ record, onOpenRecord }) => {
   if (!record) return null;
-  const traceHtml = { __html: ENTITY_HIGHLIGHTS(record.trace) };
+  const traceText = record.trace || '';
+  const traceHtml = { __html: traceText ? ENTITY_HIGHLIGHTS(traceText) : '<em style="color:var(--lb-fg-4)">No reasoning trace for this record. Run with thinking mode enabled to populate traces.</em>' };
+  const faith = record.faithfulness;
+  const subParts = [record.lbId, record.organism !== '—' && record.organism, record.gene1 !== '—' && record.gene1, record.gene2 !== '—' && record.gene2].filter(Boolean);
   return (
     <div className="card">
       <div className="head">
         <h3>Trace inspection · row {String(record.row).padStart(3, '0')}</h3>
-        <p className="sub">{record.lbId} · {record.organism} · {record.gene1} · {record.gene2}</p>
+        <p className="sub">{subParts.join(' · ')}</p>
         <div className="right">
-          {record.consistent
+          {record.consistent != null && (record.consistent
             ? <Badge kind="pass">consistent</Badge>
-            : <Badge kind="err">inconsistent</Badge>}
-          <Badge kind="neutral">faithfulness {record.faithfulness.toFixed(2)}</Badge>
+            : <Badge kind="err">inconsistent</Badge>)}
+          {faith != null && <Badge kind="neutral">faithfulness {faith.toFixed(2)}</Badge>}
           <Button variant="ghost" size="small" icon="chevR" onClick={() => onOpenRecord(record)}>Open record</Button>
         </div>
       </div>
@@ -116,8 +119,8 @@ const FeaturedTrace = ({ record, onOpenRecord }) => {
 };
 
 const LowFaithList = ({ records, onOpenRecord }) => {
-  // Pick the lowest-faithfulness records.
-  const sorted = [...records].sort((a, b) => a.faithfulness - b.faithfulness).slice(0, 4);
+  const withFaith = records.filter(r => r.faithfulness != null);
+  const sorted = (withFaith.length > 0 ? [...withFaith].sort((a, b) => a.faithfulness - b.faithfulness) : [...records]).slice(0, 4);
   return (
     <div className="card" style={{ overflow: 'hidden' }}>
       <div className="head">
@@ -142,12 +145,12 @@ const LowFaithList = ({ records, onOpenRecord }) => {
                 <span style={{ color: 'var(--lb-fg-4)' }}> / {r.gold}</span>
               </td>
               <td>
-                {r.consistent
+                {r.consistent != null && (r.consistent
                   ? <Badge kind="pass">consistent</Badge>
-                  : <Badge kind="err">inconsistent</Badge>}
+                  : <Badge kind="err">inconsistent</Badge>)}
               </td>
-              <td className="num" style={{ color: r.faithfulness < 0.5 ? 'var(--lb-error)' : (r.faithfulness < 0.7 ? '#8a5d12' : 'var(--lb-green-700)') }}>
-                {r.faithfulness.toFixed(2)}
+              <td className="num" style={{ color: r.faithfulness == null ? 'var(--lb-fg-4)' : (r.faithfulness < 0.5 ? 'var(--lb-error)' : (r.faithfulness < 0.7 ? '#8a5d12' : 'var(--lb-green-700)')) }}>
+                {r.faithfulness != null ? r.faithfulness.toFixed(2) : '—'}
               </td>
             </tr>
           ))}

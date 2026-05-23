@@ -57,18 +57,16 @@ const InFlightCard = ({ run, onOpenRun }) => {
 };
 
 const CompletedRow = ({ run, onClick }) => {
-  const score = run.f1 != null
-    ? <span className="num">{run.f1.toFixed(2)}</span>
-    : run.mae != null
-      ? <span className="num">MAE {run.mae.toFixed(1)}</span>
-      : <span className="num" style={{ color: 'var(--lb-fg-4)' }}>—</span>;
+  const primaryScore = run.f1 ?? run.mae ?? run.spark?.[7];
+  const scoreLabel = run.f1 != null ? run.f1.toFixed(2)
+                   : run.mae != null ? 'MAE ' + run.mae.toFixed(1)
+                   : primaryScore != null ? primaryScore.toFixed(2) : '—';
+  const score = primaryScore != null
+    ? <span className="num">{scoreLabel}</span>
+    : <span className="num" style={{ color: 'var(--lb-fg-4)' }}>—</span>;
 
-  const modelColor = run.model === 'longevity-llm' ? 'var(--lb-green-500)' :
-                     run.model === 'gpt-4o' ? '#2a6dc8' :
-                     run.model === 'majority-baseline' ? '#c98b1c' : '#8c948c';
-  const modelLabel = run.model === 'longevity-llm' ? 'L-LLM' :
-                     run.model === 'gpt-4o' ? 'GPT-4o' :
-                     run.model === 'majority-baseline' ? 'Majority' : run.model;
+  const modelColor = (MODEL_COLORS || {})[run.modelId] || (MODEL_COLORS || {})[run.model] || '#8c948c';
+  const modelLabel = run.model;
   const statusBadge = run.status === 'failed'
     ? <Badge kind="err">Failed · {run.errors} err</Badge>
     : <Badge kind="pass">Complete</Badge>;

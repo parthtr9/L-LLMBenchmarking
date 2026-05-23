@@ -1,0 +1,2229 @@
+{
+  "generated_at": "2026-05-23T22:40:36.933527+00:00",
+  "models": [
+    {
+      "id": "random_baseline",
+      "name": "Random",
+      "color": "#b3b8b3"
+    },
+    {
+      "id": "majority_baseline",
+      "name": "Majority",
+      "color": "#8c948c"
+    },
+    {
+      "id": "longevity_llm",
+      "name": "L-LLM",
+      "color": "#4ca045"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "LB-0038",
+      "name": "LB-0038",
+      "format": null,
+      "n": 0,
+      "metric": null
+    }
+  ],
+  "runs": [
+    {
+      "id": "MCAFrV7eqsigC7QL6Pq7nh",
+      "model": "random_baseline",
+      "lb_id": "LB-0038",
+      "status": "success",
+      "n": 50,
+      "completed": 50,
+      "errors": 0,
+      "started": "2026-05-23T22:39:51+00:00",
+      "duration_s": null,
+      "scores": {
+        "mean": 0.0
+      },
+      "ci_95": null
+    },
+    {
+      "id": "J5J4zQiQuTSmXVwgaaPmbQ",
+      "model": "majority_baseline",
+      "lb_id": "LB-0038",
+      "status": "success",
+      "n": 50,
+      "completed": 50,
+      "errors": 0,
+      "started": "2026-05-23T22:39:49+00:00",
+      "duration_s": null,
+      "scores": {
+        "mean": 0.17
+      },
+      "ci_95": null
+    },
+    {
+      "id": "iWqix7YvoFMR3psbCkWuVr",
+      "model": "longevity_llm",
+      "lb_id": "LB-0038",
+      "status": "success",
+      "n": 50,
+      "completed": 50,
+      "errors": 0,
+      "started": "2026-05-23T22:39:44+00:00",
+      "duration_s": null,
+      "scores": {
+        "mean": 0.1154
+      },
+      "ci_95": null
+    }
+  ],
+  "samples": [
+    {
+      "id": "LB-0038_00000",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "77",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.06666666666666667,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "31",
+          "score": 0.02127659574468085,
+          "pass": false,
+          "latency_s": 2.0691517499508336,
+          "tokens": 475,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00001",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "49",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.06666666666666667,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "34",
+          "score": 0.0625,
+          "pass": false,
+          "latency_s": 2.049121499992907,
+          "tokens": 475,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00002",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "59",
+      "cells": {
+        "random_baseline": {
+          "pred": "no",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.2,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "40",
+          "score": 0.05,
+          "pass": false,
+          "latency_s": 2.0119713749736547,
+          "tokens": 458,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00003",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "43",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.047619047619047616,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "21",
+          "score": 0.043478260869565216,
+          "pass": false,
+          "latency_s": 2.0680060000158846,
+          "tokens": 459,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00004",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "37",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.037037037037037035,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "25",
+          "score": 0.07692307692307693,
+          "pass": false,
+          "latency_s": 2.06895883299876,
+          "tokens": 460,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00005",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "70",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.125,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "44",
+          "score": 0.037037037037037035,
+          "pass": false,
+          "latency_s": 2.0771027910523117,
+          "tokens": 450,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00006",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "81",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.05263157894736842,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "31",
+          "score": 0.0196078431372549,
+          "pass": false,
+          "latency_s": 2.0680305419955403,
+          "tokens": 444,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00007",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "38",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.038461538461538464,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "34",
+          "score": 0.2,
+          "pass": false,
+          "latency_s": 2.050431124982424,
+          "tokens": 459,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00008",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "85",
+      "cells": {
+        "random_baseline": {
+          "pred": "no",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.043478260869565216,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "25",
+          "score": 0.01639344262295082,
+          "pass": false,
+          "latency_s": 1.9901369170984253,
+          "tokens": 444,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00009",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "23",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.024390243902439025,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "24",
+          "score": 0.5,
+          "pass": true,
+          "latency_s": 2.0233935000142083,
+          "tokens": 459,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00010",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "53",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.09090909090909091,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "34",
+          "score": 0.05,
+          "pass": false,
+          "latency_s": 2.0317530420143157,
+          "tokens": 432,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00011",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "42",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.045454545454545456,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "30",
+          "score": 0.07692307692307693,
+          "pass": false,
+          "latency_s": 2.0606277500046417,
+          "tokens": 460,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00012",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "62",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.5,
+          "pass": true,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "43",
+          "score": 0.05,
+          "pass": false,
+          "latency_s": 2.0007323750760406,
+          "tokens": 475,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00013",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "46",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.05555555555555555,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "31",
+          "score": 0.0625,
+          "pass": false,
+          "latency_s": 2.063660083920695,
+          "tokens": 431,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00014",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "38",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.038461538461538464,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "25",
+          "score": 0.07142857142857142,
+          "pass": false,
+          "latency_s": 2.016581958043389,
+          "tokens": 476,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00015",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "68",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.16666666666666666,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "40",
+          "score": 0.034482758620689655,
+          "pass": false,
+          "latency_s": 1.9907478749519214,
+          "tokens": 433,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00016",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "33",
+      "cells": {
+        "random_baseline": {
+          "pred": "no",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.03225806451612903,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "20",
+          "score": 0.07142857142857142,
+          "pass": false,
+          "latency_s": 1.9791051670908928,
+          "tokens": 430,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00017",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "85",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.043478260869565216,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "42",
+          "score": 0.022727272727272728,
+          "pass": false,
+          "latency_s": 2.027396332938224,
+          "tokens": 449,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00018",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "61",
+      "cells": {
+        "random_baseline": {
+          "pred": "no",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.3333333333333333,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "44",
+          "score": 0.05555555555555555,
+          "pass": false,
+          "latency_s": 1.9593134999740869,
+          "tokens": 476,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00019",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "21",
+      "cells": {
+        "random_baseline": {
+          "pred": "no",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.023255813953488372,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "21",
+          "score": 1.0,
+          "pass": true,
+          "latency_s": 1.9790997920790687,
+          "tokens": 431,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00020",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "39",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.04,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "31",
+          "score": 0.1111111111111111,
+          "pass": false,
+          "latency_s": 1.9908455839613453,
+          "tokens": 461,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00021",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "70",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.125,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "44",
+          "score": 0.037037037037037035,
+          "pass": false,
+          "latency_s": 1.9856967920204625,
+          "tokens": 474,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00022",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "63",
+      "cells": {
+        "random_baseline": {
+          "pred": "no",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 1.0,
+          "pass": true,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "25",
+          "score": 0.02564102564102564,
+          "pass": false,
+          "latency_s": 1.9932874579681084,
+          "tokens": 474,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00023",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "37",
+      "cells": {
+        "random_baseline": {
+          "pred": "no",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.037037037037037035,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "21",
+          "score": 0.058823529411764705,
+          "pass": false,
+          "latency_s": 1.9882383750518784,
+          "tokens": 430,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00024",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "27",
+      "cells": {
+        "random_baseline": {
+          "pred": "no",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.02702702702702703,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "30",
+          "score": 0.25,
+          "pass": false,
+          "latency_s": 2.0099503750680014,
+          "tokens": 462,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00025",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "25",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.02564102564102564,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "24",
+          "score": 0.5,
+          "pass": true,
+          "latency_s": 0.5602062919642776,
+          "tokens": 463,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00026",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "30",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.029411764705882353,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "38",
+          "score": 0.1111111111111111,
+          "pass": false,
+          "latency_s": 0.5273975830059499,
+          "tokens": 431,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00027",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "60",
+      "cells": {
+        "random_baseline": {
+          "pred": "no",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.25,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "41",
+          "score": 0.05,
+          "pass": false,
+          "latency_s": 0.5259564580628648,
+          "tokens": 446,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00028",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "63",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 1.0,
+          "pass": true,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "40",
+          "score": 0.041666666666666664,
+          "pass": false,
+          "latency_s": 0.5014106249436736,
+          "tokens": 434,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00029",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "63",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 1.0,
+          "pass": true,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "34",
+          "score": 0.03333333333333333,
+          "pass": false,
+          "latency_s": 0.5304326670011505,
+          "tokens": 444,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00030",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "61",
+      "cells": {
+        "random_baseline": {
+          "pred": "no",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.3333333333333333,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "34",
+          "score": 0.03571428571428571,
+          "pass": false,
+          "latency_s": 0.5191219999687746,
+          "tokens": 474,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00031",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "52",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.08333333333333333,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "21",
+          "score": 0.03125,
+          "pass": false,
+          "latency_s": 0.4947195409331471,
+          "tokens": 431,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00032",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "41",
+      "cells": {
+        "random_baseline": {
+          "pred": "no",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.043478260869565216,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "27",
+          "score": 0.06666666666666667,
+          "pass": false,
+          "latency_s": 0.49040574999526143,
+          "tokens": 461,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00033",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "37",
+      "cells": {
+        "random_baseline": {
+          "pred": "no",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.037037037037037035,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "25",
+          "score": 0.07692307692307693,
+          "pass": false,
+          "latency_s": 0.4943156250519678,
+          "tokens": 475,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00034",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "39",
+      "cells": {
+        "random_baseline": {
+          "pred": "no",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.04,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "30",
+          "score": 0.1,
+          "pass": false,
+          "latency_s": 0.5007434589788318,
+          "tokens": 430,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00035",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "30",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.029411764705882353,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "21",
+          "score": 0.1,
+          "pass": false,
+          "latency_s": 0.4833387080579996,
+          "tokens": 432,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00036",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "22",
+      "cells": {
+        "random_baseline": {
+          "pred": "no",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.023809523809523808,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "24",
+          "score": 0.3333333333333333,
+          "pass": false,
+          "latency_s": 0.4826114579336718,
+          "tokens": 445,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00037",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "27",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.02702702702702703,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "21",
+          "score": 0.14285714285714285,
+          "pass": false,
+          "latency_s": 0.47022941696923226,
+          "tokens": 474,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00038",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "59",
+      "cells": {
+        "random_baseline": {
+          "pred": "no",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.2,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "21",
+          "score": 0.02564102564102564,
+          "pass": false,
+          "latency_s": 0.6176554580451921,
+          "tokens": 431,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00039",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "34",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.03333333333333333,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "40",
+          "score": 0.14285714285714285,
+          "pass": false,
+          "latency_s": 0.4915959999198094,
+          "tokens": 432,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00040",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "85",
+      "cells": {
+        "random_baseline": {
+          "pred": "no",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.043478260869565216,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "50",
+          "score": 0.027777777777777776,
+          "pass": false,
+          "latency_s": 0.4564888750901446,
+          "tokens": 430,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00041",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "30",
+      "cells": {
+        "random_baseline": {
+          "pred": "no",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.029411764705882353,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "31",
+          "score": 0.5,
+          "pass": true,
+          "latency_s": 0.45236241701059043,
+          "tokens": 460,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00042",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "38",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.038461538461538464,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "21",
+          "score": 0.05555555555555555,
+          "pass": false,
+          "latency_s": 0.4623119590105489,
+          "tokens": 459,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00043",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "64",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.5,
+          "pass": true,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "43",
+          "score": 0.045454545454545456,
+          "pass": false,
+          "latency_s": 0.493352708988823,
+          "tokens": 479,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00044",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "76",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.07142857142857142,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "44",
+          "score": 0.030303030303030304,
+          "pass": false,
+          "latency_s": 0.5953324170550331,
+          "tokens": 464,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00045",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "33",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.03225806451612903,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "24",
+          "score": 0.1,
+          "pass": false,
+          "latency_s": 0.4683464579284191,
+          "tokens": 431,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00046",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "63",
+      "cells": {
+        "random_baseline": {
+          "pred": "no",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 1.0,
+          "pass": true,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "31",
+          "score": 0.030303030303030304,
+          "pass": false,
+          "latency_s": 0.6136365419952199,
+          "tokens": 473,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00047",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "59",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.2,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "46",
+          "score": 0.07142857142857142,
+          "pass": false,
+          "latency_s": 0.603203458013013,
+          "tokens": 459,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00048",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "56",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.125,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "32",
+          "score": 0.04,
+          "pass": false,
+          "latency_s": 0.4519912500400096,
+          "tokens": 478,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    },
+    {
+      "id": "LB-0038_00049",
+      "lb_id": "LB-0038",
+      "format": "regression",
+      "metadata": {
+        "lb_id": "LB-0038",
+        "display_name": "NHANES Age / Regression",
+        "format": "regression",
+        "metric": "mae",
+        "domain": "clinical",
+        "units": "years"
+      },
+      "gold": "41",
+      "cells": {
+        "random_baseline": {
+          "pred": "yes",
+          "score": 0.0,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "majority_baseline": {
+          "pred": "63",
+          "score": 0.043478260869565216,
+          "pass": false,
+          "latency_s": null,
+          "tokens": null,
+          "trace": null,
+          "reasoning_present": false
+        },
+        "longevity_llm": {
+          "pred": "28",
+          "score": 0.07142857142857142,
+          "pass": false,
+          "latency_s": 0.45179454202298075,
+          "tokens": 445,
+          "trace": null,
+          "reasoning_present": false
+        }
+      }
+    }
+  ],
+  "trace_scores": {}
+}
