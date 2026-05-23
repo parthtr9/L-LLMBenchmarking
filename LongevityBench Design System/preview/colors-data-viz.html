@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Colors — Data viz</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html, body { margin: 0; background: #fff; }
+  .card { padding: 20px 24px; }
+  .label { font: 500 11px var(--lb-font-mono); text-transform: uppercase; letter-spacing: 0.12em; color: var(--lb-fg-3); margin: 0 0 14px; }
+  .chart { display:flex; gap: 28px; align-items: flex-end; height: 140px; padding: 0 8px; border-bottom: 1px solid var(--lb-border); margin-bottom: 14px; }
+  .bar { flex: 1; display:flex; flex-direction: column; align-items: stretch; gap: 4px; }
+  .bar .b { width: 100%; border-radius: 3px 3px 0 0; }
+  .bar .lbl { font: 500 11px var(--lb-font-sans); color: var(--lb-fg-2); text-align:center; margin-top: 6px; }
+  .legend { display:flex; gap: 20px; flex-wrap: wrap; }
+  .legend span { display:inline-flex; align-items:center; gap: 8px; font: 400 12px var(--lb-font-sans); color: var(--lb-fg-2); }
+  .legend i { width: 14px; height: 14px; border-radius: 3px; display:inline-block; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="label">Data viz palette · 4 canonical model series</div>
+  <div class="chart">
+    <div class="bar"><div class="b" style="height: 78%; background:#4ca045"></div><div class="lbl">Task A</div></div>
+    <div class="bar"><div class="b" style="height: 64%; background:#2a6dc8"></div><div class="lbl">Task B</div></div>
+    <div class="bar"><div class="b" style="height: 42%; background:#c98b1c"></div><div class="lbl">LB-0038</div></div>
+    <div class="bar"><div class="b" style="height: 24%; background:#8c948c"></div><div class="lbl">LB-0042</div></div>
+    <div class="bar"><div class="b" style="height: 58%; background:#6b3fa0"></div><div class="lbl">LB-0051</div></div>
+    <div class="bar"><div class="b" style="height: 70%; background:#1c8a8c"></div><div class="lbl">LB-0067</div></div>
+  </div>
+  <div class="legend">
+    <span><i style="background:#4ca045"></i>L-LLM</span>
+    <span><i style="background:#2a6dc8"></i>GPT-4o</span>
+    <span><i style="background:#c98b1c"></i>Majority baseline</span>
+    <span><i style="background:#8c948c"></i>Random uniform</span>
+    <span><i style="background:#6b3fa0"></i>Series 5</span>
+    <span><i style="background:#1c8a8c"></i>Series 6</span>
+  </div>
+</div>
+</body>
+</html>

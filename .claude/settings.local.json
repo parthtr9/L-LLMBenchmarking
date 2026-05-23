@@ -1,7 +1,16 @@
 {
   "permissions": {
     "allow": [
-      "Bash(.venv/bin/pip install *)"
+      "Bash(.venv/bin/pip install *)",
+      "Bash(New-Item -ItemType Directory -Path \"C:\\\\Users\\\\melch\\\\L-LLMBenchmarking\\\\tools\" -Force)",
+      "Bash(New-Item -ItemType File -Path \"C:\\\\Users\\\\melch\\\\L-LLMBenchmarking\\\\tools\\\\__init__.py\" -Force)",
+      "PowerShell(New-Item -ItemType Directory -Path \"C:\\\\Users\\\\melch\\\\L-LLMBenchmarking\\\\tools\" -Force)",
+      "PowerShell(New-Item -ItemType File -Path \"C:\\\\Users\\\\melch\\\\L-LLMBenchmarking\\\\tools\\\\__init__.py\" -Force)",
+      "PowerShell(Copy-Item \"C:\\\\Users\\\\melch\\\\L-LLMBenchmarking\\\\LongevityBench Design System\\\\tools\\\\export_inspect_logs.py\" \"C:\\\\Users\\\\melch\\\\L-LLMBenchmarking\\\\tools\\\\export_inspect_logs.py\")",
+      "PowerShell(Get-Command python3, py, python -ErrorAction SilentlyContinue)",
+      "Read(//mnt/c/Users/melch/**)",
+      "PowerShell(cmd /c dir \"C:\\\\Users\\\\melch\\\\L-LLMBenchmarking\")",
+      "PowerShell($pyPath = \"C:\\\\Users\\\\melch\\\\AppData\\\\Local\\\\Microsoft\\\\WindowsApps\\\\python.exe\"; if \\(Test-Path $pyPath\\) { & $pyPath --version } else { \"not found\" })"
     ]
   }
 }

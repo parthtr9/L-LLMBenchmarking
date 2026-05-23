@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Type — Display</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html, body { margin: 0; background: #fff; }
+  .card { padding: 22px 24px; }
+  .label { font: 500 11px var(--lb-font-mono); text-transform: uppercase; letter-spacing: 0.12em; color: var(--lb-fg-3); margin: 0 0 18px; }
+  .row { display:flex; justify-content: space-between; align-items: baseline; padding: 12px 0; border-top: 1px solid var(--lb-border); }
+  .row:first-child { border-top: 0; padding-top: 0; }
+  .spec { font: 500 11px var(--lb-font-mono); color: var(--lb-fg-3); white-space: nowrap; margin-left: 16px; flex: 0 0 auto; }
+  .text { color: var(--lb-fg-1); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="label">Display + headings · DM Sans, weight 500</div>
+  <div class="row">
+    <span class="text lb-display">Benchmarking aging</span>
+    <span class="spec">Display · 64/1.05/-2%</span>
+  </div>
+  <div class="row">
+    <span class="text lb-h1">L-LLM vs GPT-4o, run 38</span>
+    <span class="spec">H1 · 44/1.10/-1.8%</span>
+  </div>
+  <div class="row">
+    <span class="text lb-h2">Task A: epistasis ternary</span>
+    <span class="spec">H2 · 32/1.20/-1.2%</span>
+  </div>
+  <div class="row">
+    <span class="text lb-h3">Macro F1 by question format</span>
+    <span class="spec">H3 · 24/1.25/-0.8%</span>
+  </div>
+  <div class="row">
+    <span class="text lb-h4">Recently completed runs</span>
+    <span class="spec">H4 · 20/1.30</span>
+  </div>
+</div>
+</body>
+</html>

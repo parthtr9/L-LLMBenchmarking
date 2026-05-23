@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Metric cards</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html, body { margin: 0; background: #fff; }
+  .card { padding: 22px 24px; display:grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .metric { border: 1px solid var(--lb-border); border-radius: 8px; padding: 14px 16px; background: #fff; }
+  .metric .lbl { font: 500 11px var(--lb-font-mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--lb-fg-3); margin-bottom: 8px; }
+  .metric .val { font: 500 32px var(--lb-font-sans); color: var(--lb-fg-1); letter-spacing: -0.018em; font-variant-numeric: tabular-nums; line-height: 1; }
+  .metric .sub { font: 400 12px var(--lb-font-mono); color: var(--lb-fg-3); margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .delta { display:inline-flex; align-items: center; gap: 4px; padding: 1px 6px; border-radius: 3px; font: 500 11px var(--lb-font-mono); margin-left: 6px; }
+  .delta.up { background: var(--lb-success-bg); color: var(--lb-green-700); }
+  .delta.down { background: var(--lb-error-bg); color: #8a2419; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="metric">
+    <div class="lbl">Macro F1 · L-LLM</div>
+    <div class="val">0.62 <span class="delta up">+0.04</span></div>
+    <div class="sub">CI 0.58 — 0.66 · n=200</div>
+  </div>
+  <div class="metric">
+    <div class="lbl">Balanced acc.</div>
+    <div class="val">0.59</div>
+    <div class="sub">vs GPT-4o 0.55</div>
+  </div>
+  <div class="metric">
+    <div class="lbl">MAE · regression</div>
+    <div class="val">11.4 <span class="delta down">+1.2</span></div>
+    <div class="sub">% lifespan change</div>
+  </div>
+  <div class="metric">
+    <div class="lbl">Trace faithfulness</div>
+    <div class="val">0.81</div>
+    <div class="sub">154 / 190 verified</div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Trace viewer card</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html, body { margin: 0; background: #fff; }
+  .card { padding: 22px 24px; }
+  .label { font: 500 11px var(--lb-font-mono); text-transform: uppercase; letter-spacing: 0.12em; color: var(--lb-fg-3); margin: 0 0 14px; }
+  .panel { border: 1px solid var(--lb-border); border-radius: 8px; overflow: hidden; }
+  .head { display:flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--lb-ink-50); border-bottom: 1px solid var(--lb-border); }
+  .head .id { font: 500 12px var(--lb-font-mono); color: var(--lb-fg-1); }
+  .head .meta { font: 400 11px var(--lb-font-mono); color: var(--lb-fg-3); }
+  .trace { padding: 12px 16px; font: 400 13px var(--lb-font-mono); color: var(--lb-fg-2); line-height: 1.65; max-height: 110px; overflow: hidden; }
+  .gene { background: var(--lb-green-50); color: var(--lb-green-700); padding: 1px 4px; border-radius: 2px; }
+  .verify { background: var(--lb-success-bg); padding: 0 3px; border-radius: 2px; color: var(--lb-green-700); }
+  .fail { background: var(--lb-error-bg); padding: 0 3px; border-radius: 2px; color: #8a2419; }
+  .foot { display:flex; gap: 14px; padding: 10px 14px; border-top: 1px solid var(--lb-border); background: #fff; font: 400 12px var(--lb-font-sans); color: var(--lb-fg-3); align-items: center; }
+  .score { font: 500 13px var(--lb-font-mono); color: var(--lb-fg-1); font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="label">Trace viewer · with verified entities</div>
+  <div class="panel">
+    <div class="head">
+      <span class="id">LB-0038-004 · Qwen think</span>
+      <span class="meta">1,284 tok · 6.04s · seed 42</span>
+    </div>
+    <div class="trace">
+&lt;think&gt;<br>
+The interaction between <span class="gene verify">daf-2</span> (insulin receptor) and <span class="gene verify">age-1</span> (PI3K) in C. elegans is well-characterized. Both function in the IIS pathway upstream of <span class="gene verify">daf-16</span>. Single-gene loss-of-function each <span class="verify">extends lifespan</span> by ~100%. The double mutant shows… <span class="fail">epistatic suppression</span>…
+    </div>
+    <div class="foot">
+      <span>Verified entities</span>
+      <span class="score">7 / 8</span>
+      <span>·</span>
+      <span>Trace ↔ label</span>
+      <span class="score" style="color:var(--lb-green-700)">consistent</span>
+      <span style="margin-left:auto" class="score">faithfulness 0.91</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>

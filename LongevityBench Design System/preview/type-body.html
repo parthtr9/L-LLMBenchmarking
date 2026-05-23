@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Type — Body</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html, body { margin: 0; background: #fff; }
+  .card { padding: 22px 24px; }
+  .label { font: 500 11px var(--lb-font-mono); text-transform: uppercase; letter-spacing: 0.12em; color: var(--lb-fg-3); margin: 0 0 16px; }
+  .row { display:flex; justify-content: space-between; align-items: baseline; padding: 10px 0; border-top: 1px solid var(--lb-border); gap: 16px; }
+  .row:first-child { border-top: 0; padding-top: 0; }
+  .spec { font: 500 11px var(--lb-font-mono); color: var(--lb-fg-3); white-space: nowrap; flex: 0 0 auto; }
+  .t { flex: 1; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="label">Body + supporting · sentence case, no marketing tone</div>
+  <div class="row">
+    <span class="t lb-lead">Compares L-LLM against GPT-4o across 6 LongeBench tasks and reports macro F1 with bootstrap confidence intervals.</span>
+    <span class="spec">Lead · 17/1.55</span>
+  </div>
+  <div class="row">
+    <span class="t lb-p">20 rows queued. 4 in flight. Average latency 6.3s. Endpoint sqrq2pj09htgequ0.us-east-2.aws.endpoints.huggingface.cloud is shared — keep concurrency ≤ 8.</span>
+    <span class="spec">P · 15/1.60</span>
+  </div>
+  <div class="row">
+    <span class="t lb-small">Trace inconsistent with final label on 3 of 20 rows. See the Traces tab for the failing IDs.</span>
+    <span class="spec">Small · 13/1.50</span>
+  </div>
+  <div class="row">
+    <span class="t lb-meta">Updated 2 min ago · seed 42 · cl100k_base tokenizer</span>
+    <span class="spec">Meta · 12/1.40</span>
+  </div>
+  <div class="row">
+    <span class="t lb-eyebrow">Task A · epistasis ternary · synergyage</span>
+    <span class="spec">Eyebrow · mono 11/UC/12%</span>
+  </div>
+</div>
+</body>
+</html>

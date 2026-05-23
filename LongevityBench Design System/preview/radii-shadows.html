@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Radii + Shadows</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html, body { margin: 0; background: #fff; }
+  .card { padding: 22px 24px; }
+  .label { font: 500 11px var(--lb-font-mono); text-transform: uppercase; letter-spacing: 0.12em; color: var(--lb-fg-3); margin: 0 0 14px; }
+  .grid { display:grid; grid-template-columns: repeat(6, 1fr); gap: 14px; align-items: end; }
+  .box { background: #fff; border: 1px solid var(--lb-border); height: 60px; display:flex; align-items: center; justify-content: center; font: 500 11px var(--lb-font-mono); color: var(--lb-fg-2); }
+  .lbl { font: 400 11px var(--lb-font-mono); color: var(--lb-fg-3); text-align:center; margin-top: 6px; }
+  .sec { margin-bottom: 22px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="sec">
+    <div class="label">Radii · prefer small, considered values</div>
+    <div class="grid">
+      <div><div class="box" style="border-radius:2px">2</div><div class="lbl">xs · chips</div></div>
+      <div><div class="box" style="border-radius:4px">4</div><div class="lbl">sm · inputs</div></div>
+      <div><div class="box" style="border-radius:6px">6</div><div class="lbl">default</div></div>
+      <div><div class="box" style="border-radius:8px">8</div><div class="lbl">md · cards</div></div>
+      <div><div class="box" style="border-radius:12px">12</div><div class="lbl">lg · panels</div></div>
+      <div><div class="box" style="border-radius:999px;width:60px;margin:0 auto">999</div><div class="lbl">pill · avatar</div></div>
+    </div>
+  </div>
+  <div>
+    <div class="label">Shadows · barely there</div>
+    <div class="grid">
+      <div><div class="box" style="box-shadow: var(--lb-shadow-xs); border-color:transparent">xs</div><div class="lbl">hairline</div></div>
+      <div><div class="box" style="box-shadow: var(--lb-shadow-sm); border-color:transparent">sm</div><div class="lbl">default rise</div></div>
+      <div><div class="box" style="box-shadow: var(--lb-shadow); border-color:transparent">base</div><div class="lbl">card</div></div>
+      <div><div class="box" style="box-shadow: var(--lb-shadow-md); border-color:transparent">md</div><div class="lbl">dropdown</div></div>
+      <div><div class="box" style="box-shadow: var(--lb-shadow-lg); border-color:transparent">lg</div><div class="lbl">modal</div></div>
+      <div><div class="box" style="box-shadow: var(--lb-shadow-focus); border-color: var(--lb-green-500)">focus</div><div class="lbl">25% green</div></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

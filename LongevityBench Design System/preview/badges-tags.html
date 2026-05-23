@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Badges + Tags</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html, body { margin: 0; background: #fff; }
+  .card { padding: 22px 24px; }
+  .label { font: 500 11px var(--lb-font-mono); text-transform: uppercase; letter-spacing: 0.12em; color: var(--lb-fg-3); margin: 0 0 14px; }
+  .row { display:flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
+  .row:last-child { margin-bottom: 0; }
+
+  .badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; border-radius: 4px; font: 500 12px var(--lb-font-sans); border: 1px solid transparent; }
+  .badge::before { content:''; width: 6px; height: 6px; border-radius: 50%; }
+  .badge.pass    { background: var(--lb-success-bg); color: var(--lb-green-700); }
+  .badge.pass::before { background: var(--lb-green-500); }
+  .badge.warn    { background: var(--lb-warning-bg); color: #8a5d12; }
+  .badge.warn::before { background: var(--lb-warning); }
+  .badge.err     { background: var(--lb-error-bg); color: #8a2419; }
+  .badge.err::before { background: var(--lb-error); }
+  .badge.info    { background: var(--lb-info-bg); color: #1b4a8c; }
+  .badge.info::before { background: var(--lb-info); }
+  .badge.neutral { background: var(--lb-ink-100); color: var(--lb-fg-2); border-color: var(--lb-border); }
+  .badge.neutral::before { background: var(--lb-fg-4); }
+
+  .tag { display:inline-flex; align-items:center; gap: 6px; padding: 2px 7px 2px 7px; font: 400 12px var(--lb-font-mono); color: var(--lb-fg-2); background: var(--lb-ink-50); border: 1px solid var(--lb-border); border-radius: 2px; }
+  .tag.removable::after { content: '×'; margin-left: 4px; color: var(--lb-fg-4); font-size: 13px; line-height: 1; }
+  .chip { display:inline-flex; align-items:center; padding: 3px 9px; font: 500 11px var(--lb-font-mono); border-radius: 999px; background: var(--lb-ink-100); color: var(--lb-fg-2); text-transform: uppercase; letter-spacing: 0.06em; }
+  .chip.brand { background: var(--lb-green-50); color: var(--lb-green-700); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="label">Status badges · semantic</div>
+  <div class="row">
+    <span class="badge pass">Pass</span>
+    <span class="badge warn">Slow</span>
+    <span class="badge err">Failed</span>
+    <span class="badge info">Dry-run</span>
+    <span class="badge neutral">Queued</span>
+  </div>
+  <div class="label" style="margin-top: 22px">Filter tags · removable</div>
+  <div class="row">
+    <span class="tag removable">organism: C. elegans</span>
+    <span class="tag removable">format: ternary</span>
+    <span class="tag removable">split: test</span>
+    <span class="tag">epistasis_type: synergistic</span>
+  </div>
+  <div class="label" style="margin-top: 22px">Pills · task identifiers</div>
+  <div class="row">
+    <span class="chip brand">LB-0038</span>
+    <span class="chip">Task A</span>
+    <span class="chip">epistasis · ternary</span>
+    <span class="chip">benchmark / eval</span>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Type — Mono / data</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html, body { margin: 0; background: #fff; }
+  .card { padding: 22px 24px; }
+  .label { font: 500 11px var(--lb-font-mono); text-transform: uppercase; letter-spacing: 0.12em; color: var(--lb-fg-3); margin: 0 0 14px; }
+  table { width: 100%; border-collapse: collapse; font: 400 13px var(--lb-font-sans); }
+  th, td { padding: 8px 10px; border-top: 1px solid var(--lb-border); text-align: left; }
+  th { font: 500 11px var(--lb-font-mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--lb-fg-3); border-top: 0; padding-top: 0; }
+  td.id, td.gene, td.num { font-family: var(--lb-font-mono); font-variant-numeric: tabular-nums; }
+  td.num { text-align: right; }
+  td.gene { color: var(--lb-fg-1); }
+  td.id { color: var(--lb-fg-3); font-size: 12px; }
+  .pass { color: var(--lb-green-700); font-weight: 500; }
+  .fail { color: var(--lb-error); font-weight: 500; }
+  code.inline { background: var(--lb-ink-50); border: 1px solid var(--lb-border); padding: 1px 5px; border-radius: 2px; font: 400 12px var(--lb-font-mono); color: var(--lb-fg-1); }
+  .desc { font: 400 13px var(--lb-font-sans); color: var(--lb-fg-3); margin: 0 0 14px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="label">Monospace · JetBrains Mono, tabular numbers</div>
+  <p class="desc">Used for IDs, gene symbols, scores, and code spans. Always <code class="inline">font-variant-numeric: tabular-nums</code> in data tables.</p>
+  <table>
+    <thead>
+      <tr><th>Row</th><th>Task</th><th>Gene 1 · 2</th><th style="text-align:right">F1</th><th style="text-align:right">Latency</th><th>Trace</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="id">LB-0038-004</td><td>epistasis</td><td class="gene">daf-2 · age-1</td><td class="num">0.62</td><td class="num">4.21s</td><td><span class="pass">✓ consistent</span></td></tr>
+      <tr><td class="id">LB-0038-005</td><td>epistasis</td><td class="gene">clk-1 · isp-1</td><td class="num">0.71</td><td class="num">6.04s</td><td><span class="pass">✓ consistent</span></td></tr>
+      <tr><td class="id">LB-0038-006</td><td>regression</td><td class="gene">FOXO3 · MTOR</td><td class="num">−23.5</td><td class="num">7.88s</td><td><span class="fail">✗ inconsistent</span></td></tr>
+      <tr><td class="id">LB-0038-007</td><td>mcq</td><td class="gene">Trp53 · Igf1r</td><td class="num">0.48</td><td class="num">5.12s</td><td><span class="pass">✓ consistent</span></td></tr>
+    </tbody>
+  </table>
+</div>
+</body>
+</html>

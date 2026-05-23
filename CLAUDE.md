@@ -5,6 +5,37 @@ Sponsored by Insilico Medicine. Prize: $1,000 + co-authorship on a peer-reviewed
 
 ---
 
+## Design system
+
+For any UI work, slide deck, paper figure, or eval-site page, ground in
+`LongevityBench Design System/` and follow it precisely. Specifically:
+
+1. Read `LongevityBench Design System/README.md` for tone, voice, and visual rules
+2. Link `LongevityBench Design System/colors_and_type.css` for tokens
+3. Reuse components from `LongevityBench Design System/ui_kits/longevity_bench/`:
+   - Layout: `Sidebar`, `TopBar`
+   - Views: `TrustView`, `ResultsMatrix`, `CompareView`, `LiveRunsView`, `RunDetail`, `RecordDrawer`
+   - Primitives: `Icon`, `Button`, `Badge`, `Pill`, `MetricCard`
+4. Icons: brand glyphs in `LongevityBench Design System/assets/`, science icons in
+   `LongevityBench Design System/assets/scicons/`. Never invent SVG illustrations.
+5. Voice: scientific, terse, sentence-case, tabular numbers, green only
+   for primary action / success / brand. No emoji, no marketing intensifiers.
+
+## Dashboard pipeline (do NOT overlap with Inspect AI)
+
+The dashboard is a static viewer on top of Inspect AI logs:
+
+  run_inspect.py → outputs/inspect/<model>/*.eval
+                 → tools/export_inspect_logs.py
+                 → LongevityBench Design System/ui_kits/longevity_bench/public/data.json
+                 → static React dashboard (just open index.html)
+
+When extending evals, always write through Inspect AI's task/solver/scorer
+APIs — never reimplement runners, scoring, or log parsing in the dashboard.
+The dashboard reads, never executes.
+
+---
+
 ## Communication style (ALL agents must follow)
 
 Use **caveman mode** in every response. Mandatory for all agents in this repo.

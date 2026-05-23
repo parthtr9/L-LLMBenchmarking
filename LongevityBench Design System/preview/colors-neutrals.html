@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Colors — Neutrals</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html, body { margin: 0; background: #fff; }
+  .card { padding: 20px 24px; }
+  .row { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; }
+  .sw { aspect-ratio: 1.4 / 1; border-radius: 4px; display:flex; flex-direction:column; justify-content:space-between; padding: 8px; border: 1px solid rgba(10,12,10,0.06); }
+  .sw .step { font: 500 10px var(--lb-font-mono); color: rgba(255,255,255,0.85); letter-spacing: 0.04em; }
+  .sw .hex  { font: 400 10px var(--lb-font-mono); color: rgba(255,255,255,0.7); }
+  .sw.light .step, .sw.light .hex { color: rgba(10,12,10,0.7); }
+  .label { font: 500 11px var(--lb-font-mono); text-transform: uppercase; letter-spacing: 0.12em; color: var(--lb-fg-3); margin: 0 0 10px; }
+  .name { font: 500 17px var(--lb-font-sans); color: var(--lb-fg-1); margin: 0 0 2px; letter-spacing: -0.008em; }
+  .desc { font: 400 13px var(--lb-font-sans); color: var(--lb-fg-3); margin: 0 0 14px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="label">Ink · neutrals</div>
+  <p class="name">Cool-tinted greyscale</p>
+  <p class="desc">Slight green undertone so it sits next to brand green without clashing. Use 50/100 for surfaces, 200/300 for borders, 500–800 for text.</p>
+  <div class="row">
+    <div class="sw light" style="background:#ffffff"><span class="step">0</span><span class="hex">#ffffff</span></div>
+    <div class="sw light" style="background:#f7f8f7"><span class="step">50</span><span class="hex">#f7f8f7</span></div>
+    <div class="sw light" style="background:#eef0ee"><span class="step">100</span><span class="hex">#eef0ee</span></div>
+    <div class="sw light" style="background:#dde1dc"><span class="step">200</span><span class="hex">#dde1dc</span></div>
+    <div class="sw light" style="background:#c1c7c1"><span class="step">300</span><span class="hex">#c1c7c1</span></div>
+    <div class="sw" style="background:#8c948c"><span class="step">400</span><span class="hex">#8c948c</span></div>
+    <div class="sw" style="background:#5c655c"><span class="step">500</span><span class="hex">#5c655c</span></div>
+    <div class="sw" style="background:#3f463f"><span class="step">600</span><span class="hex">#3f463f</span></div>
+    <div class="sw" style="background:#2a2f2a"><span class="step">700</span><span class="hex">#2a2f2a</span></div>
+    <div class="sw" style="background:#0a0c0a"><span class="step">900</span><span class="hex">#0a0c0a</span></div>
+  </div>
+</div>
+</body>
+</html>

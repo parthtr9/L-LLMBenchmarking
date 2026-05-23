@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brand · LongevityBench mark</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html, body { margin: 0; background: #fff; }
+  .card { padding: 22px 24px; }
+  .label { font: 500 11px var(--lb-font-mono); text-transform: uppercase; letter-spacing: 0.12em; color: var(--lb-fg-3); margin: 0 0 18px; }
+  .top { display:flex; align-items: center; gap: 24px; padding-bottom: 18px; border-bottom: 1px solid var(--lb-border); }
+  .mark { display:flex; align-items: center; gap: 14px; }
+  .mark .sym { width: 44px; height: 44px; border-radius: 8px; background: var(--lb-green-500); display:grid; place-items: center; color:#fff; font: 500 22px var(--lb-font-sans); letter-spacing: -0.04em; }
+  .mark .word { display:flex; flex-direction:column; gap: 2px; }
+  .mark .word .a { font: 500 22px var(--lb-font-sans); color: var(--lb-fg-1); letter-spacing: -0.018em; line-height: 1; }
+  .mark .word .b { font: 400 11px var(--lb-font-mono); color: var(--lb-fg-3); text-transform: uppercase; letter-spacing: 0.12em; }
+  .alt { display:flex; gap: 28px; margin-top: 18px; align-items: center; flex-wrap: wrap; }
+  .swatch { display:flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid var(--lb-border); border-radius: 6px; }
+  .swatch.dark { background: var(--lb-ink-900); border-color: transparent; }
+  .swatch .sym2 { width: 28px; height: 28px; border-radius: 6px; background: var(--lb-green-500); display:grid; place-items:center; color:#fff; font: 500 14px var(--lb-font-sans); }
+  .swatch .lbl { font: 500 14px var(--lb-font-sans); color: var(--lb-fg-1); }
+  .swatch.dark .lbl { color: #fff; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="label">LongevityBench · primary lockup</div>
+  <div class="top">
+    <div class="mark">
+      <div class="sym">LB</div>
+      <div class="word">
+        <span class="a">LongevityBench</span>
+        <span class="b">Insilico Medicine · L-LLM eval</span>
+      </div>
+    </div>
+  </div>
+  <div class="alt">
+    <div class="swatch"><div class="sym2">LB</div><span class="lbl">LongevityBench</span></div>
+    <div class="swatch dark"><div class="sym2">LB</div><span class="lbl">LongevityBench</span></div>
+    <div class="swatch"><div class="sym2">LB</div></div>
+  </div>
+</div>
+</body>
+</html>

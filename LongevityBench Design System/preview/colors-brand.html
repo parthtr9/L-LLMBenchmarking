@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Colors — Brand</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html, body { margin: 0; background: #fff; }
+  .card { padding: 20px 24px; }
+  .row { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; }
+  .sw { aspect-ratio: 1.4 / 1; border-radius: 4px; display:flex; flex-direction:column; justify-content:space-between; padding: 8px; border: 1px solid rgba(10,12,10,0.06); }
+  .sw .step { font: 500 10px var(--lb-font-mono); color: rgba(255,255,255,0.85); letter-spacing: 0.04em; }
+  .sw .hex  { font: 400 10px var(--lb-font-mono); color: rgba(255,255,255,0.7); }
+  .sw.light .step, .sw.light .hex { color: rgba(10,12,10,0.7); }
+  .label { font: 500 11px var(--lb-font-mono); text-transform: uppercase; letter-spacing: 0.12em; color: var(--lb-fg-3); margin: 0 0 10px; }
+  .name { font: 500 17px var(--lb-font-sans); color: var(--lb-fg-1); margin: 0 0 2px; letter-spacing: -0.008em; }
+  .desc { font: 400 13px var(--lb-font-sans); color: var(--lb-fg-3); margin: 0 0 14px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="label">Brand green · primary</div>
+  <p class="name">Insilico-green ramp</p>
+  <p class="desc">Sampled from insilico.com tile-color #4ca045. Use 500 for actions, 50 for backgrounds, 700+ for text on light.</p>
+  <div class="row">
+    <div class="sw light" style="background:#f0f8ee"><span class="step">50</span><span class="hex">#f0f8ee</span></div>
+    <div class="sw light" style="background:#d7eed1"><span class="step">100</span><span class="hex">#d7eed1</span></div>
+    <div class="sw light" style="background:#b3dfa8"><span class="step">200</span><span class="hex">#b3dfa8</span></div>
+    <div class="sw" style="background:#8aca7a"><span class="step">300</span><span class="hex">#8aca7a</span></div>
+    <div class="sw" style="background:#66b452"><span class="step">400</span><span class="hex">#66b452</span></div>
+    <div class="sw" style="background:#4ca045;outline:2px solid rgba(76,160,69,0.3);outline-offset:2px"><span class="step">500</span><span class="hex">#4ca045</span></div>
+    <div class="sw" style="background:#3d8838"><span class="step">600</span><span class="hex">#3d8838</span></div>
+    <div class="sw" style="background:#2f6a2c"><span class="step">700</span><span class="hex">#2f6a2c</span></div>
+    <div class="sw" style="background:#234e21"><span class="step">800</span><span class="hex">#234e21</span></div>
+    <div class="sw" style="background:#163115"><span class="step">900</span><span class="hex">#163115</span></div>
+  </div>
+</div>
+</body>
+</html>

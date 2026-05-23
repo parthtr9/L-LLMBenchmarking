@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Data table</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html, body { margin: 0; background: #fff; }
+  .card { padding: 22px 24px; }
+  .label { font: 500 11px var(--lb-font-mono); text-transform: uppercase; letter-spacing: 0.12em; color: var(--lb-fg-3); margin: 0 0 14px; }
+  table { width: 100%; border-collapse: collapse; font: 400 13px var(--lb-font-sans); border: 1px solid var(--lb-border); border-radius: 6px; overflow: hidden; }
+  th { font: 500 11px var(--lb-font-mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--lb-fg-3); text-align: left; padding: 10px 12px; background: var(--lb-ink-50); border-bottom: 1px solid var(--lb-border); }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--lb-border); }
+  tr:last-child td { border-bottom: 0; }
+  tr.selected { background: var(--lb-green-50); box-shadow: inset 2px 0 0 var(--lb-green-500); }
+  tr:hover { background: var(--lb-ink-50); }
+  td.mono { font-family: var(--lb-font-mono); font-size: 12px; }
+  td.num { text-align: right; font-family: var(--lb-font-mono); font-variant-numeric: tabular-nums; }
+  .b { display:inline-flex; align-items: center; gap: 6px; padding: 2px 7px; border-radius: 4px; font: 500 11px var(--lb-font-sans); }
+  .b::before { content:''; width:6px; height:6px; border-radius:50%; }
+  .b.pass { background: var(--lb-success-bg); color: var(--lb-green-700); }
+  .b.pass::before { background: var(--lb-green-500); }
+  .b.fail { background: var(--lb-error-bg); color: #8a2419; }
+  .b.fail::before { background: var(--lb-error); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="label">Records table · 4–6 col, sortable</div>
+  <table>
+    <thead>
+      <tr><th>Row</th><th>Task</th><th>Gene 1 · Gene 2</th><th>Gold</th><th style="text-align:right">F1</th><th style="text-align:right">Latency</th><th>Trace</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="mono">003</td><td>LB-0038</td><td class="mono">daf-2 · age-1</td><td>synergistic</td><td class="num">0.71</td><td class="num">4.21s</td><td><span class="b pass">consistent</span></td></tr>
+      <tr class="selected"><td class="mono">004</td><td>LB-0038</td><td class="mono">clk-1 · isp-1</td><td>additive</td><td class="num">0.62</td><td class="num">6.04s</td><td><span class="b pass">consistent</span></td></tr>
+      <tr><td class="mono">005</td><td>LB-0038</td><td class="mono">FOXO3 · MTOR</td><td>−23.5</td><td class="num">0.48</td><td class="num">7.88s</td><td><span class="b fail">inconsistent</span></td></tr>
+      <tr><td class="mono">006</td><td>LB-0042</td><td class="mono">Trp53 · Igf1r</td><td>decreased</td><td class="num">0.54</td><td class="num">5.12s</td><td><span class="b pass">consistent</span></td></tr>
+      <tr><td class="mono">007</td><td>LB-0042</td><td class="mono">Sirt1 · Atg7</td><td>no_change</td><td class="num">0.31</td><td class="num">5.92s</td><td><span class="b pass">consistent</span></td></tr>
+    </tbody>
+  </table>
+</div>
+</body>
+</html>

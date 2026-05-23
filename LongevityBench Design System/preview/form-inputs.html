@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Form inputs</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html, body { margin: 0; background: #fff; }
+  .card { padding: 22px 24px; display:grid; grid-template-columns: 1fr 1fr; gap: 18px 24px; }
+  .field { display:flex; flex-direction: column; gap: 6px; }
+  .field label { font: 500 12px var(--lb-font-sans); color: var(--lb-fg-2); }
+  .field .hint { font: 400 11px var(--lb-font-mono); color: var(--lb-fg-4); }
+  .input { font: 400 14px var(--lb-font-sans); padding: 8px 12px; border: 1px solid var(--lb-border-strong); border-radius: 4px; background: #fff; color: var(--lb-fg-1); outline: none; transition: all 120ms; }
+  .input:focus { border-color: var(--lb-green-500); box-shadow: var(--lb-shadow-focus); }
+  .input.mono { font-family: var(--lb-font-mono); font-size: 13px; }
+  .input.error { border-color: var(--lb-error); }
+  select.input { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--lb-fg-3) 50%), linear-gradient(135deg, var(--lb-fg-3) 50%, transparent 50%); background-position: calc(100% - 14px) 50%, calc(100% - 9px) 50%; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; padding-right: 28px; }
+  .check { display:flex; align-items: center; gap: 8px; font: 400 13px var(--lb-font-sans); color: var(--lb-fg-1); }
+  .check input { accent-color: var(--lb-green-500); width: 14px; height: 14px; }
+  .switch { display:inline-flex; align-items:center; gap: 10px; font: 400 13px var(--lb-font-sans); }
+  .switch .track { width: 30px; height: 18px; background: var(--lb-green-500); border-radius: 999px; position: relative; }
+  .switch .knob { position: absolute; right: 2px; top: 2px; width: 14px; height: 14px; background: #fff; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="field">
+    <label>LongeBench task ID</label>
+    <input class="input mono" value="LB-0038" />
+    <span class="hint">benchmark / extra split</span>
+  </div>
+  <div class="field">
+    <label>Model endpoint</label>
+    <select class="input"><option>longevity-llm (hosted)</option><option>gpt-4o</option><option>majority-baseline</option></select>
+  </div>
+  <div class="field">
+    <label>Max tokens</label>
+    <input class="input mono" value="500" />
+  </div>
+  <div class="field">
+    <label>HF token</label>
+    <input class="input mono error" value="hf_xxxxxx" />
+    <span class="hint" style="color:var(--lb-error)">required · set in .env</span>
+  </div>
+  <div class="check"><input type="checkbox" checked>Enable Qwen thinking mode (slower)</div>
+  <label class="switch">Concurrency cap (≤ 8)<span class="track"><span class="knob"></span></span></label>
+</div>
+</body>
+</html>
