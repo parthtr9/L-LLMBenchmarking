@@ -1,8 +1,11 @@
 # L-LLMBenchmarking
 
-Utilities for the Caltech Longevity Hackathon Track 01 work. The current
-pipeline can run the hosted Longevity-LLM endpoint against the public
-LongeBench benchmark dataset and save reproducible per-row outputs.
+Caltech Longevity Hackathon Track 01 — LongevityLLM Benchmarking.
+Evaluates L-LLM (Insilico Medicine) against Gemini, DeepSeek, Anthropic, and baselines on LongeBench and custom SynergyAge/MGI tasks.
+
+**Stack:** Inspect AI (task orchestration + logs) · LiteLLM (provider abstraction) · HuggingFace datasets
+
+---
 
 ## Setup
 
@@ -10,23 +13,88 @@ LongeBench benchmark dataset and save reproducible per-row outputs.
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 cp .env.example .env
+# Fill in .env — see Required env vars below
 ```
 
-Put the HuggingFace endpoint token in `.env`:
+---
+
+## Required env vars
+
+| Var | Required | Notes |
+|-----|----------|-------|
+| `HF_TOKEN` | Yes | Token needs **"Read access to public gated repositories"** enabled at huggingface.co/settings/tokens |
+| `HF_ENDPOINT_URL` | Yes for L-LLM | Hosted vLLM endpoint from organizers |
+| `GEMINI_API_KEY` | For gemini_flash | Google AI Studio key |
+| `DEEPSEEK_API_KEY` | For deepseek_chat | DeepSeek platform key |
+| `ANTHROPIC_API_KEY` | For claude_sonnet | Anthropic Console key |
+| `OPENAI_API_KEY` | Optional | Only needed for direct OpenAI calls |
+
+Never commit `.env`.
+
+---
+
+## Run one LongeBench task (Inspect AI — main orchestrator)
 
 ```bash
-HF_ENDPOINT_URL=https://sqrq2pj09htgequ0.us-east-2.aws.endpoints.huggingface.cloud
-HF_TOKEN=hf_...
-LONGBENCH_MODEL=longevity-llm
+# Single model, 20 rows
+.venv/bin/python -m src.eval.run_inspect \
+  --lb-id LB-0038 \
+  --limit 20 \
+  --models longevity_llm
+
+# Dry run — loads dataset, builds samples, skips all model calls
+.venv/bin/python -m src.eval.run_inspect \
+  --lb-id LB-0038 \
+  --limit 3 \
+  --models longevity_llm \
+  --dry-run
 ```
 
-Do not commit `.env`.
+---
 
-## Smoke test LongeBench
+## Run multiple providers in one command
 
-The default command runs 20 rows of `LB-0038` from the benchmark split, drops
-the gold assistant answer via `messages[:-1]`, calls `/v1/chat/completions`,
-and writes both raw records and a quick metric summary.
+```bash
+.venv/bin/python -m src.eval.run_inspect \
+  --lb-id LB-0038 \
+  --limit 20 \
+  --models longevity_llm,gemini_flash,deepseek_chat,claude_sonnet,random_baseline,majority_baseline
+```
+
+Each model gets its own subdirectory under `outputs/inspect/<model_name>/`.
+
+---
+
+## Model registry
+
+Models are defined in [config/models.yaml](config/models.yaml). Add new providers there without touching Python code.
+
+```yaml
+my_new_model:
+  litellm_model: "openai/my-model"
+  api_base_env: "MY_ENDPOINT_URL"
+  api_key_env: "MY_API_KEY"
+```
+
+Available out of the box: `longevity_llm`, `longevity_llm_thinking`, `gemini_flash`, `deepseek_chat`, `claude_sonnet`, `random_baseline`, `majority_baseline`.
+
+---
+
+## Open Inspect log viewer
+
+```bash
+inspect view outputs/inspect
+# or a specific model's logs:
+inspect view outputs/inspect/longevity_llm
+```
+
+Logs include raw response, parsed answer, gold answer, usage, latency, and score per sample.
+
+---
+
+## Fallback smoke runner (legacy)
+
+The original `longebench_runner.py` calls the HF endpoint directly via the OpenAI SDK and is kept as a quick smoke-test tool:
 
 ```bash
 .venv/bin/python -m src.eval.longebench_runner \
@@ -35,19 +103,39 @@ and writes both raw records and a quick metric summary.
   --concurrency 4 \
   --output outputs/lb0038_records.jsonl \
   --summary-output outputs/lb0038_summary.json
-```
 
-Useful variants:
-
-```bash
-# Verify dataset loading and output shape without calling the endpoint.
+# Dry run / no model calls
 .venv/bin/python -m src.eval.longebench_runner --dry-run --limit 3
-
-# Run the held-out extra split.
-.venv/bin/python -m src.eval.longebench_runner --dataset-config extra --lb-id LB-0038
-
-# Enable Qwen thinking mode. This is slower and should use more tokens.
-.venv/bin/python -m src.eval.longebench_runner --think --max-tokens 3000
 ```
 
-Keep `--concurrency` at 8 or below because the endpoint is shared.
+Keep `--concurrency` ≤ 8 (shared endpoint).
+
+---
+
+## HuggingFace gated dataset notes
+
+`insilicomedicine/longebench` is a gated repository. Two steps required:
+
+1. Accept dataset terms at `huggingface.co/datasets/insilicomedicine/longebench`
+2. Edit your token at `huggingface.co/settings/tokens` → enable **"Read access to public gated repositories"**
+
+Classic "read" tokens include this permission by default. Fine-grained tokens require explicit opt-in.
+
+---
+
+## Pipeline architecture
+
+```
+run_inspect.py  →  longebench_task (@task)
+                       ├── _load_hf_samples()       # HF datasets
+                       ├── litellm_solver (@solver)  # LiteLLM → any provider
+                       └── longebench_scorer (@scorer)  # format-aware
+
+litellm_client.py   async acomplete()  →  litellm.acompletion()
+                                              ├── openai/longevity-llm  (HF vLLM)
+                                              ├── gemini/gemini-2.0-flash
+                                              ├── deepseek/deepseek-chat
+                                              └── anthropic/claude-sonnet-4-5
+```
+
+Scorers: regression MAE · MCQ letter extraction · set Jaccard · normalized exact match.

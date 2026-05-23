@@ -1,0 +1,38 @@
+models:
+  longevity_llm:
+    litellm_model: "openai/longevity-llm"
+    api_base_env: "HF_ENDPOINT_URL"
+    api_key_env: "HF_TOKEN"
+    extra_body:
+      chat_template_kwargs:
+        enable_thinking: false
+    max_concurrency: 8
+
+  longevity_llm_thinking:
+    litellm_model: "openai/longevity-llm"
+    api_base_env: "HF_ENDPOINT_URL"
+    api_key_env: "HF_TOKEN"
+    extra_body:
+      chat_template_kwargs:
+        enable_thinking: true
+    max_concurrency: 4
+
+  gemini_flash:
+    litellm_model: "gemini/gemini-2.0-flash"
+    api_key_env: "GEMINI_API_KEY"
+
+  deepseek_chat:
+    litellm_model: "deepseek/deepseek-chat"
+    api_key_env: "DEEPSEEK_API_KEY"
+
+  claude_sonnet:
+    litellm_model: "anthropic/claude-sonnet-4-5"
+    api_key_env: "ANTHROPIC_API_KEY"
+
+  random_baseline:
+    type: baseline
+    strategy: random
+
+  majority_baseline:
+    type: baseline
+    strategy: majority
