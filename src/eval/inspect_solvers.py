@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 import random
@@ -73,6 +74,8 @@ def litellm_solver(
         os.getenv(model_cfg["api_key_env"]) if "api_key_env" in model_cfg else None
     )
     extra_body: dict[str, Any] | None = model_cfg.get("extra_body")
+    max_concurrency: int = model_cfg.get("max_concurrency", 8)
+    semaphore = asyncio.Semaphore(max_concurrency)
 
     async def solve(state: TaskState, generate: Generate) -> TaskState:
         if dry_run:
@@ -83,17 +86,18 @@ def litellm_solver(
             return state
 
         messages = _state_messages_to_litellm(state)
-        result = await acomplete(
-            messages=messages,
-            model=model_id,
-            api_base=api_base,
-            api_key=api_key,
-            extra_body=extra_body,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            timeout=timeout,
-            seed=seed,
-        )
+        async with semaphore:
+            result = await acomplete(
+                messages=messages,
+                model=model_id,
+                api_base=api_base,
+                api_key=api_key,
+                extra_body=extra_body,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                timeout=timeout,
+                seed=seed,
+            )
         state.output = _result_to_output(result, model_id)
         if state.metadata is None:
             state.metadata = {}

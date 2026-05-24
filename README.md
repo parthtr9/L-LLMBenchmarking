@@ -92,6 +92,63 @@ Logs include raw response, parsed answer, gold answer, usage, latency, and score
 
 ---
 
+## Automated pipeline (recommended)
+
+[`pipeline.py`](pipeline.py) runs the full eval → export → dashboard flow interactively. It prompts `y/n` at every major step so nothing runs without confirmation.
+
+```bash
+.venv/bin/python pipeline.py
+```
+
+**What it does, step by step:**
+
+| Step | What happens | Prompt |
+|------|-------------|--------|
+| 1. Choose models | Numbered list of all models from `config/models.yaml`. Enter numbers or names comma-separated. Default: `longevity_llm,majority_baseline,random_baseline` | input |
+| 2. Choose task | Pick LB-ID from list (LB-0038 … LB-0090). Enter sample limit or press Enter for 50. | input |
+| 3. Run eval | Shows full config summary, then runs `src.eval.run_inspect`. Live output streams to terminal. If eval errors, asks whether to continue to export anyway. | `y/n` |
+| 4. Export | Runs `tools.export_inspect_logs` — writes `public/data.json` from all `.eval` logs under `outputs/inspect/`. | `y/n` |
+| 5. Serve dashboard | Optionally starts `python3 -m http.server 8765` from the dashboard directory. Blocks until Ctrl-C. If declined, prints the manual command. | `y/n` |
+
+**Example session:**
+
+```
+  LongevityBench Pipeline
+  eval → export → dashboard
+
+── STEP 1 — Choose models to evaluate ──────────────
+   1) longevity_llm        (openai/longevity-llm)
+   2) gemini_flash         (gemini/gemini-3.5-flash)
+   3) claude_sonnet        (anthropic/claude-sonnet-4-6)
+   4) random_baseline      (baseline:random)  [baseline]
+   5) majority_baseline    (baseline:majority) [baseline]
+
+  models: 1,3,4,5
+
+── STEP 2 — Choose task and sample limit ───────────
+  Task: LB-0038  |  Limit: 50
+
+── STEP 3 — Run evaluation ─────────────────────────
+  Run eval now? [y/n]: y
+  ...live inspect output...
+
+── STEP 4 — Export logs → dashboard JSON ───────────
+  Export now? [y/n]: y
+  wrote 50 samples, 2 runs across 4 models → public/data.json
+
+── STEP 5 — Serve dashboard ────────────────────────
+  Start HTTP server now? [y/n]: y
+  Server starting on http://localhost:8765/
+```
+
+**Notes:**
+- Run from repo root with the `.venv` Python.
+- All env vars are loaded from `.env` automatically.
+- The pipeline skips steps you decline — e.g. say `n` to serve if you already have a server running.
+- Concurrency per model is controlled by `max_concurrency` in `config/models.yaml`. Gemini free tier is set to 2; Anthropic to 4; L-LLM to 8.
+
+---
+
 ## Dashboard (static React UI)
 
 Full pipeline: run eval → export → open browser.
