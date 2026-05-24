@@ -181,7 +181,7 @@ def generate_mcq_prompt(row: pd.Series, lipid_cols: list[str],
         "display_group": "Lipidomics Age",
         "domain": "lipidomics",
         "format": "mcq",
-        "metric": "accuracy",
+        "metric": "off-by-one accuracy",
         "units": "age_bracket",
         "messages": [
             {"role": "system", "content": SYSTEM_MSG},
@@ -410,10 +410,19 @@ def split_train_test_stratified(prompts_by_format: dict[str, list[dict]],
     target_test_per_fmt: dict[str, int] = {}
     for fmt, prompts in prompts_by_format.items():
         n = len(prompts)
-        target_test_per_fmt[fmt] = min(
-            int(round(n * test_fraction)),
-            max(0, n - min_train_per_task),
-        )
+        desired = int(round(n * test_fraction))
+        floor_cap = max(0, n - min_train_per_task)
+        target_test_per_fmt[fmt] = min(desired, floor_cap)
+        if floor_cap < desired:
+            shortfall = desired - floor_cap
+            print(
+                f"  WARNING: {fmt}: min_train_per_task={min_train_per_task} "
+                f"consumes test slots — wanted {desired} test prompts "
+                f"({test_fraction:.0%} of {n}) but floor caps at {floor_cap} "
+                f"(losing {shortfall}). "
+                f"Lower --min-train-per-task to ≤{int(n * (1 - test_fraction))} "
+                f"or raise --target-per-task to restore the test fraction."
+            )
 
     # Group individuals by their task signature
     sig_to_indivs: dict[tuple, list[str]] = {}
@@ -507,7 +516,8 @@ def split_train_test_stratified(prompts_by_format: dict[str, list[dict]],
 
 def save_prompts(prompts: list[dict], parquet_path: str, json_path: str) -> None:
     df = pd.DataFrame(prompts)
-    df["messages"] = df["messages"].apply(json.dumps)
+    if "messages" in df.columns:
+        df["messages"] = df["messages"].apply(json.dumps)
     df.to_parquet(parquet_path, index=False)
     print(f"  Parquet → {parquet_path}  ({len(df)} rows)")
     with open(json_path, "w") as f:
