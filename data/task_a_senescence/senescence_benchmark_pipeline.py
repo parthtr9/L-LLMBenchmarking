@@ -331,6 +331,95 @@ def prepare_binary_significance_pool(
 
     return filtered
 
+
+# ---------------------------------------------------------------------------
+# 4c. CONTRADICTION CHECK (SIGNIFICANCE PROMPTS)
+# ---------------------------------------------------------------------------
+
+SIG_CONTEXT_COLS = [
+    'Gene',
+    'Treatment', 'Treatment_dose', 'Gene_down', 'Gene_up',
+    'Sen_type', 'Sen_subtype',
+    'Control_type',
+    'Cell_line', 'Organ',
+    'Time_after_induction',
+    'RNAseq_Microarray',
+    'Replicates', 'Analysis',
+]
+
+
+def check_significance_contradictions(
+    df: pd.DataFrame,
+    label: str = "dataset",
+    max_print: int = 5,
+) -> dict:
+    """
+    Detect rows that render the same significance prompt context but disagree
+    on sig_label.
+
+    Fingerprint covers every field that drives the user-visible significance
+    prompt (gene, perturbation, senescence model, cell line, timepoint, assay,
+    replicates, analysis). Two rows with matching fingerprints but opposite
+    sig_label values produce identical questions with contradictory gold
+    answers — typically the same gene measured in different studies that
+    disagreed on whether the perturbation effect cleared the |LogFC|/p
+    thresholds.
+    """
+    cols = [c for c in SIG_CONTEXT_COLS if c in df.columns]
+    extras = [c for c in ('Acc_no', 'Comparison', 'LogFC', 'Pvalues')
+              if c in df.columns]
+    work = df[cols + ['sig_label'] + extras].copy()
+    for c in cols:
+        work[c] = work[c].fillna('__NA__').astype(str)
+
+    grouped = work.groupby(cols, sort=False)
+    contradictions = []
+    for keys, group in grouped:
+        labels = set(group['sig_label'].unique())
+        if len(labels) > 1:
+            keys_tuple = keys if isinstance(keys, tuple) else (keys,)
+            contradictions.append({
+                'fingerprint': dict(zip(cols, keys_tuple)),
+                'n_rows': int(len(group)),
+                'labels': sorted(labels),
+                'accessions': sorted(set(group['Acc_no'].astype(str).tolist()))
+                              if 'Acc_no' in group.columns else [],
+                'comparisons': sorted(set(group['Comparison'].astype(str).tolist()))
+                               if 'Comparison' in group.columns else [],
+            })
+
+    n_affected = sum(c['n_rows'] for c in contradictions)
+    print(f"\n  Contradiction check [{label}]:")
+    print(f"    Rows scanned:           {len(df)}")
+    print(f"    Distinct fingerprints:  {grouped.ngroups}")
+    print(f"    Contradicting groups:   {len(contradictions)}")
+    print(f"    Rows in contradictions: {n_affected}")
+
+    if contradictions:
+        print(f"    ⚠ Same rendered context, disagreeing sig_label gold across studies")
+        for c in contradictions[:max_print]:
+            fp = c['fingerprint']
+            tag = (f"{fp.get('Gene','?')} | {fp.get('Treatment','?')} | "
+                   f"{fp.get('Sen_type','?')} | {fp.get('Cell_line','?')} | "
+                   f"t={fp.get('Time_after_induction','?')}")
+            print(f"      {tag}: labels={c['labels']}, "
+                  f"accessions={c['accessions']}")
+        if len(contradictions) > max_print:
+            print(f"      ... and {len(contradictions) - max_print} more")
+    else:
+        print(f"    ✓ No fingerprint disagreements")
+
+    return {
+        'label': label,
+        'n_rows': int(len(df)),
+        'n_groups': int(grouped.ngroups),
+        'n_contradicting_groups': len(contradictions),
+        'n_contradicting_rows': int(n_affected),
+        'contradictions': contradictions,
+        'fingerprint_columns': cols,
+    }
+
+
 def run_eda(df: pd.DataFrame) -> None:
     """Print detailed summary statistics and stratifications for the balanced set."""
 
@@ -766,16 +855,26 @@ def generate_mcq_prompt(row: pd.Series, lb_id_counter: int) -> dict:
     cell_desc, sen_desc, treat_desc, control_desc, time_str, assay = _build_experiment_block(row)
     gd = _gene_display(row)
 
-    direction_letter = {'upregulated': 'A', 'downregulated': 'B', 'no_change': 'C'}[row['direction']]
+    direction_letter = {
+        'upregulated': 'A',
+        'downregulated': 'B',
+        'no_change': 'C',
+    }[row['direction']]
 
     question = (
-        f"You are presented with a senescence perturbation experiment. "
-        f"In {cell_desc} undergoing {sen_desc}{time_str}, "
-        f"{treat_desc} is applied. "
-        f"Compared to {control_desc}, the mRNA expression of "
-        f"{gd} measured by {assay}:"
+        "You are given a perturbational transcriptomics experiment in cellular senescence. "
+        f"In the perturbed condition, {cell_desc} undergoing {sen_desc}{time_str} receives {treat_desc}. "
+        f"The reference condition is {control_desc}. "
+        f"Predict whether {gd} is upregulated, downregulated, or not significantly changed "
+        f"in the perturbed condition relative to the reference condition, as measured by {assay}. "
+        "Respond with only the option letter."
     )
-    options = "A. increases (upregulated) B. decreases (downregulated) C. no significant change"
+
+    options = (
+        "A. upregulated relative to the reference condition "
+        "B. downregulated relative to the reference condition "
+        "C. no significant change relative to the reference condition"
+    )
 
     user_content = (
         f"<question>\n{question}\n</question>\n"
@@ -874,26 +973,30 @@ def generate_pairwise_prompt(
     Pairs are pre-filtered to have a minimum |LogFC| gap, so there is always
     a clear winner.
     """
-    # Both rows share the same comparison, so experiment context is the same
     cell_desc, sen_desc, treat_desc, control_desc, time_str, assay = _build_experiment_block(row_a)
     gd_a = _gene_display(row_a)
     gd_b = _gene_display(row_b)
 
     abs_a = abs(float(row_a['LogFC']))
     abs_b = abs(float(row_b['LogFC']))
-    # Ground truth: which gene has the larger absolute change?
     answer = 'A' if abs_a > abs_b else 'B'
 
     question = (
-        f"In a senescence perturbation experiment using {cell_desc} undergoing "
-        f"{sen_desc}{time_str}, {treat_desc} is applied. "
-        f"Compared to {control_desc}, consider the following two genes measured by {assay}:\n\n"
+        "You are given a perturbational transcriptomics experiment in cellular senescence. "
+        f"In the perturbed condition, {cell_desc} undergoing {sen_desc}{time_str} receives {treat_desc}. "
+        f"The reference condition is {control_desc}. "
+        f"Two genes are measured by {assay}:\n\n"
         f"Gene A: {gd_a}\n"
         f"Gene B: {gd_b}\n\n"
-        f"Which gene shows a larger absolute change in mRNA expression (|Log2FC|)?"
+        "Which gene shows the larger absolute change in mRNA expression "
+        "(larger |Log2FC|) in the perturbed condition relative to the reference condition? "
+        "Respond with only the option letter."
     )
 
-    options = "A. Gene A shows a larger absolute change B. Gene B shows a larger absolute change"
+    options = (
+        "A. Gene A shows the larger absolute change "
+        "B. Gene B shows the larger absolute change"
+    )
 
     user_content = (
         f"<question>\n{question}\n</question>\n"
@@ -949,23 +1052,20 @@ def generate_pairwise_prompt(
         'domain': 'transcriptomics',
         'format': 'pairwise',
         'metric': 'balanced accuracy',
-        'units': 'direction',
+        'units': 'absolute_log2fc',
         'messages': messages,
         'task': 'senescence_perturbation_pairwise',
         'has_reasoning': False,
         'metadata': json.dumps(metadata),
     }
 
-
 def generate_significance_prompt(row: pd.Series, lb_id_counter: int) -> dict:
     """
     Generate a binary significance classification prompt.
-    Direction is NOT revealed — the model must predict whether the gene
-    is significantly dysregulated at all.
 
     Labels:
-      A. Significantly dysregulated  — |LogFC| > 1.0 AND p < 0.05
-      B. No significant change        — |LogFC| <= 1.0 OR p >= 0.05
+      A. Significantly dysregulated — |LogFC| > 1.0 AND p < 0.05
+      B. No significant change       — |LogFC| <= 1.0 OR p >= 0.05
     """
     cell_desc, sen_desc, treat_desc, control_desc, time_str, assay = _build_experiment_block(row)
     gd = _gene_display(row)
@@ -974,16 +1074,18 @@ def generate_significance_prompt(row: pd.Series, lb_id_counter: int) -> dict:
     answer = 'A' if sig_label == 'significant' else 'B'
 
     question = (
-        f"You are presented with a senescence perturbation experiment. "
-        f"In {cell_desc} undergoing {sen_desc}{time_str}, "
-        f"{treat_desc} is applied. "
-        f"Compared to {control_desc}, is the mRNA expression of "
-        f"{gd} measured by {assay} significantly dysregulated?"
+        "You are given a perturbational transcriptomics experiment in cellular senescence. "
+        f"In the perturbed condition, {cell_desc} undergoing {sen_desc}{time_str} receives {treat_desc}. "
+        f"The reference condition is {control_desc}. "
+        f"Predict whether {gd} is significantly dysregulated in the perturbed condition "
+        f"relative to the reference condition, as measured by {assay}. "
+        "Use the criterion |Log2FC| > 1.0 and p < 0.05. "
+        "Respond with only the option letter."
     )
 
     options = (
-        "A. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) "
-        "B. No significant change (|Log2FC| ≤ 1.0 or p ≥ 0.05)"
+        "A. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) "
+        "B. no significant change (|Log2FC| ≤ 1.0 or p ≥ 0.05)"
     )
 
     user_content = (
@@ -1106,7 +1208,7 @@ def generate_all_benchmarks(
     target_per_task: int = 100,
     min_logfc_gap: float = 0.5,
     random_state: int = 42,
-) -> tuple[list[dict], list[dict], list[dict]]:
+) -> tuple[list[dict], list[dict], list[dict], dict]:
     """Generate prompts for all three task formats, capped to target_per_task each,
     with tissue-balanced sampling across Organ types."""
     rng = np.random.RandomState(random_state)
@@ -1187,7 +1289,15 @@ def generate_all_benchmarks(
     else:
         print(f"    ✓ Significance label balance OK: {sig_label_counts}")
 
-    return mcq_prompts, pair_prompts, sig_prompts
+    # Contradiction check on the final emitted significance prompts:
+    # same rendered prompt context with disagreeing sig_label gold answers
+    # would mean two test items ask the model an identical question but
+    # accept opposite answers as correct.
+    sig_contradiction_report = check_significance_contradictions(
+        sig_input, label="sig_input (final emitted prompts)"
+    )
+
+    return mcq_prompts, pair_prompts, sig_prompts, sig_contradiction_report
 
 
 # ---------------------------------------------------------------------------
@@ -1198,6 +1308,8 @@ def compute_summary(
     mcq_prompts: list[dict],
     pair_prompts: list[dict],
     sig_prompts: list[dict],
+    sig_contradiction_report: dict | None = None,
+    sig_pool_contradiction_report: dict | None = None,
 ) -> dict:
     """Compute benchmark summary statistics across all task formats."""
 
@@ -1240,6 +1352,19 @@ def compute_summary(
             'All prompts from a given study go into either train or test.'
         ),
     }
+
+    def _trim(report: dict, n_examples: int = 10) -> dict:
+        trimmed = {k: v for k, v in report.items() if k != 'contradictions'}
+        trimmed['example_contradictions'] = report.get('contradictions', [])[:n_examples]
+        return trimmed
+
+    if sig_contradiction_report or sig_pool_contradiction_report:
+        summary['significance_contradictions'] = {}
+        if sig_pool_contradiction_report:
+            summary['significance_contradictions']['pool'] = _trim(sig_pool_contradiction_report)
+        if sig_contradiction_report:
+            summary['significance_contradictions']['emitted'] = _trim(sig_contradiction_report)
+
     return summary
 
 
@@ -1540,13 +1665,19 @@ def main():
         random_state=args.seed,
     )
 
+    # Step 6c: Check for prompt-context contradictions in the sig pool
+    print("\n--- Step 8c: Check significance prompt contradictions (pool) ---")
+    sig_pool_contradiction_report = check_significance_contradictions(
+        sig_pool, label="sig_pool (post-filtering, pre-sampling)"
+    )
+
     # Step 7: Three-way split into task formats
     print("\n--- Step 9: Split into MCQ / Pairwise / Binary Significance ---")
     mcq_df, pair_df, sig_df = split_three_way(significant, sig_pool, random_state=args.seed)
 
     # Step 8: Generate prompts for all formats
     print("\n--- Step 10: Generate prompts ---")
-    mcq_prompts, pair_prompts, sig_prompts = generate_all_benchmarks(
+    mcq_prompts, pair_prompts, sig_prompts, sig_contradiction_report = generate_all_benchmarks(
         mcq_df, pair_df, sig_df,
         target_per_task=args.target_per_task,
         min_logfc_gap=args.min_logfc_gap,
@@ -1593,7 +1724,11 @@ def main():
 
     # Step 11: Summary
     print("\n--- Step 13: Summary ---")
-    summary = compute_summary(mcq_prompts, pair_prompts, sig_prompts)
+    summary = compute_summary(
+        mcq_prompts, pair_prompts, sig_prompts,
+        sig_contradiction_report=sig_contradiction_report,
+        sig_pool_contradiction_report=sig_pool_contradiction_report,
+    )
     summary['split'] = split_report
     summary_path = output_dir / args.summary_output
     with open(summary_path, 'w') as f:

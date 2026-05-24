@@ -15,7 +15,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 5d post-senescence induction, shRNA knockdown of PTBP1 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of MCM7 (minichromosome maintenance complex component 7) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of PTBP1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): PTBP1.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 5d post-senescence induction receives shRNA knockdown of PTBP1. The reference condition is untreated oncogene-induced senescent cells. Predict whether MCM7 (minichromosome maintenance complex component 7) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of PTBP1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): PTBP1.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -42,7 +42,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 7d post-senescence induction, overexpression of ZFP36L1 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of ARID1B (AT-rich interaction domain 1B) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: overexpression of ZFP36L1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): ZFP36L1.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 7d post-senescence induction receives overexpression of ZFP36L1. The reference condition is untreated oncogene-induced senescent cells. Predict whether ARID1B (AT-rich interaction domain 1B) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: overexpression of ZFP36L1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): ZFP36L1.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -69,7 +69,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 7d post-senescence induction, overexpression of ZFP36L1 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of ITPKB (inositol-trisphosphate 3-kinase B) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: overexpression of ZFP36L1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): ZFP36L1.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 7d post-senescence induction receives overexpression of ZFP36L1. The reference condition is untreated oncogene-induced senescent cells. Predict whether ITPKB (inositol-trisphosphate 3-kinase B) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: overexpression of ZFP36L1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): ZFP36L1.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -96,7 +96,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (IR) at 10d post-senescence induction, treatment with CCCP (targeting mitochondrial) at dose 48h12.5uMCCCP2daIR is applied. Compared to untreated DNA damage-induced senescent cells, the mRNA expression of ITPK1 (inositol-tetrakisphosphate 1-kinase) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (IR). Perturbation: treatment with CCCP (targeting mitochondrial) at dose 48h12.5uMCCCP2daIR. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): mitochondrial, overexpressed gene(s): Parkin.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (IR) at 10d post-senescence induction receives treatment with CCCP (targeting mitochondrial) at dose 48h12.5uMCCCP2daIR. The reference condition is untreated DNA damage-induced senescent cells. Predict whether ITPK1 (inositol-tetrakisphosphate 1-kinase) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (IR). Perturbation: treatment with CCCP (targeting mitochondrial) at dose 48h12.5uMCCCP2daIR. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): mitochondrial, overexpressed gene(s): Parkin.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -123,7 +123,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In MRC-5 lung fibroblasts undergoing DNA damage-induced senescence (IR) at 10d post-senescence induction, CRISPR knockout of BAK_BAX is applied. Compared to untreated DNA damage-induced senescent cells, the mRNA expression of ATG4D (autophagy related 4D cysteine peptidase) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: MRC-5 lung fibroblasts. Senescence model: DNA damage-induced senescence (IR). Perturbation: CRISPR knockout of BAK_BAX. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): BAK_BAX.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, MRC-5 lung fibroblasts undergoing DNA damage-induced senescence (IR) at 10d post-senescence induction receives CRISPR knockout of BAK_BAX. The reference condition is untreated DNA damage-induced senescent cells. Predict whether ATG4D (autophagy related 4D cysteine peptidase) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: MRC-5 lung fibroblasts. Senescence model: DNA damage-induced senescence (IR). Perturbation: CRISPR knockout of BAK_BAX. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): BAK_BAX.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -150,7 +150,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 10d post-senescence induction, treatment with rapamycin (targeting mTOR) at dose 1nM is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of IGFBP3 (insulin like growth factor binding protein 3) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: treatment with rapamycin (targeting mTOR) at dose 1nM. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): mTOR.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 10d post-senescence induction receives treatment with rapamycin (targeting mTOR) at dose 1nM. The reference condition is untreated oncogene-induced senescent cells. Predict whether IGFBP3 (insulin like growth factor binding protein 3) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: treatment with rapamycin (targeting mTOR) at dose 1nM. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): mTOR.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -177,7 +177,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In HDF skin fibroblasts undergoing replicative senescence at 15d post-senescence induction, treatment with Y27632 at dose 2.5uM is applied. Compared to untreated replicatively senescent cells, the mRNA expression of POU5F1 (POU class 5 homeobox 1) measured by microarray:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: HDF skin fibroblasts. Senescence model: replicative senescence. Perturbation: treatment with Y27632 at dose 2.5uM. Control condition: untreated replicatively senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, HDF skin fibroblasts undergoing replicative senescence at 15d post-senescence induction receives treatment with Y27632 at dose 2.5uM. The reference condition is untreated replicatively senescent cells. Predict whether POU5F1 (POU class 5 homeobox 1) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by microarray. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: HDF skin fibroblasts. Senescence model: replicative senescence. Perturbation: treatment with Y27632 at dose 2.5uM. Control condition: untreated replicatively senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>"
       },
       {
         "role": "assistant",
@@ -204,7 +204,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 10d post-senescence induction, treatment with DDD86481 at dose 1.5uM is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of HOPX (HOP homeobox) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: treatment with DDD86481 at dose 1.5uM. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 10d post-senescence induction receives treatment with DDD86481 at dose 1.5uM. The reference condition is untreated oncogene-induced senescent cells. Predict whether HOPX (HOP homeobox) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: treatment with DDD86481 at dose 1.5uM. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>"
       },
       {
         "role": "assistant",
@@ -231,7 +231,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction, siRNA knockdown of LTR10 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of MAGOHB (mago homolog B, exon junction complex subunit) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR10. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR10.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction receives siRNA knockdown of LTR10. The reference condition is untreated oncogene-induced senescent cells. Predict whether MAGOHB (mago homolog B, exon junction complex subunit) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR10. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR10.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -258,7 +258,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (RAF) at 3d post-senescence induction, siRNA knockdown of YBX1 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of CKAP2 (cytoskeleton associated protein 2) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (RAF). Perturbation: siRNA knockdown of YBX1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): YBX1.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, BJ skin fibroblasts undergoing oncogene-induced senescence (RAF) at 3d post-senescence induction receives siRNA knockdown of YBX1. The reference condition is untreated oncogene-induced senescent cells. Predict whether CKAP2 (cytoskeleton associated protein 2) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (RAF). Perturbation: siRNA knockdown of YBX1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): YBX1.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -285,7 +285,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In HDF161 skin fibroblasts undergoing DNA damage-induced senescence (H2O2) at 15d post-senescence induction, treatment with 1201 at dose 0.01% is applied. Compared to untreated DNA damage-induced senescent cells, the mRNA expression of PLK1 (polo like kinase 1) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: HDF161 skin fibroblasts. Senescence model: DNA damage-induced senescence (H2O2). Perturbation: treatment with 1201 at dose 0.01%. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): unknown, overexpressed gene(s): unknown.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, HDF161 skin fibroblasts undergoing DNA damage-induced senescence (H2O2) at 15d post-senescence induction receives treatment with 1201 at dose 0.01%. The reference condition is untreated DNA damage-induced senescent cells. Predict whether PLK1 (polo like kinase 1) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: HDF161 skin fibroblasts. Senescence model: DNA damage-induced senescence (H2O2). Perturbation: treatment with 1201 at dose 0.01%. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): unknown, overexpressed gene(s): unknown.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -312,7 +312,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In MRC-5 lung fibroblasts undergoing DNA damage-induced senescence (IR) at 10d post-senescence induction, treatment with CCCP (targeting mitochondrial) at dose 12.5uM_4d is applied. Compared to untreated DNA damage-induced senescent cells, the mRNA expression of BLVRA (biliverdin reductase A) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: MRC-5 lung fibroblasts. Senescence model: DNA damage-induced senescence (IR). Perturbation: treatment with CCCP (targeting mitochondrial) at dose 12.5uM_4d. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): mitochondrial, overexpressed gene(s): Parkin.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, MRC-5 lung fibroblasts undergoing DNA damage-induced senescence (IR) at 10d post-senescence induction receives treatment with CCCP (targeting mitochondrial) at dose 12.5uM_4d. The reference condition is untreated DNA damage-induced senescent cells. Predict whether BLVRA (biliverdin reductase A) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: MRC-5 lung fibroblasts. Senescence model: DNA damage-induced senescence (IR). Perturbation: treatment with CCCP (targeting mitochondrial) at dose 12.5uM_4d. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): mitochondrial, overexpressed gene(s): Parkin.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -339,7 +339,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction, siRNA knockdown of LTR10 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of BRIP1 (BRCA1 interacting helicase 1) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR10. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR10.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction receives siRNA knockdown of LTR10. The reference condition is untreated oncogene-induced senescent cells. Predict whether BRIP1 (BRCA1 interacting helicase 1) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR10. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR10.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -366,7 +366,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In TIG-3 lung fibroblasts undergoing DNA damage-induced senescence (Doxorubicin) at 12d post-senescence induction, treatment with ARV825 (targeting BRD4) at dose 10nM_2d is applied. Compared to untreated DNA damage-induced senescent cells, the mRNA expression of BRD7 (bromodomain containing 7) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: TIG-3 lung fibroblasts. Senescence model: DNA damage-induced senescence (Doxorubicin). Perturbation: treatment with ARV825 (targeting BRD4) at dose 10nM_2d. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): BRD4.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, TIG-3 lung fibroblasts undergoing DNA damage-induced senescence (Doxorubicin) at 12d post-senescence induction receives treatment with ARV825 (targeting BRD4) at dose 10nM_2d. The reference condition is untreated DNA damage-induced senescent cells. Predict whether BRD7 (bromodomain containing 7) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: TIG-3 lung fibroblasts. Senescence model: DNA damage-induced senescence (Doxorubicin). Perturbation: treatment with ARV825 (targeting BRD4) at dose 10nM_2d. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): BRD4.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -393,7 +393,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing DNA damage-induced senescence (Etoposide) at 3d post-senescence induction, siRNA knockdown of p21 is applied. Compared to untreated DNA damage-induced senescent cells, the mRNA expression of ENTPD7 (ectonucleoside triphosphate diphosphohydrolase 7) measured by microarray:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: DNA damage-induced senescence (Etoposide). Perturbation: siRNA knockdown of p21. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p21.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, BJ skin fibroblasts undergoing DNA damage-induced senescence (Etoposide) at 3d post-senescence induction receives siRNA knockdown of p21. The reference condition is untreated DNA damage-induced senescent cells. Predict whether ENTPD7 (ectonucleoside triphosphate diphosphohydrolase 7) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by microarray. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: DNA damage-induced senescence (Etoposide). Perturbation: siRNA knockdown of p21. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p21.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -420,7 +420,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 7d post-senescence induction, siRNA knockdown of METTL14 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of FOXQ1 (forkhead box Q1) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of METTL14. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): METTL14.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 7d post-senescence induction receives siRNA knockdown of METTL14. The reference condition is untreated oncogene-induced senescent cells. Predict whether FOXQ1 (forkhead box Q1) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of METTL14. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): METTL14.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -447,7 +447,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (AKT) at 14d post-senescence induction, shRNA knockdown of p53 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of ZMPSTE24 (zinc metallopeptidase STE24) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (AKT). Perturbation: shRNA knockdown of p53. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p53.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, BJ skin fibroblasts undergoing oncogene-induced senescence (AKT) at 14d post-senescence induction receives shRNA knockdown of p53. The reference condition is untreated oncogene-induced senescent cells. Predict whether ZMPSTE24 (zinc metallopeptidase STE24) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (AKT). Perturbation: shRNA knockdown of p53. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p53.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -474,7 +474,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In WI-38 lung fibroblasts undergoing DNA damage-induced senescence (Etoposide) at 8d post-senescence induction, treatment with Verteporfin at dose 1.5uM is applied. Compared to untreated DNA damage-induced senescent cells, the mRNA expression of CCL2 (C-C motif chemokine ligand 2) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: WI-38 lung fibroblasts. Senescence model: DNA damage-induced senescence (Etoposide). Perturbation: treatment with Verteporfin at dose 1.5uM. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, WI-38 lung fibroblasts undergoing DNA damage-induced senescence (Etoposide) at 8d post-senescence induction receives treatment with Verteporfin at dose 1.5uM. The reference condition is untreated DNA damage-induced senescent cells. Predict whether CCL2 (C-C motif chemokine ligand 2) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: WI-38 lung fibroblasts. Senescence model: DNA damage-induced senescence (Etoposide). Perturbation: treatment with Verteporfin at dose 1.5uM. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>"
       },
       {
         "role": "assistant",
@@ -501,7 +501,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction, siRNA knockdown of LTR10 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of SUV39H1 (SUV39H1 histone lysine methyltransferase) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR10. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR10.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction receives siRNA knockdown of LTR10. The reference condition is untreated oncogene-induced senescent cells. Predict whether SUV39H1 (SUV39H1 histone lysine methyltransferase) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR10. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR10.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -528,7 +528,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing nan (nan), overexpression of SmallT_E6_E7 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of CAVIN1 (caveolae associated protein 1) measured by microarray:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: nan (nan). Perturbation: overexpression of SmallT_E6_E7. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 2. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): SmallT_E6_E7.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing nan (nan) receives overexpression of SmallT_E6_E7. The reference condition is untreated oncogene-induced senescent cells. Predict whether CAVIN1 (caveolae associated protein 1) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by microarray. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: nan (nan). Perturbation: overexpression of SmallT_E6_E7. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 2. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): SmallT_E6_E7.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -555,7 +555,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing replicative senescence, knockdown of p38 at dose 10uM_48h is applied. Compared to untreated replicatively senescent cells, the mRNA expression of SIK1 (salt inducible kinase 1) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: replicative senescence. Perturbation: knockdown of p38 at dose 10uM_48h. Control condition: untreated replicatively senescent cells. Biological replicates: 2. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p38.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, BJ skin fibroblasts undergoing replicative senescence receives knockdown of p38 at dose 10uM_48h. The reference condition is untreated replicatively senescent cells. Predict whether SIK1 (salt inducible kinase 1) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: replicative senescence. Perturbation: knockdown of p38 at dose 10uM_48h. Control condition: untreated replicatively senescent cells. Biological replicates: 2. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p38.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -582,7 +582,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 10d post-senescence induction, treatment with rapamycin (targeting mTOR) at dose 10nM is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of DNMT1 (DNA methyltransferase 1) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: treatment with rapamycin (targeting mTOR) at dose 10nM. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): mTOR.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 10d post-senescence induction receives treatment with rapamycin (targeting mTOR) at dose 10nM. The reference condition is untreated oncogene-induced senescent cells. Predict whether DNMT1 (DNA methyltransferase 1) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: treatment with rapamycin (targeting mTOR) at dose 10nM. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): mTOR.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -609,7 +609,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (RAF) at 3d post-senescence induction, siRNA knockdown of YBX1 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of CAV1 (caveolin 1) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (RAF). Perturbation: siRNA knockdown of YBX1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): YBX1.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, BJ skin fibroblasts undergoing oncogene-induced senescence (RAF) at 3d post-senescence induction receives siRNA knockdown of YBX1. The reference condition is untreated oncogene-induced senescent cells. Predict whether CAV1 (caveolin 1) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (RAF). Perturbation: siRNA knockdown of YBX1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): YBX1.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -636,7 +636,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In HDF161 skin fibroblasts undergoing DNA damage-induced senescence (H2O2) at 15d post-senescence induction, treatment with 1201 at dose 0.01% is applied. Compared to untreated DNA damage-induced senescent cells, the mRNA expression of SUV39H1 (SUV39H1 histone lysine methyltransferase) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: HDF161 skin fibroblasts. Senescence model: DNA damage-induced senescence (H2O2). Perturbation: treatment with 1201 at dose 0.01%. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): unknown, overexpressed gene(s): unknown.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, HDF161 skin fibroblasts undergoing DNA damage-induced senescence (H2O2) at 15d post-senescence induction receives treatment with 1201 at dose 0.01%. The reference condition is untreated DNA damage-induced senescent cells. Predict whether SUV39H1 (SUV39H1 histone lysine methyltransferase) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: HDF161 skin fibroblasts. Senescence model: DNA damage-induced senescence (H2O2). Perturbation: treatment with 1201 at dose 0.01%. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): unknown, overexpressed gene(s): unknown.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -663,7 +663,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (AKT) at 14d post-senescence induction, shRNA knockdown of NF1 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of SFRP1 (secreted frizzled related protein 1) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (AKT). Perturbation: shRNA knockdown of NF1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): NF1.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, BJ skin fibroblasts undergoing oncogene-induced senescence (AKT) at 14d post-senescence induction receives shRNA knockdown of NF1. The reference condition is untreated oncogene-induced senescent cells. Predict whether SFRP1 (secreted frizzled related protein 1) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (AKT). Perturbation: shRNA knockdown of NF1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): NF1.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -690,7 +690,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing replicative senescence, knockdown of p38 at dose 10uM_48h is applied. Compared to untreated replicatively senescent cells, the mRNA expression of RAD51C (RAD51 paralog C) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: replicative senescence. Perturbation: knockdown of p38 at dose 10uM_48h. Control condition: untreated replicatively senescent cells. Biological replicates: 2. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p38.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, BJ skin fibroblasts undergoing replicative senescence receives knockdown of p38 at dose 10uM_48h. The reference condition is untreated replicatively senescent cells. Predict whether RAD51C (RAD51 paralog C) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: replicative senescence. Perturbation: knockdown of p38 at dose 10uM_48h. Control condition: untreated replicatively senescent cells. Biological replicates: 2. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p38.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -717,7 +717,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 4d post-senescence induction, shRNA knockdown of DOT1L is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of NOLC1 (nucleolar and coiled-body phosphoprotein 1) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of DOT1L. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): DOT1L.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 4d post-senescence induction receives shRNA knockdown of DOT1L. The reference condition is untreated oncogene-induced senescent cells. Predict whether NOLC1 (nucleolar and coiled-body phosphoprotein 1) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of DOT1L. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): DOT1L.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -744,7 +744,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In HDF skin fibroblasts undergoing replicative senescence at 15d post-senescence induction, treatment with Y27632_KU60019 at dose 2.5uM_0.5uM is applied. Compared to untreated replicatively senescent cells, the mRNA expression of EIF4EBP1 (eukaryotic translation initiation factor 4E binding protein 1) measured by microarray:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: HDF skin fibroblasts. Senescence model: replicative senescence. Perturbation: treatment with Y27632_KU60019 at dose 2.5uM_0.5uM. Control condition: untreated replicatively senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, HDF skin fibroblasts undergoing replicative senescence at 15d post-senescence induction receives treatment with Y27632_KU60019 at dose 2.5uM_0.5uM. The reference condition is untreated replicatively senescent cells. Predict whether EIF4EBP1 (eukaryotic translation initiation factor 4E binding protein 1) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by microarray. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: HDF skin fibroblasts. Senescence model: replicative senescence. Perturbation: treatment with Y27632_KU60019 at dose 2.5uM_0.5uM. Control condition: untreated replicatively senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>"
       },
       {
         "role": "assistant",
@@ -771,7 +771,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (RAF) at 3d post-senescence induction, siRNA knockdown of MIR31HG is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of MDK (midkine) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (RAF). Perturbation: siRNA knockdown of MIR31HG. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): MIR31HG.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, BJ skin fibroblasts undergoing oncogene-induced senescence (RAF) at 3d post-senescence induction receives siRNA knockdown of MIR31HG. The reference condition is untreated oncogene-induced senescent cells. Predict whether MDK (midkine) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by RNA-seq. Respond with only the option letter.\n</question>\n<options>\nA. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (RAF). Perturbation: siRNA knockdown of MIR31HG. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): MIR31HG.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -789,8 +789,8 @@
     "display_group": "Senescence Perturbation",
     "domain": "transcriptomics",
     "format": "pairwise",
-    "metric": "accuracy",
-    "units": "direction",
+    "metric": "balanced accuracy",
+    "units": "absolute_log2fc",
     "messages": [
       {
         "role": "system",
@@ -798,7 +798,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 10d post-senescence induction, shRNA knockdown of COPB2 at dose 1ugml_Doxycycline is applied. Compared to untreated DNA damage-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: DIDO1 (death inducer-obliterator 1)\nGene B: DPY30 (dpy-30 histone methyltransferase complex regulatory subunit)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of COPB2 at dose 1ugml_Doxycycline. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): COPB2.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 10d post-senescence induction receives shRNA knockdown of COPB2 at dose 1ugml_Doxycycline. The reference condition is untreated DNA damage-induced senescent cells. Two genes are measured by RNA-seq:\n\nGene A: DIDO1 (death inducer-obliterator 1)\nGene B: DPY30 (dpy-30 histone methyltransferase complex regulatory subunit)\n\nWhich gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.\n</question>\n<options>\nA. Gene A shows the larger absolute change B. Gene B shows the larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of COPB2 at dose 1ugml_Doxycycline. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): COPB2.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -816,8 +816,8 @@
     "display_group": "Senescence Perturbation",
     "domain": "transcriptomics",
     "format": "pairwise",
-    "metric": "accuracy",
-    "units": "direction",
+    "metric": "balanced accuracy",
+    "units": "absolute_log2fc",
     "messages": [
       {
         "role": "system",
@@ -825,7 +825,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 10d post-senescence induction, treatment with DDD86481 at dose 1.5uM is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: PMVK (phosphomevalonate kinase)\nGene B: SERPINB2 (serpin family B member 2)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: treatment with DDD86481 at dose 1.5uM. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 10d post-senescence induction receives treatment with DDD86481 at dose 1.5uM. The reference condition is untreated oncogene-induced senescent cells. Two genes are measured by RNA-seq:\n\nGene A: PMVK (phosphomevalonate kinase)\nGene B: SERPINB2 (serpin family B member 2)\n\nWhich gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.\n</question>\n<options>\nA. Gene A shows the larger absolute change B. Gene B shows the larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: treatment with DDD86481 at dose 1.5uM. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>"
       },
       {
         "role": "assistant",
@@ -843,8 +843,8 @@
     "display_group": "Senescence Perturbation",
     "domain": "transcriptomics",
     "format": "pairwise",
-    "metric": "accuracy",
-    "units": "direction",
+    "metric": "balanced accuracy",
+    "units": "absolute_log2fc",
     "messages": [
       {
         "role": "system",
@@ -852,7 +852,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nIn a senescence perturbation experiment using WI-38 lung fibroblasts undergoing DNA damage-induced senescence (IR) at 10d post-senescence induction, siRNA knockdown of BAFF is applied. Compared to untreated DNA damage-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: XAF1 (XIAP associated factor 1)\nGene B: GDF15 (growth differentiation factor 15)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: WI-38 lung fibroblasts. Senescence model: DNA damage-induced senescence (IR). Perturbation: siRNA knockdown of BAFF. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 2. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): BAFF.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, WI-38 lung fibroblasts undergoing DNA damage-induced senescence (IR) at 10d post-senescence induction receives siRNA knockdown of BAFF. The reference condition is untreated DNA damage-induced senescent cells. Two genes are measured by RNA-seq:\n\nGene A: XAF1 (XIAP associated factor 1)\nGene B: GDF15 (growth differentiation factor 15)\n\nWhich gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.\n</question>\n<options>\nA. Gene A shows the larger absolute change B. Gene B shows the larger absolute change\n</options>\n<experiment>\nCell line: WI-38 lung fibroblasts. Senescence model: DNA damage-induced senescence (IR). Perturbation: siRNA knockdown of BAFF. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 2. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): BAFF.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -870,8 +870,8 @@
     "display_group": "Senescence Perturbation",
     "domain": "transcriptomics",
     "format": "pairwise",
-    "metric": "accuracy",
-    "units": "direction",
+    "metric": "balanced accuracy",
+    "units": "absolute_log2fc",
     "messages": [
       {
         "role": "system",
@@ -879,7 +879,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nIn a senescence perturbation experiment using WI-38 lung fibroblasts undergoing DNA damage-induced senescence (Etoposide) at 9d post-senescence induction, shRNA knockdown of H2AJ at dose pred3d_9d1ugml is applied. Compared to untreated DNA damage-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: CDCA2 (cell division cycle associated 2)\nGene B: NIPA2 (NIPA magnesium transporter 2)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: WI-38 lung fibroblasts. Senescence model: DNA damage-induced senescence (Etoposide). Perturbation: shRNA knockdown of H2AJ at dose pred3d_9d1ugml. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 6. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): H2AJ.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, WI-38 lung fibroblasts undergoing DNA damage-induced senescence (Etoposide) at 9d post-senescence induction receives shRNA knockdown of H2AJ at dose pred3d_9d1ugml. The reference condition is untreated DNA damage-induced senescent cells. Two genes are measured by RNA-seq:\n\nGene A: CDCA2 (cell division cycle associated 2)\nGene B: NIPA2 (NIPA magnesium transporter 2)\n\nWhich gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.\n</question>\n<options>\nA. Gene A shows the larger absolute change B. Gene B shows the larger absolute change\n</options>\n<experiment>\nCell line: WI-38 lung fibroblasts. Senescence model: DNA damage-induced senescence (Etoposide). Perturbation: shRNA knockdown of H2AJ at dose pred3d_9d1ugml. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 6. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): H2AJ.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -897,8 +897,8 @@
     "display_group": "Senescence Perturbation",
     "domain": "transcriptomics",
     "format": "pairwise",
-    "metric": "accuracy",
-    "units": "direction",
+    "metric": "balanced accuracy",
+    "units": "absolute_log2fc",
     "messages": [
       {
         "role": "system",
@@ -906,7 +906,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 7d post-senescence induction, overexpression of WSTF is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: ID1 (inhibitor of DNA binding 1, HLH protein)\nGene B: IL6 (interleukin 6)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: overexpression of WSTF. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): WSTF.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 7d post-senescence induction receives overexpression of WSTF. The reference condition is untreated oncogene-induced senescent cells. Two genes are measured by RNA-seq:\n\nGene A: ID1 (inhibitor of DNA binding 1, HLH protein)\nGene B: IL6 (interleukin 6)\n\nWhich gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.\n</question>\n<options>\nA. Gene A shows the larger absolute change B. Gene B shows the larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: overexpression of WSTF. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): WSTF.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -924,8 +924,8 @@
     "display_group": "Senescence Perturbation",
     "domain": "transcriptomics",
     "format": "pairwise",
-    "metric": "accuracy",
-    "units": "direction",
+    "metric": "balanced accuracy",
+    "units": "absolute_log2fc",
     "messages": [
       {
         "role": "system",
@@ -933,7 +933,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 6d post-senescence induction, treatment with 3deazaadenosine at dose 10uM is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: MCM3AP (minichromosome maintenance complex component 3 associated protein)\nGene B: MCM7 (minichromosome maintenance complex component 7)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: treatment with 3deazaadenosine at dose 10uM. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 4. Differential expression analysis: Limma.\n</experiment>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 6d post-senescence induction receives treatment with 3deazaadenosine at dose 10uM. The reference condition is untreated oncogene-induced senescent cells. Two genes are measured by RNA-seq:\n\nGene A: MCM3AP (minichromosome maintenance complex component 3 associated protein)\nGene B: MCM7 (minichromosome maintenance complex component 7)\n\nWhich gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.\n</question>\n<options>\nA. Gene A shows the larger absolute change B. Gene B shows the larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: treatment with 3deazaadenosine at dose 10uM. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 4. Differential expression analysis: Limma.\n</experiment>"
       },
       {
         "role": "assistant",
@@ -951,8 +951,8 @@
     "display_group": "Senescence Perturbation",
     "domain": "transcriptomics",
     "format": "pairwise",
-    "metric": "accuracy",
-    "units": "direction",
+    "metric": "balanced accuracy",
+    "units": "absolute_log2fc",
     "messages": [
       {
         "role": "system",
@@ -960,7 +960,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction, siRNA knockdown of LTR2 is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: E2F7 (E2F transcription factor 7)\nGene B: WNT2 (Wnt family member 2)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR2. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR2.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction receives siRNA knockdown of LTR2. The reference condition is untreated oncogene-induced senescent cells. Two genes are measured by RNA-seq:\n\nGene A: E2F7 (E2F transcription factor 7)\nGene B: WNT2 (Wnt family member 2)\n\nWhich gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.\n</question>\n<options>\nA. Gene A shows the larger absolute change B. Gene B shows the larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR2. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR2.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -978,8 +978,8 @@
     "display_group": "Senescence Perturbation",
     "domain": "transcriptomics",
     "format": "pairwise",
-    "metric": "accuracy",
-    "units": "direction",
+    "metric": "balanced accuracy",
+    "units": "absolute_log2fc",
     "messages": [
       {
         "role": "system",
@@ -987,7 +987,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (Doxorubicin) at 10d post-senescence induction, treatment with MDL72527 at dose 50uM is applied. Compared to untreated DNA damage-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: FLT1 (fms related receptor tyrosine kinase 1)\nGene B: PINK1 (PTEN induced kinase 1)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (Doxorubicin). Perturbation: treatment with MDL72527 at dose 50uM. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (Doxorubicin) at 10d post-senescence induction receives treatment with MDL72527 at dose 50uM. The reference condition is untreated DNA damage-induced senescent cells. Two genes are measured by RNA-seq:\n\nGene A: FLT1 (fms related receptor tyrosine kinase 1)\nGene B: PINK1 (PTEN induced kinase 1)\n\nWhich gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.\n</question>\n<options>\nA. Gene A shows the larger absolute change B. Gene B shows the larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (Doxorubicin). Perturbation: treatment with MDL72527 at dose 50uM. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>"
       },
       {
         "role": "assistant",
@@ -1005,8 +1005,8 @@
     "display_group": "Senescence Perturbation",
     "domain": "transcriptomics",
     "format": "pairwise",
-    "metric": "accuracy",
-    "units": "direction",
+    "metric": "balanced accuracy",
+    "units": "absolute_log2fc",
     "messages": [
       {
         "role": "system",
@@ -1014,7 +1014,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 6d post-senescence induction, shRNA knockdown of PTBP1 is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: ETS1 (ETS proto-oncogene 1, transcription factor)\nGene B: ARG2 (arginase 2)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of PTBP1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): PTBP1.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 6d post-senescence induction receives shRNA knockdown of PTBP1. The reference condition is untreated oncogene-induced senescent cells. Two genes are measured by RNA-seq:\n\nGene A: ETS1 (ETS proto-oncogene 1, transcription factor)\nGene B: ARG2 (arginase 2)\n\nWhich gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.\n</question>\n<options>\nA. Gene A shows the larger absolute change B. Gene B shows the larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of PTBP1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): PTBP1.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1032,8 +1032,8 @@
     "display_group": "Senescence Perturbation",
     "domain": "transcriptomics",
     "format": "pairwise",
-    "metric": "accuracy",
-    "units": "direction",
+    "metric": "balanced accuracy",
+    "units": "absolute_log2fc",
     "messages": [
       {
         "role": "system",
@@ -1041,7 +1041,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 6d post-senescence induction, shRNA knockdown of PTBP1 is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: ITPR2 (inositol 1,4,5-trisphosphate receptor type 2)\nGene B: WWP1 (WW domain containing E3 ubiquitin protein ligase 1)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of PTBP1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): PTBP1.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 6d post-senescence induction receives shRNA knockdown of PTBP1. The reference condition is untreated oncogene-induced senescent cells. Two genes are measured by RNA-seq:\n\nGene A: ITPR2 (inositol 1,4,5-trisphosphate receptor type 2)\nGene B: WWP1 (WW domain containing E3 ubiquitin protein ligase 1)\n\nWhich gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.\n</question>\n<options>\nA. Gene A shows the larger absolute change B. Gene B shows the larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of PTBP1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): PTBP1.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1059,8 +1059,8 @@
     "display_group": "Senescence Perturbation",
     "domain": "transcriptomics",
     "format": "pairwise",
-    "metric": "accuracy",
-    "units": "direction",
+    "metric": "balanced accuracy",
+    "units": "absolute_log2fc",
     "messages": [
       {
         "role": "system",
@@ -1068,7 +1068,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nIn a senescence perturbation experiment using TIG-3 lung fibroblasts undergoing oncogene-induced senescence (RAF) at 10d post-senescence induction, overexpression of SV40smallT is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: NF2 (neurofibromin 2)\nGene B: DGCR8 (DGCR8 microprocessor complex subunit)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: TIG-3 lung fibroblasts. Senescence model: oncogene-induced senescence (RAF). Perturbation: overexpression of SV40smallT. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): SV40smallT.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, TIG-3 lung fibroblasts undergoing oncogene-induced senescence (RAF) at 10d post-senescence induction receives overexpression of SV40smallT. The reference condition is untreated oncogene-induced senescent cells. Two genes are measured by RNA-seq:\n\nGene A: NF2 (neurofibromin 2)\nGene B: DGCR8 (DGCR8 microprocessor complex subunit)\n\nWhich gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.\n</question>\n<options>\nA. Gene A shows the larger absolute change B. Gene B shows the larger absolute change\n</options>\n<experiment>\nCell line: TIG-3 lung fibroblasts. Senescence model: oncogene-induced senescence (RAF). Perturbation: overexpression of SV40smallT. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): SV40smallT.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1086,8 +1086,8 @@
     "display_group": "Senescence Perturbation",
     "domain": "transcriptomics",
     "format": "pairwise",
-    "metric": "accuracy",
-    "units": "direction",
+    "metric": "balanced accuracy",
+    "units": "absolute_log2fc",
     "messages": [
       {
         "role": "system",
@@ -1095,7 +1095,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 7d post-senescence induction, overexpression of ZFP36L1 is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: RAPGEF4 (Rap guanine nucleotide exchange factor 4)\nGene B: ERRFI1 (ERBB receptor feedback inhibitor 1)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: overexpression of ZFP36L1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): ZFP36L1.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 7d post-senescence induction receives overexpression of ZFP36L1. The reference condition is untreated oncogene-induced senescent cells. Two genes are measured by RNA-seq:\n\nGene A: RAPGEF4 (Rap guanine nucleotide exchange factor 4)\nGene B: ERRFI1 (ERBB receptor feedback inhibitor 1)\n\nWhich gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.\n</question>\n<options>\nA. Gene A shows the larger absolute change B. Gene B shows the larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: overexpression of ZFP36L1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): ZFP36L1.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1113,8 +1113,8 @@
     "display_group": "Senescence Perturbation",
     "domain": "transcriptomics",
     "format": "pairwise",
-    "metric": "accuracy",
-    "units": "direction",
+    "metric": "balanced accuracy",
+    "units": "absolute_log2fc",
     "messages": [
       {
         "role": "system",
@@ -1122,7 +1122,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 6d post-senescence induction, treatment with Celecoxib (targeting COX2) at dose 6d_40uM is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: NDST2 (N-deacetylase and N-sulfotransferase 2)\nGene B: MAD2L1 (mitotic arrest deficient 2 like 1)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: treatment with Celecoxib (targeting COX2) at dose 6d_40uM. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 8. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): COX2.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 6d post-senescence induction receives treatment with Celecoxib (targeting COX2) at dose 6d_40uM. The reference condition is untreated oncogene-induced senescent cells. Two genes are measured by RNA-seq:\n\nGene A: NDST2 (N-deacetylase and N-sulfotransferase 2)\nGene B: MAD2L1 (mitotic arrest deficient 2 like 1)\n\nWhich gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.\n</question>\n<options>\nA. Gene A shows the larger absolute change B. Gene B shows the larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: treatment with Celecoxib (targeting COX2) at dose 6d_40uM. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 8. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): COX2.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1140,8 +1140,8 @@
     "display_group": "Senescence Perturbation",
     "domain": "transcriptomics",
     "format": "pairwise",
-    "metric": "accuracy",
-    "units": "direction",
+    "metric": "balanced accuracy",
+    "units": "absolute_log2fc",
     "messages": [
       {
         "role": "system",
@@ -1149,7 +1149,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (IR) at 10d post-senescence induction, overexpression of Parkin_mtDNA at dose 12uM_15ug is applied. Compared to untreated DNA damage-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: MCAM (melanoma cell adhesion molecule)\nGene B: AURKB (aurora kinase B)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (IR). Perturbation: overexpression of Parkin_mtDNA at dose 12uM_15ug. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): Parkin_mtDNA.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (IR) at 10d post-senescence induction receives overexpression of Parkin_mtDNA at dose 12uM_15ug. The reference condition is untreated DNA damage-induced senescent cells. Two genes are measured by RNA-seq:\n\nGene A: MCAM (melanoma cell adhesion molecule)\nGene B: AURKB (aurora kinase B)\n\nWhich gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.\n</question>\n<options>\nA. Gene A shows the larger absolute change B. Gene B shows the larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (IR). Perturbation: overexpression of Parkin_mtDNA at dose 12uM_15ug. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): Parkin_mtDNA.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1167,8 +1167,8 @@
     "display_group": "Senescence Perturbation",
     "domain": "transcriptomics",
     "format": "pairwise",
-    "metric": "accuracy",
-    "units": "direction",
+    "metric": "balanced accuracy",
+    "units": "absolute_log2fc",
     "messages": [
       {
         "role": "system",
@@ -1176,7 +1176,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (IR) at 10d post-senescence induction, treatment with CCCP (targeting mitochondrial) at dose 48h12.5uMCCCP2daIR is applied. Compared to untreated DNA damage-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: NEK2 (NIMA related kinase 2)\nGene B: HJURP (Holliday junction recognition protein)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (IR). Perturbation: treatment with CCCP (targeting mitochondrial) at dose 48h12.5uMCCCP2daIR. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): mitochondrial, overexpressed gene(s): Parkin.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (IR) at 10d post-senescence induction receives treatment with CCCP (targeting mitochondrial) at dose 48h12.5uMCCCP2daIR. The reference condition is untreated DNA damage-induced senescent cells. Two genes are measured by RNA-seq:\n\nGene A: NEK2 (NIMA related kinase 2)\nGene B: HJURP (Holliday junction recognition protein)\n\nWhich gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.\n</question>\n<options>\nA. Gene A shows the larger absolute change B. Gene B shows the larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (IR). Perturbation: treatment with CCCP (targeting mitochondrial) at dose 48h12.5uMCCCP2daIR. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): mitochondrial, overexpressed gene(s): Parkin.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1194,8 +1194,8 @@
     "display_group": "Senescence Perturbation",
     "domain": "transcriptomics",
     "format": "pairwise",
-    "metric": "accuracy",
-    "units": "direction",
+    "metric": "balanced accuracy",
+    "units": "absolute_log2fc",
     "messages": [
       {
         "role": "system",
@@ -1203,7 +1203,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (Bleomycin) at 7d post-senescence induction, CRISPR knockout of ABCA1 is applied. Compared to untreated DNA damage-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: LMNB1 (lamin B1)\nGene B: MCM7 (minichromosome maintenance complex component 7)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (Bleomycin). Perturbation: CRISPR knockout of ABCA1. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 2. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): ABCA1.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (Bleomycin) at 7d post-senescence induction receives CRISPR knockout of ABCA1. The reference condition is untreated DNA damage-induced senescent cells. Two genes are measured by RNA-seq:\n\nGene A: LMNB1 (lamin B1)\nGene B: MCM7 (minichromosome maintenance complex component 7)\n\nWhich gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.\n</question>\n<options>\nA. Gene A shows the larger absolute change B. Gene B shows the larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (Bleomycin). Perturbation: CRISPR knockout of ABCA1. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 2. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): ABCA1.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1221,8 +1221,8 @@
     "display_group": "Senescence Perturbation",
     "domain": "transcriptomics",
     "format": "pairwise",
-    "metric": "accuracy",
-    "units": "direction",
+    "metric": "balanced accuracy",
+    "units": "absolute_log2fc",
     "messages": [
       {
         "role": "system",
@@ -1230,7 +1230,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nIn a senescence perturbation experiment using HDF skin fibroblasts undergoing replicative senescence at 15d post-senescence induction, treatment with Y27632_KU60019 at dose 2.5uM_0.5uM is applied. Compared to untreated replicatively senescent cells, consider the following two genes measured by microarray:\n\nGene A: WWP1 (WW domain containing E3 ubiquitin protein ligase 1)\nGene B: TGFB1I1 (transforming growth factor beta 1 induced transcript 1)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: HDF skin fibroblasts. Senescence model: replicative senescence. Perturbation: treatment with Y27632_KU60019 at dose 2.5uM_0.5uM. Control condition: untreated replicatively senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, HDF skin fibroblasts undergoing replicative senescence at 15d post-senescence induction receives treatment with Y27632_KU60019 at dose 2.5uM_0.5uM. The reference condition is untreated replicatively senescent cells. Two genes are measured by microarray:\n\nGene A: WWP1 (WW domain containing E3 ubiquitin protein ligase 1)\nGene B: TGFB1I1 (transforming growth factor beta 1 induced transcript 1)\n\nWhich gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.\n</question>\n<options>\nA. Gene A shows the larger absolute change B. Gene B shows the larger absolute change\n</options>\n<experiment>\nCell line: HDF skin fibroblasts. Senescence model: replicative senescence. Perturbation: treatment with Y27632_KU60019 at dose 2.5uM_0.5uM. Control condition: untreated replicatively senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>"
       },
       {
         "role": "assistant",
@@ -1248,8 +1248,8 @@
     "display_group": "Senescence Perturbation",
     "domain": "transcriptomics",
     "format": "pairwise",
-    "metric": "accuracy",
-    "units": "direction",
+    "metric": "balanced accuracy",
+    "units": "absolute_log2fc",
     "messages": [
       {
         "role": "system",
@@ -1257,7 +1257,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction, siRNA knockdown of LTR10 is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: ENTPD7 (ectonucleoside triphosphate diphosphohydrolase 7)\nGene B: CASP2 (caspase 2)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR10. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR10.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction receives siRNA knockdown of LTR10. The reference condition is untreated oncogene-induced senescent cells. Two genes are measured by RNA-seq:\n\nGene A: ENTPD7 (ectonucleoside triphosphate diphosphohydrolase 7)\nGene B: CASP2 (caspase 2)\n\nWhich gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.\n</question>\n<options>\nA. Gene A shows the larger absolute change B. Gene B shows the larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR10. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR10.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1275,8 +1275,8 @@
     "display_group": "Senescence Perturbation",
     "domain": "transcriptomics",
     "format": "pairwise",
-    "metric": "accuracy",
-    "units": "direction",
+    "metric": "balanced accuracy",
+    "units": "absolute_log2fc",
     "messages": [
       {
         "role": "system",
@@ -1284,7 +1284,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing nan (Prolif) at 7d post-senescence induction, overexpression of WSTF is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: SAT2 (spermidine/spermine N1-acetyltransferase family member 2)\nGene B: ATG7 (autophagy related 7)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: nan (Prolif). Perturbation: overexpression of WSTF. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): WSTF.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing nan (Prolif) at 7d post-senescence induction receives overexpression of WSTF. The reference condition is untreated oncogene-induced senescent cells. Two genes are measured by RNA-seq:\n\nGene A: SAT2 (spermidine/spermine N1-acetyltransferase family member 2)\nGene B: ATG7 (autophagy related 7)\n\nWhich gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.\n</question>\n<options>\nA. Gene A shows the larger absolute change B. Gene B shows the larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: nan (Prolif). Perturbation: overexpression of WSTF. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): WSTF.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1302,8 +1302,8 @@
     "display_group": "Senescence Perturbation",
     "domain": "transcriptomics",
     "format": "pairwise",
-    "metric": "accuracy",
-    "units": "direction",
+    "metric": "balanced accuracy",
+    "units": "absolute_log2fc",
     "messages": [
       {
         "role": "system",
@@ -1311,7 +1311,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction, siRNA knockdown of LTR2 is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: ZMPSTE24 (zinc metallopeptidase STE24)\nGene B: LAYN (layilin)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR2. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR2.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction receives siRNA knockdown of LTR2. The reference condition is untreated oncogene-induced senescent cells. Two genes are measured by RNA-seq:\n\nGene A: ZMPSTE24 (zinc metallopeptidase STE24)\nGene B: LAYN (layilin)\n\nWhich gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.\n</question>\n<options>\nA. Gene A shows the larger absolute change B. Gene B shows the larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR2. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR2.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1329,8 +1329,8 @@
     "display_group": "Senescence Perturbation",
     "domain": "transcriptomics",
     "format": "pairwise",
-    "metric": "accuracy",
-    "units": "direction",
+    "metric": "balanced accuracy",
+    "units": "absolute_log2fc",
     "messages": [
       {
         "role": "system",
@@ -1338,7 +1338,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (Doxorubicin) at 10d post-senescence induction, treatment with MDL72527 at dose 50uM is applied. Compared to untreated DNA damage-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: MME (membrane metalloendopeptidase)\nGene B: IL6 (interleukin 6)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (Doxorubicin). Perturbation: treatment with MDL72527 at dose 50uM. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (Doxorubicin) at 10d post-senescence induction receives treatment with MDL72527 at dose 50uM. The reference condition is untreated DNA damage-induced senescent cells. Two genes are measured by RNA-seq:\n\nGene A: MME (membrane metalloendopeptidase)\nGene B: IL6 (interleukin 6)\n\nWhich gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.\n</question>\n<options>\nA. Gene A shows the larger absolute change B. Gene B shows the larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (Doxorubicin). Perturbation: treatment with MDL72527 at dose 50uM. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>"
       },
       {
         "role": "assistant",
@@ -1356,8 +1356,8 @@
     "display_group": "Senescence Perturbation",
     "domain": "transcriptomics",
     "format": "pairwise",
-    "metric": "accuracy",
-    "units": "direction",
+    "metric": "balanced accuracy",
+    "units": "absolute_log2fc",
     "messages": [
       {
         "role": "system",
@@ -1365,7 +1365,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing reprogramming-induced senescence at 10d post-senescence induction, treatment with rapamycin (targeting mTOR) at dose 10nM is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: XAF1 (XIAP associated factor 1)\nGene B: SERPINB2 (serpin family B member 2)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: reprogramming-induced senescence. Perturbation: treatment with rapamycin (targeting mTOR) at dose 10nM. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): mTOR.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing reprogramming-induced senescence at 10d post-senescence induction receives treatment with rapamycin (targeting mTOR) at dose 10nM. The reference condition is untreated oncogene-induced senescent cells. Two genes are measured by RNA-seq:\n\nGene A: XAF1 (XIAP associated factor 1)\nGene B: SERPINB2 (serpin family B member 2)\n\nWhich gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.\n</question>\n<options>\nA. Gene A shows the larger absolute change B. Gene B shows the larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: reprogramming-induced senescence. Perturbation: treatment with rapamycin (targeting mTOR) at dose 10nM. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): mTOR.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1392,7 +1392,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing reprogramming-induced senescence at 10d post-senescence induction, treatment with rapamycin (targeting mTOR) at dose 1nM is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of NR1H2 (nuclear receptor subfamily 1 group H member 2) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: reprogramming-induced senescence. Perturbation: treatment with rapamycin (targeting mTOR) at dose 1nM. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): mTOR.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing reprogramming-induced senescence at 10d post-senescence induction receives treatment with rapamycin (targeting mTOR) at dose 1nM. The reference condition is untreated oncogene-induced senescent cells. Predict whether NR1H2 (nuclear receptor subfamily 1 group H member 2) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by RNA-seq. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.\n</question>\n<options>\nA. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: reprogramming-induced senescence. Perturbation: treatment with rapamycin (targeting mTOR) at dose 1nM. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): mTOR.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1419,7 +1419,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In HDF161 skin fibroblasts undergoing DNA damage-induced senescence (H2O2) at 15d post-senescence induction, treatment with 1201 at dose 0.01% is applied. Compared to untreated DNA damage-induced senescent cells, is the mRNA expression of SUV39H1 (SUV39H1 histone lysine methyltransferase) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: HDF161 skin fibroblasts. Senescence model: DNA damage-induced senescence (H2O2). Perturbation: treatment with 1201 at dose 0.01%. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): unknown, overexpressed gene(s): unknown.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, HDF161 skin fibroblasts undergoing DNA damage-induced senescence (H2O2) at 15d post-senescence induction receives treatment with 1201 at dose 0.01%. The reference condition is untreated DNA damage-induced senescent cells. Predict whether SUV39H1 (SUV39H1 histone lysine methyltransferase) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by RNA-seq. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.\n</question>\n<options>\nA. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: HDF161 skin fibroblasts. Senescence model: DNA damage-induced senescence (H2O2). Perturbation: treatment with 1201 at dose 0.01%. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): unknown, overexpressed gene(s): unknown.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1446,7 +1446,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing DNA damage-induced senescence (Etoposide) at 3d post-senescence induction, siRNA knockdown of p21 is applied. Compared to untreated DNA damage-induced senescent cells, is the mRNA expression of ENTPD7 (ectonucleoside triphosphate diphosphohydrolase 7) measured by microarray significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: DNA damage-induced senescence (Etoposide). Perturbation: siRNA knockdown of p21. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p21.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, BJ skin fibroblasts undergoing DNA damage-induced senescence (Etoposide) at 3d post-senescence induction receives siRNA knockdown of p21. The reference condition is untreated DNA damage-induced senescent cells. Predict whether ENTPD7 (ectonucleoside triphosphate diphosphohydrolase 7) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by microarray. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.\n</question>\n<options>\nA. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: DNA damage-induced senescence (Etoposide). Perturbation: siRNA knockdown of p21. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p21.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1473,7 +1473,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (IR) at 10d post-senescence induction, overexpression of Parkin_mtDNA at dose 12uM_15ug is applied. Compared to untreated DNA damage-induced senescent cells, is the mRNA expression of CALR (calreticulin) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (IR). Perturbation: overexpression of Parkin_mtDNA at dose 12uM_15ug. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): Parkin_mtDNA.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (IR) at 10d post-senescence induction receives overexpression of Parkin_mtDNA at dose 12uM_15ug. The reference condition is untreated DNA damage-induced senescent cells. Predict whether CALR (calreticulin) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by RNA-seq. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.\n</question>\n<options>\nA. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (IR). Perturbation: overexpression of Parkin_mtDNA at dose 12uM_15ug. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): Parkin_mtDNA.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1500,7 +1500,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 5d post-senescence induction, siRNA knockdown of LTR2 is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of CENPA (centromere protein A) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR2. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR2.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 5d post-senescence induction receives siRNA knockdown of LTR2. The reference condition is untreated oncogene-induced senescent cells. Predict whether CENPA (centromere protein A) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by RNA-seq. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.\n</question>\n<options>\nA. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR2. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR2.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1527,7 +1527,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 10d post-senescence induction, shRNA knockdown of COPB2 at dose 1ugml_Doxycycline is applied. Compared to untreated DNA damage-induced senescent cells, is the mRNA expression of DPY30 (dpy-30 histone methyltransferase complex regulatory subunit) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of COPB2 at dose 1ugml_Doxycycline. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): COPB2.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 10d post-senescence induction receives shRNA knockdown of COPB2 at dose 1ugml_Doxycycline. The reference condition is untreated DNA damage-induced senescent cells. Predict whether DPY30 (dpy-30 histone methyltransferase complex regulatory subunit) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by RNA-seq. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.\n</question>\n<options>\nA. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of COPB2 at dose 1ugml_Doxycycline. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): COPB2.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1554,7 +1554,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In TIG-3 lung fibroblasts undergoing oncogene-induced senescence (RAF) at 4d post-senescence induction, overexpression of SV40smallT is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of MAPK1 (mitogen-activated protein kinase 1) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: TIG-3 lung fibroblasts. Senescence model: oncogene-induced senescence (RAF). Perturbation: overexpression of SV40smallT. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): SV40smallT.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, TIG-3 lung fibroblasts undergoing oncogene-induced senescence (RAF) at 4d post-senescence induction receives overexpression of SV40smallT. The reference condition is untreated oncogene-induced senescent cells. Predict whether MAPK1 (mitogen-activated protein kinase 1) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by RNA-seq. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.\n</question>\n<options>\nA. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: TIG-3 lung fibroblasts. Senescence model: oncogene-induced senescence (RAF). Perturbation: overexpression of SV40smallT. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): SV40smallT.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1581,7 +1581,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (Doxorubicin) at 10d post-senescence induction, treatment with MDL72527 at dose 50uM is applied. Compared to untreated DNA damage-induced senescent cells, is the mRNA expression of IL6 (interleukin 6) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (Doxorubicin). Perturbation: treatment with MDL72527 at dose 50uM. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (Doxorubicin) at 10d post-senescence induction receives treatment with MDL72527 at dose 50uM. The reference condition is untreated DNA damage-induced senescent cells. Predict whether IL6 (interleukin 6) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by RNA-seq. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.\n</question>\n<options>\nA. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (Doxorubicin). Perturbation: treatment with MDL72527 at dose 50uM. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>"
       },
       {
         "role": "assistant",
@@ -1608,7 +1608,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (RAF) at 3d post-senescence induction, siRNA knockdown of MIR31HG is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of SERPINB2 (serpin family B member 2) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (RAF). Perturbation: siRNA knockdown of MIR31HG. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): MIR31HG.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, BJ skin fibroblasts undergoing oncogene-induced senescence (RAF) at 3d post-senescence induction receives siRNA knockdown of MIR31HG. The reference condition is untreated oncogene-induced senescent cells. Predict whether SERPINB2 (serpin family B member 2) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by RNA-seq. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.\n</question>\n<options>\nA. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (RAF). Perturbation: siRNA knockdown of MIR31HG. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): MIR31HG.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1635,7 +1635,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing replicative senescence, knockdown of p38 at dose 10uM_48h is applied. Compared to untreated replicatively senescent cells, is the mRNA expression of SIK1 (salt inducible kinase 1) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: replicative senescence. Perturbation: knockdown of p38 at dose 10uM_48h. Control condition: untreated replicatively senescent cells. Biological replicates: 2. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p38.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, BJ skin fibroblasts undergoing replicative senescence receives knockdown of p38 at dose 10uM_48h. The reference condition is untreated replicatively senescent cells. Predict whether SIK1 (salt inducible kinase 1) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by RNA-seq. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.\n</question>\n<options>\nA. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: replicative senescence. Perturbation: knockdown of p38 at dose 10uM_48h. Control condition: untreated replicatively senescent cells. Biological replicates: 2. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p38.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1662,7 +1662,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (IR) at 10d post-senescence induction, treatment with CCCP (targeting mitochondrial) at dose 48h12.5uMCCCP2daIR is applied. Compared to untreated DNA damage-induced senescent cells, is the mRNA expression of SIN3B (SIN3 transcription regulator family member B) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (IR). Perturbation: treatment with CCCP (targeting mitochondrial) at dose 48h12.5uMCCCP2daIR. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): mitochondrial.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (IR) at 10d post-senescence induction receives treatment with CCCP (targeting mitochondrial) at dose 48h12.5uMCCCP2daIR. The reference condition is untreated DNA damage-induced senescent cells. Predict whether SIN3B (SIN3 transcription regulator family member B) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by RNA-seq. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.\n</question>\n<options>\nA. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (IR). Perturbation: treatment with CCCP (targeting mitochondrial) at dose 48h12.5uMCCCP2daIR. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): mitochondrial.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1689,7 +1689,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (AKT) at 14d post-senescence induction, shRNA knockdown of NF1 is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of SFRP1 (secreted frizzled related protein 1) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (AKT). Perturbation: shRNA knockdown of NF1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): NF1.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, BJ skin fibroblasts undergoing oncogene-induced senescence (AKT) at 14d post-senescence induction receives shRNA knockdown of NF1. The reference condition is untreated oncogene-induced senescent cells. Predict whether SFRP1 (secreted frizzled related protein 1) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by RNA-seq. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.\n</question>\n<options>\nA. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (AKT). Perturbation: shRNA knockdown of NF1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): NF1.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1716,7 +1716,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 5d post-senescence induction, shRNA knockdown of PTBP1 is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of MCM7 (minichromosome maintenance complex component 7) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of PTBP1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): PTBP1.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 5d post-senescence induction receives shRNA knockdown of PTBP1. The reference condition is untreated oncogene-induced senescent cells. Predict whether MCM7 (minichromosome maintenance complex component 7) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by RNA-seq. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.\n</question>\n<options>\nA. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of PTBP1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): PTBP1.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1743,7 +1743,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (IR) at 10d post-senescence induction, treatment with CCCP (targeting Parkin) at dose 12uM is applied. Compared to untreated DNA damage-induced senescent cells, is the mRNA expression of E2F1 (E2F transcription factor 1) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (IR). Perturbation: treatment with CCCP (targeting Parkin) at dose 12uM. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): Parkin.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (IR) at 10d post-senescence induction receives treatment with CCCP (targeting Parkin) at dose 12uM. The reference condition is untreated DNA damage-induced senescent cells. Predict whether E2F1 (E2F transcription factor 1) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by RNA-seq. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.\n</question>\n<options>\nA. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (IR). Perturbation: treatment with CCCP (targeting Parkin) at dose 12uM. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): Parkin.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1770,7 +1770,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (AKT) at 14d post-senescence induction, shRNA knockdown of p53 is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of ZMPSTE24 (zinc metallopeptidase STE24) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (AKT). Perturbation: shRNA knockdown of p53. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p53.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, BJ skin fibroblasts undergoing oncogene-induced senescence (AKT) at 14d post-senescence induction receives shRNA knockdown of p53. The reference condition is untreated oncogene-induced senescent cells. Predict whether ZMPSTE24 (zinc metallopeptidase STE24) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by RNA-seq. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.\n</question>\n<options>\nA. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (AKT). Perturbation: shRNA knockdown of p53. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p53.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1797,7 +1797,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 10d post-senescence induction, shRNA knockdown of COPB2 at dose 1ugml_Doxycycline is applied. Compared to untreated DNA damage-induced senescent cells, is the mRNA expression of DIDO1 (death inducer-obliterator 1) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of COPB2 at dose 1ugml_Doxycycline. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): COPB2.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 10d post-senescence induction receives shRNA knockdown of COPB2 at dose 1ugml_Doxycycline. The reference condition is untreated DNA damage-induced senescent cells. Predict whether DIDO1 (death inducer-obliterator 1) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by RNA-seq. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.\n</question>\n<options>\nA. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of COPB2 at dose 1ugml_Doxycycline. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): COPB2.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1824,7 +1824,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In HFF skin fibroblasts undergoing nan (nan), treatment with rotenone (targeting ComplexI) at dose 0.1uM is applied. Compared to untreated replicatively senescent cells, is the mRNA expression of PPM1D (protein phosphatase, Mg2+/Mn2+ dependent 1D) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: HFF skin fibroblasts. Senescence model: nan (nan). Perturbation: treatment with rotenone (targeting ComplexI) at dose 0.1uM. Control condition: untreated replicatively senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): ComplexI.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, HFF skin fibroblasts undergoing nan (nan) receives treatment with rotenone (targeting ComplexI) at dose 0.1uM. The reference condition is untreated replicatively senescent cells. Predict whether PPM1D (protein phosphatase, Mg2+/Mn2+ dependent 1D) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by RNA-seq. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.\n</question>\n<options>\nA. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: HFF skin fibroblasts. Senescence model: nan (nan). Perturbation: treatment with rotenone (targeting ComplexI) at dose 0.1uM. Control condition: untreated replicatively senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): ComplexI.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1851,7 +1851,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In HDF161 skin fibroblasts undergoing DNA damage-induced senescence (H2O2) at 15d post-senescence induction, treatment with 1201 at dose 0.01% is applied. Compared to untreated DNA damage-induced senescent cells, is the mRNA expression of CSNK2A1 (casein kinase 2 alpha 1) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: HDF161 skin fibroblasts. Senescence model: DNA damage-induced senescence (H2O2). Perturbation: treatment with 1201 at dose 0.01%. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): unknown, overexpressed gene(s): unknown.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, HDF161 skin fibroblasts undergoing DNA damage-induced senescence (H2O2) at 15d post-senescence induction receives treatment with 1201 at dose 0.01%. The reference condition is untreated DNA damage-induced senescent cells. Predict whether CSNK2A1 (casein kinase 2 alpha 1) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by RNA-seq. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.\n</question>\n<options>\nA. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: HDF161 skin fibroblasts. Senescence model: DNA damage-induced senescence (H2O2). Perturbation: treatment with 1201 at dose 0.01%. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): unknown, overexpressed gene(s): unknown.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1878,7 +1878,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In HDF skin fibroblasts undergoing replicative senescence at 15d post-senescence induction, treatment with Y27632 at dose 2.5uM is applied. Compared to untreated replicatively senescent cells, is the mRNA expression of POU5F1 (POU class 5 homeobox 1) measured by microarray significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: HDF skin fibroblasts. Senescence model: replicative senescence. Perturbation: treatment with Y27632 at dose 2.5uM. Control condition: untreated replicatively senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, HDF skin fibroblasts undergoing replicative senescence at 15d post-senescence induction receives treatment with Y27632 at dose 2.5uM. The reference condition is untreated replicatively senescent cells. Predict whether POU5F1 (POU class 5 homeobox 1) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by microarray. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.\n</question>\n<options>\nA. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: HDF skin fibroblasts. Senescence model: replicative senescence. Perturbation: treatment with Y27632 at dose 2.5uM. Control condition: untreated replicatively senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>"
       },
       {
         "role": "assistant",
@@ -1905,7 +1905,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 7d post-senescence induction, overexpression of ZFP36L1 is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of PPARG (peroxisome proliferator activated receptor gamma) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: overexpression of ZFP36L1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): ZFP36L1.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 7d post-senescence induction receives overexpression of ZFP36L1. The reference condition is untreated oncogene-induced senescent cells. Predict whether PPARG (peroxisome proliferator activated receptor gamma) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by RNA-seq. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.\n</question>\n<options>\nA. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: overexpression of ZFP36L1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): ZFP36L1.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1932,7 +1932,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 7d post-senescence induction, overexpression of WSTF is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of CAV1 (caveolin 1) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: overexpression of WSTF. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): WSTF.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 7d post-senescence induction receives overexpression of WSTF. The reference condition is untreated oncogene-induced senescent cells. Predict whether CAV1 (caveolin 1) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by RNA-seq. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.\n</question>\n<options>\nA. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: overexpression of WSTF. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): WSTF.\n</gene_context>"
       },
       {
         "role": "assistant",
@@ -1959,7 +1959,7 @@
       },
       {
         "role": "user",
-        "content": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (AKT) at 14d post-senescence induction, shRNA knockdown of NF1 is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of KDM1A (lysine demethylase 1A) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (AKT). Perturbation: shRNA knockdown of NF1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): NF1.\n</gene_context>"
+        "content": "<question>\nYou are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, BJ skin fibroblasts undergoing oncogene-induced senescence (AKT) at 14d post-senescence induction receives shRNA knockdown of NF1. The reference condition is untreated oncogene-induced senescent cells. Predict whether KDM1A (lysine demethylase 1A) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by RNA-seq. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.\n</question>\n<options>\nA. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (AKT). Perturbation: shRNA knockdown of NF1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): NF1.\n</gene_context>"
       },
       {
         "role": "assistant",

@@ -274,6 +274,15 @@ Binary significance pool (target 100 per class × 3, |LogFC| cap=10.0):
   significant: 300 rows, median p=1.22e-11, median |LogFC|=1.467
   not_significant: 300 rows, median p=5.68e-01, median |LogFC|=0.098
 
+--- Step 8c: Check significance prompt contradictions (pool) ---
+
+  Contradiction check [sig_pool (post-filtering, pre-sampling)]:
+    Rows scanned:           600
+    Distinct fingerprints:  589
+    Contradicting groups:   0
+    Rows in contradictions: 0
+    ✓ No fingerprint disagreements
+
 --- Step 9: Split into MCQ / Pairwise / Binary Significance ---
 
 Three-way split:
@@ -291,6 +300,13 @@ Three-way split:
     ⚠ Below target — only 99 valid pairs survived the |LogFC| gap ≥ 0.5 filter
   Significance prompts: 100 (target 100) | tissues: {'Lung': 50, 'Skin': 50} | labels: {'not_significant': 50, 'significant': 50}
     ✓ Significance label balance OK: {'B': 50, 'A': 50}
+
+  Contradiction check [sig_input (final emitted prompts)]:
+    Rows scanned:           100
+    Distinct fingerprints:  100
+    Contradicting groups:   0
+    Rows in contradictions: 0
+    ✓ No fingerprint disagreements
   ✓ MCQ label balance OK: {'B': 33, 'C': 33, 'A': 33}
 
 --- Step 11: Train/Test split by accession ---
@@ -334,10 +350,10 @@ You are a biomedical AI specialized in aging biology and cellular senescence, tr
 
 [user]
 <question>
-You are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (RAF) at 1d post-senescence induction, treatment with compoundA (targeting RELA) at dose 2uM_2h is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of GNG11 (G protein subunit gamma 11) measured by microarray:
+You are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, BJ skin fibroblasts undergoing oncogene-induced senescence (RAF) at 1d post-senescence induction receives treatment with compoundA (targeting RELA) at dose 2uM_2h. The reference condition is untreated oncogene-induced senescent cells. Predict whether GNG11 (G protein subunit gamma 11) is upregulated, downregulated, or not significantly changed in the perturbed condition relative to the reference condition, as measured by microarray. Respond with only the option letter.
 </question>
 <options>
-A. increases (upregulated) B. decreases (downregulated) C. no significant change
+A. upregulated relative to the reference condition B. downregulated relative to the reference condition C. no significant change relative to the reference condition
 </options>
 <experiment>
 Cell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (RAF). Perturbation: treatment with compoundA (targeting RELA) at dose 2uM_2h. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.
@@ -356,22 +372,22 @@ Gene: GNG11 (G protein subunit gamma 11). Log2FC=-536.1259, p=4.60e-07. Signific
 lb_id: LB-SEN-PAIR-0001
 pool: senescence_perturbation_pairwise
 format: pairwise
-metric: accuracy
+metric: balanced accuracy
 
 [system]
 You are a biomedical AI specialized in aging biology and cellular senescence, trained on genomic, transcriptomic, and epigenomic data.
 
 [user]
 <question>
-In a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 10d post-senescence induction, shRNA knockdown of COPB2 at dose 1ugml_Doxycycline is applied. Compared to untreated DNA damage-induced senescent cells, consider the following two genes measured by RNA-seq:
+You are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 10d post-senescence induction receives shRNA knockdown of COPB2 at dose 1ugml_Doxycycline. The reference condition is untreated DNA damage-induced senescent cells. Two genes are measured by RNA-seq:
 
 Gene A: DIDO1 (death inducer-obliterator 1)
 Gene B: DPY30 (dpy-30 histone methyltransferase complex regulatory subunit)
 
-Which gene shows a larger absolute change in mRNA expression (|Log2FC|)?
+Which gene shows the larger absolute change in mRNA expression (larger |Log2FC|) in the perturbed condition relative to the reference condition? Respond with only the option letter.
 </question>
 <options>
-A. Gene A shows a larger absolute change B. Gene B shows a larger absolute change
+A. Gene A shows the larger absolute change B. Gene B shows the larger absolute change
 </options>
 <experiment>
 Cell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of COPB2 at dose 1ugml_Doxycycline. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.
@@ -397,10 +413,10 @@ You are a biomedical AI specialized in aging biology and cellular senescence, tr
 
 [user]
 <question>
-You are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 12d post-senescence induction, shRNA knockdown of p53_pRb is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of AGT (angiotensinogen) measured by RNA-seq significantly dysregulated?
+You are given a perturbational transcriptomics experiment in cellular senescence. In the perturbed condition, IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 12d post-senescence induction receives shRNA knockdown of p53_pRb. The reference condition is untreated oncogene-induced senescent cells. Predict whether AGT (angiotensinogen) is significantly dysregulated in the perturbed condition relative to the reference condition, as measured by RNA-seq. Use the criterion |Log2FC| > 1.0 and p < 0.05. Respond with only the option letter.
 </question>
 <options>
-A. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| ≤ 1.0 or p ≥ 0.05)
+A. significantly dysregulated (|Log2FC| > 1.0 and p < 0.05) B. no significant change (|Log2FC| ≤ 1.0 or p ≥ 0.05)
 </options>
 <experiment>
 Cell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of p53_pRb. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.

@@ -49,6 +49,56 @@
     "target_per_task": 100
   },
   "splitting_recommendation": "Split by accession (GEO accession) to prevent data leakage. All prompts from a given study go into either train or test.",
+  "significance_contradictions": {
+    "pool": {
+      "label": "sig_pool (post-filtering, pre-sampling)",
+      "n_rows": 600,
+      "n_groups": 589,
+      "n_contradicting_groups": 0,
+      "n_contradicting_rows": 0,
+      "fingerprint_columns": [
+        "Gene",
+        "Treatment",
+        "Treatment_dose",
+        "Gene_down",
+        "Gene_up",
+        "Sen_type",
+        "Sen_subtype",
+        "Control_type",
+        "Cell_line",
+        "Organ",
+        "Time_after_induction",
+        "RNAseq_Microarray",
+        "Replicates",
+        "Analysis"
+      ],
+      "example_contradictions": []
+    },
+    "emitted": {
+      "label": "sig_input (final emitted prompts)",
+      "n_rows": 100,
+      "n_groups": 100,
+      "n_contradicting_groups": 0,
+      "n_contradicting_rows": 0,
+      "fingerprint_columns": [
+        "Gene",
+        "Treatment",
+        "Treatment_dose",
+        "Gene_down",
+        "Gene_up",
+        "Sen_type",
+        "Sen_subtype",
+        "Control_type",
+        "Cell_line",
+        "Organ",
+        "Time_after_induction",
+        "RNAseq_Microarray",
+        "Replicates",
+        "Analysis"
+      ],
+      "example_contradictions": []
+    }
+  },
   "split": {
     "train_accessions": [
       "GSE101766",
