@@ -15,34 +15,35 @@ Loaded: 1,864 samples × 497 lipid features
 
 --- Step 3: Partition samples across tasks ---
 
-Partition (target 50 per task):
-  MCQ:         40 prompts (10/bracket × 4)
-  Binary:      50 prompts (25/class × 2)
-  Regression:  36 prompts (stratified across remaining brackets)
+Partition (target 100 per task):
+  MCQ:         85 prompts (≤25/bracket × 4)
+  Binary:     100 prompts (≤50/class × 2)
+  Regression: 100 prompts (stratified across brackets, topped up to target)
+  Cross-task individual overlap: mcq∩bin=5, mcq∩reg=28, bin∩reg=5, all-three=2
 
 --- Step 4: Generate prompts ---
-  MCQ:        40
-  Regression: 36
-  Binary:     50
+  MCQ:        85
+  Regression: 100
+  Binary:     100
 
 --- Step 5: Stratified train/test split by individual_id ---
 
-Train/test split (stratified by format, grouped by individual_id):
-  Train: 101 prompts
-  Test:  25 prompts
-  Actual test fraction: 19.8%
-  mcq          train= 32  test=  8  (20.0% test)
-  regression   train= 29  test=  7  (19.4% test)
-  binary       train= 40  test= 10  (20.0% test)
+Train/test split (per-task 80/20, grouped by individual_id):
+  Train: 228 prompts (199 individuals)
+  Test:  57 prompts (50 individuals)
+  Actual test fraction: 20.0%
+  mcq          train= 68  test= 17  (20.0% test)
+  regression   train= 80  test= 20  (20.0% test)
+  binary       train= 80  test= 20  (20.0% test)
 
 --- Step 6: Save outputs ---
-  Parquet → /Users/gauri/Desktop/longevityhack/L-LLMBenchmarking/data/task_b_lipidomics/task_b_lipidomics_train.parquet  (101 rows)
-  JSON    → /Users/gauri/Desktop/longevityhack/L-LLMBenchmarking/data/task_b_lipidomics/task_b_lipidomics_train.json  (101 entries)
-  Parquet → /Users/gauri/Desktop/longevityhack/L-LLMBenchmarking/data/task_b_lipidomics/task_b_lipidomics_test.parquet  (25 rows)
-  JSON    → /Users/gauri/Desktop/longevityhack/L-LLMBenchmarking/data/task_b_lipidomics/task_b_lipidomics_test.json  (25 entries)
+  Parquet → task_b_lipidomics_train.parquet  (228 rows)
+  JSON    → task_b_lipidomics_train.json  (228 entries)
+  Parquet → task_b_lipidomics_test.parquet  (57 rows)
+  JSON    → task_b_lipidomics_test.json  (57 entries)
 
 --- Step 7: Summary ---
-Summary → /Users/gauri/Desktop/longevityhack/L-LLMBenchmarking/data/task_b_lipidomics/task_b_lipidomics_summary.json
+Summary → task_b_lipidomics_summary.json
 
 --- Example MCQ ---
 lb_id: LB-LIP-MCQ-0001  format: mcq  metric: accuracy
@@ -67,11 +68,11 @@ lb_id: LB-LIP-REG-0001  format: regression  metric: mae
 You are presented with a plasma lipidomics profile from a human donor together with the donor's diabetes status. Given this information, predict the donor's age in years. Respond with only a numeric value rounded to the nearest integer.
 </question>
 <lipid_profile>
-cholesterol: 8.533, mz_637.3359: 2.501, lysophosphatidylcholine 15:0: 2.81, lysophosphatidylethanolamine 18:0: 2.81, lysophosphatidylcholine 16:1: 3.285, lysophosphatidylethanolamine 19:1: 3.285, lysophosphatidylcholine 16:0: 7.489, lysoph…</lipid_profile>
+cholesterol: 8.769, mz_637.3359: 3.072, lysophosphatidylcholine 15:0: 3.354, lysophosphatidylethanolamine 18:0: 3.354, lysophosphatidylcholine 16:1: 3.828, lysophosphatidylethanolamine 19:1: 3.828, lysophosphatidylcholine 16:0: 7.298, lyso…</lipid_profile>
 <sample_context>
-Sex: Male. Diabetes status: Yes. Measurement platform: DI-MS (alternating polarity). Study: MTBLS4461.
+Sex: Male. Diabetes status: No. Measurement platform: DI-MS (alternating polarity). Study: MTBLS4461.
 </sample_context>
-[assistant] 35
+[assistant] 75
 
 --- Example BINARY ---
 lb_id: LB-LIP-DIAB-0001  format: binary  metric: accuracy
@@ -83,8 +84,8 @@ You are presented with a plasma lipidomics profile from a human donor together w
 A. Yes (diabetic) B. No (non-diabetic)
 </options>
 <lipid_profile>
-cholesterol: 9.083, mz_637.3359: 3.609, lysophosphatidylcholine 15:0: 3.203, lysophosphatidylethanolamine 18:0: 3.203, lysophosphatidylcholine 16:1: 4.012, lysophosphatidylethanolamine 19:1: 4.012, lysophosphatidylcholine 16:0: 7.595, lyso…</lipid_profile>
+cholesterol: 8.582, mz_637.3359: 2.689, lysophosphatidylcholine 15:0: 3.01, lysophosphatidylethanolamine 18:0: 3.01, lysophosphatidylcholine 16:1: 3.563, lysophosphatidylethanolamine 19:1: 3.563, lysophosphatidylcholine 16:0: 7.311, lysoph…</lipid_profile>
 <sample_context>
-Sex: Female. Age: 47 years. Measurement platform: DI-MS (alternating polarity). Study: MTBLS4461.
+Sex: Male. Age: 58 years. Measurement platform: DI-MS (alternating polarity). Study: MTBLS4461.
 </sample_context>
 [assistant] B

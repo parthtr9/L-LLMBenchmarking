@@ -1,94 +1,107 @@
 {
-  "total_prompts": 126,
+  "total_prompts": 285,
   "mcq": {
-    "total_prompts": 40,
+    "total_prompts": 85,
     "format": "mcq",
     "metric": "accuracy",
     "label_distribution": {
-      "B": 10,
-      "C": 10,
-      "D": 10,
-      "A": 10
+      "B": 25,
+      "A": 25,
+      "C": 25,
+      "D": 10
     },
-    "unique_individuals": 40,
+    "unique_individuals": 85,
     "age_range": [
       32,
       87
     ]
   },
   "regression": {
-    "total_prompts": 36,
+    "total_prompts": 100,
     "format": "regression",
     "metric": "mae",
     "label_distribution": {
-      "60": 5,
-      "50": 4,
-      "38": 4,
+      "60": 13,
+      "50": 10,
+      "80": 9,
+      "65": 7,
+      "55": 7,
+      "36": 6,
+      "38": 6,
+      "54": 3,
+      "37": 3,
       "70": 3,
-      "36": 3,
-      "55": 3,
+      "53": 3,
+      "35": 3,
+      "75": 2,
+      "52": 2,
+      "51": 2,
       "34": 2,
-      "35": 1,
-      "53": 1,
-      "48": 1,
-      "75": 1,
-      "40": 1,
-      "54": 1,
-      "37": 1,
-      "39": 1,
+      "64": 2,
+      "33": 2,
+      "39": 2,
+      "59": 2,
+      "63": 1,
+      "87": 1,
+      "45": 1,
       "62": 1,
+      "32": 1,
       "58": 1,
-      "65": 1,
-      "64": 1
+      "72": 1,
+      "68": 1,
+      "61": 1,
+      "56": 1,
+      "43": 1
     },
-    "unique_individuals": 36,
+    "unique_individuals": 100,
     "age_range": [
-      34,
-      75
+      32,
+      87
     ]
   },
   "binary": {
-    "total_prompts": 50,
+    "total_prompts": 100,
     "format": "binary",
     "metric": "accuracy",
     "label_distribution": {
-      "B": 25,
-      "A": 25
+      "B": 50,
+      "A": 50
     },
-    "unique_individuals": 50,
+    "unique_individuals": 100,
     "age_range": [
-      37,
-      75
+      36,
+      80
     ]
   },
   "study": "MTBLS4461",
-  "splitting_recommendation": "Split by individual_id to prevent donor leakage. In MTBLS4461 each individual contributes one sample, so the split is effectively random \u2014 kept as a group split for forward compatibility with multi-sample-per-donor data.",
+  "splitting_recommendation": "Global group split by individual_id across all task formats. Patients may appear in more than one task (cross-task reuse), but all of a patient's prompts go to the same split, so no donor leakage occurs between train and test.",
   "split": {
-    "stratified_by": "format",
-    "grouped_by": "individual_id",
-    "n_train_prompts": 101,
-    "n_test_prompts": 25,
-    "actual_test_fraction": 0.1984,
+    "grouped_by": "individual_id (per-task split, stratified by task signature)",
+    "n_train_prompts": 228,
+    "n_test_prompts": 57,
+    "n_train_individuals": 199,
+    "n_test_individuals": 50,
+    "actual_test_fraction": 0.2,
     "per_format": {
       "mcq": {
-        "n_train_prompts": 32,
-        "n_test_prompts": 8,
-        "n_train_individuals": 32,
-        "n_test_individuals": 8,
+        "n_train_prompts": 68,
+        "n_test_prompts": 17,
+        "n_train_individuals": 68,
+        "n_test_individuals": 17,
         "actual_test_fraction": 0.2
       },
       "regression": {
-        "n_train_prompts": 29,
-        "n_test_prompts": 7,
-        "n_train_individuals": 29,
-        "n_test_individuals": 7,
-        "actual_test_fraction": 0.1944
+        "n_train_prompts": 80,
+        "n_test_prompts": 20,
+        "n_train_individuals": 80,
+        "n_test_individuals": 20,
+        "actual_test_fraction": 0.2
       },
       "binary": {
-        "n_train_prompts": 40,
-        "n_test_prompts": 10,
-        "n_train_individuals": 40,
-        "n_test_individuals": 10,
+        "n_train_prompts": 80,
+        "n_test_prompts": 20,
+        "n_train_individuals": 80,
+        "n_test_individuals": 20,
         "actual_test_fraction": 0.2
       }
     }

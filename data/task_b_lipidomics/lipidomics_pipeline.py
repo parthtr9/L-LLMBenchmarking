@@ -21,10 +21,10 @@ Outputs (all written under --output-dir):
     task_b_lipidomics_summary.json           per-task + split statistics
 
 Split:
-    By individual_id (each individual's samples go entirely to one split).
-    In MTBLS4461 each individual contributes a single sample, so the split is
-    effectively random — we still implement it as a group split so future
-    multi-sample-per-donor data does not leak.
+    Global group split by individual_id. A patient may contribute prompts to
+    more than one task format (cross-task reuse is allowed), but all of that
+    patient's prompts must land in the same split (train or test). Within a
+    single task, no patient appears twice.
 """
 
 import argparse
@@ -293,143 +293,181 @@ def generate_binary_prompt(row: pd.Series, lipid_cols: list[str],
 
 
 # ---------------------------------------------------------------------------
-# 4. SAMPLING — keep classes balanced, avoid sample reuse across tasks
+# 4. SAMPLING — each task samples independently; patients may appear in
+#    multiple tasks, but never twice within the same task.
 # ---------------------------------------------------------------------------
 
-def _balanced_sample(df: pd.DataFrame, group_col: str, per_class: int,
-                     rng: np.random.RandomState) -> pd.DataFrame:
+def _stratified_sample(df: pd.DataFrame, group_col: str, per_class: int,
+                       rng: np.random.RandomState) -> pd.DataFrame:
     """Draw up to per_class rows from each value of group_col."""
     parts = []
-    for label, group in df.groupby(group_col):
+    for _, group in df.groupby(group_col):
         take = min(per_class, len(group))
-        parts.append(group.sample(take, random_state=rng))
+        if take > 0:
+            parts.append(group.sample(take, random_state=rng))
     out = pd.concat(parts).sample(frac=1, random_state=rng).reset_index(drop=True)
     return out
 
 
+def _fill_to_target(stratified: pd.DataFrame, full_pool: pd.DataFrame,
+                    target: int, rng: np.random.RandomState) -> pd.DataFrame:
+    """Top up a stratified sample with extra rows (drawn without replacement
+    from the unused remainder of full_pool) until it reaches target size.
+    Used to recover prompt count when one stratum is capacity-limited."""
+    if len(stratified) >= target:
+        return stratified
+    used_ids = set(stratified["sample_id"])
+    remainder = full_pool[~full_pool["sample_id"].isin(used_ids)]
+    need = target - len(stratified)
+    take = min(need, len(remainder))
+    if take > 0:
+        extra = remainder.sample(take, random_state=rng)
+        stratified = pd.concat([stratified, extra]).sample(
+            frac=1, random_state=rng,
+        ).reset_index(drop=True)
+    return stratified
+
+
 def partition_for_tasks(df: pd.DataFrame, target_per_task: int,
                         random_state: int = 42) -> dict[str, pd.DataFrame]:
-    """Split the input table into three disjoint subsets, one per task format.
+    """Sample each task independently from the full pool.
 
-    MCQ is fully balanced across 4 age brackets (capped by smallest bracket).
-    Binary is fully balanced across Yes/No diabetes.
-    Regression draws uniformly across the remaining pool (any age).
+    Each task aims for target_per_task prompts subject to per-class capacity:
+      - MCQ:        stratified across 4 age brackets (≤ target/4 per bracket).
+      - Binary:     balanced across diabetes Yes/No (≤ target/2 per class).
+      - Regression: stratified across 4 age brackets, topped up uniformly.
 
-    Disjoint sampling: once a sample is allocated to a task, it cannot be
-    reused. The 80+ bracket is sparse (~10 samples) so MCQ gets first pick,
-    then binary, then regression.
+    Within a task no sample appears twice. Across tasks the same patient may
+    appear in more than one task (the train/test split handles donor leakage
+    globally by grouping on individual_id).
     """
     rng = np.random.RandomState(random_state)
-    pool = df.copy()
-    used: set = set()
 
-    # --- MCQ: balanced across 4 age brackets ---
-    bracket_counts = pool["age_bracket"].value_counts()
-    per_bracket = min(target_per_task // len(AGE_BIN_LABELS),
-                      int(bracket_counts.min()))
-    if per_bracket < 1:
-        raise ValueError(
-            f"Cannot build MCQ: smallest bracket has {bracket_counts.min()} samples"
-        )
-    mcq = _balanced_sample(pool, "age_bracket", per_bracket, rng)
-    used.update(mcq["sample_id"].tolist())
-    pool = pool[~pool["sample_id"].isin(used)]
+    # --- MCQ: stratified by age bracket (smallest bracket caps that stratum) ---
+    per_bracket_mcq = max(1, target_per_task // len(AGE_BIN_LABELS))
+    mcq = _stratified_sample(df, "age_bracket", per_bracket_mcq, rng)
 
-    # --- Binary: balanced across diabetes Yes/No ---
-    diab_counts = pool["diabetes"].value_counts()
-    per_diab = min(target_per_task // 2, int(diab_counts.min()))
-    binary = _balanced_sample(pool, "diabetes", per_diab, rng)
-    used.update(binary["sample_id"].tolist())
-    pool = pool[~pool["sample_id"].isin(used)]
+    # --- Binary: balanced by diabetes class ---
+    per_diab = max(1, target_per_task // 2)
+    binary = _stratified_sample(df, "diabetes", per_diab, rng)
 
-    # --- Regression: roughly uniform across age brackets in remaining pool ---
-    remaining_bracket_counts = pool["age_bracket"].value_counts()
-    per_reg_bracket = max(
-        1,
-        min(
-            target_per_task // len(AGE_BIN_LABELS),
-            int(remaining_bracket_counts.min())
-            if len(remaining_bracket_counts) == len(AGE_BIN_LABELS)
-            else target_per_task // max(1, len(remaining_bracket_counts)),
-        ),
-    )
-    reg = _balanced_sample(pool, "age_bracket", per_reg_bracket, rng)
-    if len(reg) > target_per_task:
-        reg = reg.sample(target_per_task, random_state=rng).reset_index(drop=True)
+    # --- Regression: stratified by age bracket, then topped up to target ---
+    per_bracket_reg = max(1, target_per_task // len(AGE_BIN_LABELS))
+    reg = _stratified_sample(df, "age_bracket", per_bracket_reg, rng)
+    reg = _fill_to_target(reg, df, target_per_task, rng)
 
     print(f"\nPartition (target {target_per_task} per task):")
     print(f"  MCQ:        {len(mcq):3d} prompts "
-          f"({per_bracket}/bracket × {len(AGE_BIN_LABELS)})")
+          f"(≤{per_bracket_mcq}/bracket × {len(AGE_BIN_LABELS)})")
     print(f"  Binary:     {len(binary):3d} prompts "
-          f"({per_diab}/class × 2)")
+          f"(≤{per_diab}/class × 2)")
     print(f"  Regression: {len(reg):3d} prompts "
-          f"(stratified across remaining brackets)")
+          f"(stratified across brackets, topped up to target)")
+
+    # Cross-task overlap diagnostics
+    mcq_ids = set(mcq["individual_id"])
+    bin_ids = set(binary["individual_id"])
+    reg_ids = set(reg["individual_id"])
+    print(f"  Cross-task individual overlap: "
+          f"mcq∩bin={len(mcq_ids & bin_ids)}, "
+          f"mcq∩reg={len(mcq_ids & reg_ids)}, "
+          f"bin∩reg={len(bin_ids & reg_ids)}, "
+          f"all-three={len(mcq_ids & bin_ids & reg_ids)}")
     return {"mcq": mcq, "regression": reg, "binary": binary}
 
 
 # ---------------------------------------------------------------------------
-# 5. TRAIN / TEST SPLIT BY individual_id
+# 5. TRAIN / TEST SPLIT — global group split by individual_id
 # ---------------------------------------------------------------------------
-
-def _split_one_format(prompts: list[dict], test_fraction: float,
-                      rng: np.random.RandomState
-                      ) -> tuple[list[dict], list[dict], int, int]:
-    """Group-split a single task's prompts by individual_id."""
-    by_indiv: dict[str, list[int]] = {}
-    for i, p in enumerate(prompts):
-        meta = json.loads(p["metadata"])
-        by_indiv.setdefault(meta["individual_id"], []).append(i)
-
-    individuals = list(by_indiv.keys())
-    rng.shuffle(individuals)
-
-    total = len(prompts)
-    target_test = int(round(total * test_fraction))
-    test_ids: set = set()
-    test_count = 0
-    for ind in individuals:
-        if test_count >= target_test:
-            break
-        test_ids.add(ind)
-        test_count += len(by_indiv[ind])
-
-    test_idxs = {i for ind in test_ids for i in by_indiv[ind]}
-    train = [p for i, p in enumerate(prompts) if i not in test_idxs]
-    test = [p for i, p in enumerate(prompts) if i in test_idxs]
-    return train, test, len(individuals) - len(test_ids), len(test_ids)
-
 
 def split_train_test_stratified(prompts_by_format: dict[str, list[dict]],
                                 test_fraction: float = 0.20,
+                                min_train_per_task: int = 50,
                                 random_state: int = 42
                                 ) -> tuple[list[dict], list[dict], dict]:
-    """Stratified group split by individual_id, stratified by task format.
+    """Per-task 80/20 group split by individual_id, with the global rule that
+    a reused patient's prompts must all land in the same split, and a hard
+    floor of at least `min_train_per_task` train prompts per task.
 
-    Each task's prompts get split 80/20 independently, then concatenated.
-    Guarantees each format hits the test fraction; donor leakage is still
-    prevented within each task's split.
+    Individuals are bucketed by their task signature (the sorted tuple of task
+    formats they appear in). Each bucket is processed in turn, taking the
+    test fraction from every bucket so each task hits the target on its own.
+    Per-task test admissions are capped at N_task - min_train_per_task so the
+    train floor is never violated; donor leakage across tasks is impossible
+    because the split decision is made per individual.
     """
     rng = np.random.RandomState(random_state)
+
+    # individual_id -> set of task formats they appear in
+    indiv_to_formats: dict[str, set] = {}
+    for fmt, prompts in prompts_by_format.items():
+        for p in prompts:
+            meta = json.loads(p["metadata"])
+            indiv_to_formats.setdefault(meta["individual_id"], set()).add(fmt)
+
+    # Per-task test cap: targets ~20% test but never lets train fall below
+    # min_train_per_task.
+    target_test_per_fmt: dict[str, int] = {}
+    for fmt, prompts in prompts_by_format.items():
+        n = len(prompts)
+        target_test_per_fmt[fmt] = min(
+            int(round(n * test_fraction)),
+            max(0, n - min_train_per_task),
+        )
+
+    # Group individuals by their task signature
+    sig_to_indivs: dict[tuple, list[str]] = {}
+    for ind, fmts in indiv_to_formats.items():
+        sig = tuple(sorted(fmts))
+        sig_to_indivs.setdefault(sig, []).append(ind)
+
+    # Per-signature 80/20, capped per task. Process multi-task signatures first
+    # — those individuals are constrained by multiple caps, so admit them while
+    # there is still slack everywhere.
+    test_individuals: set = set()
+    test_counts = {fmt: 0 for fmt in prompts_by_format}
+    sig_order = sorted(sig_to_indivs.keys(), key=lambda s: (-len(s), s))
+    for sig in sig_order:
+        inds = sig_to_indivs[sig]
+        rng.shuffle(inds)
+        bucket_target = int(round(len(inds) * test_fraction))
+        added = 0
+        for ind in inds:
+            if added >= bucket_target:
+                break
+            if all(test_counts[fmt] < target_test_per_fmt[fmt] for fmt in sig):
+                test_individuals.add(ind)
+                for fmt in sig:
+                    test_counts[fmt] += 1
+                added += 1
+
+    individuals = list(indiv_to_formats.keys())
 
     train_all: list[dict] = []
     test_all: list[dict] = []
     per_format = {}
-
     for fmt, prompts in prompts_by_format.items():
-        if not prompts:
-            continue
-        train, test, n_train_ind, n_test_ind = _split_one_format(
-            prompts, test_fraction, rng,
-        )
+        train_fmt: list[dict] = []
+        test_fmt: list[dict] = []
+        for p in prompts:
+            meta = json.loads(p["metadata"])
+            if meta["individual_id"] in test_individuals:
+                test_fmt.append(p)
+            else:
+                train_fmt.append(p)
+        train_ind = {json.loads(p["metadata"])["individual_id"] for p in train_fmt}
+        test_ind = {json.loads(p["metadata"])["individual_id"] for p in test_fmt}
         per_format[fmt] = {
-            "n_train_prompts": len(train),
-            "n_test_prompts": len(test),
-            "n_train_individuals": n_train_ind,
-            "n_test_individuals": n_test_ind,
-            "actual_test_fraction": round(len(test) / max(len(prompts), 1), 4),
+            "n_train_prompts": len(train_fmt),
+            "n_test_prompts": len(test_fmt),
+            "n_train_individuals": len(train_ind),
+            "n_test_individuals": len(test_ind),
+            "actual_test_fraction": round(
+                len(test_fmt) / max(len(prompts), 1), 4,
+            ),
         }
-        train_all.extend(train)
-        test_all.extend(test)
+        train_all.extend(train_fmt)
+        test_all.extend(test_fmt)
 
     for p in train_all:
         m = json.loads(p["metadata"]); m["split"] = "train"
@@ -440,17 +478,20 @@ def split_train_test_stratified(prompts_by_format: dict[str, list[dict]],
 
     total = len(train_all) + len(test_all)
     report = {
-        "stratified_by": "format",
-        "grouped_by": "individual_id",
+        "grouped_by": "individual_id (per-task split, stratified by task signature)",
         "n_train_prompts": len(train_all),
         "n_test_prompts": len(test_all),
+        "n_train_individuals": len(individuals) - len(test_individuals),
+        "n_test_individuals": len(test_individuals),
         "actual_test_fraction": round(len(test_all) / total, 4) if total else 0.0,
         "per_format": per_format,
     }
 
-    print(f"\nTrain/test split (stratified by format, grouped by individual_id):")
-    print(f"  Train: {len(train_all)} prompts")
-    print(f"  Test:  {len(test_all)} prompts")
+    print(f"\nTrain/test split (per-task 80/20, grouped by individual_id):")
+    print(f"  Train: {len(train_all)} prompts "
+          f"({report['n_train_individuals']} individuals)")
+    print(f"  Test:  {len(test_all)} prompts "
+          f"({report['n_test_individuals']} individuals)")
     print(f"  Actual test fraction: {report['actual_test_fraction']:.1%}")
     for fmt, stats in per_format.items():
         print(f"  {fmt:11s}  train={stats['n_train_prompts']:3d}  "
@@ -497,10 +538,10 @@ def compute_summary(by_task: dict[str, list[dict]]) -> dict:
         "binary": _stats(by_task.get("binary", [])),
         "study": STUDY_TAG,
         "splitting_recommendation": (
-            "Split by individual_id to prevent donor leakage. In MTBLS4461 "
-            "each individual contributes one sample, so the split is "
-            "effectively random — kept as a group split for forward "
-            "compatibility with multi-sample-per-donor data."
+            "Global group split by individual_id across all task formats. "
+            "Patients may appear in more than one task (cross-task reuse), "
+            "but all of a patient's prompts go to the same split, so no "
+            "donor leakage occurs between train and test."
         ),
     }
 
@@ -515,10 +556,12 @@ def main():
                         help="Path to balanced lipidomics TSV")
     parser.add_argument("--output-dir", type=str, default=".",
                         help="Output directory")
-    parser.add_argument("--target-per-task", type=int, default=50,
+    parser.add_argument("--target-per-task", type=int, default=100,
                         help="Target prompts per task format")
     parser.add_argument("--test-fraction", type=float, default=0.20,
                         help="Test set fraction (group split by individual_id)")
+    parser.add_argument("--min-train-per-task", type=int, default=50,
+                        help="Hard floor on train prompt count per task")
     parser.add_argument("--seed", type=int, default=42,
                         help="Random seed")
     parser.add_argument("--summary-output", type=str,
@@ -559,6 +602,7 @@ def main():
     train, test, split_report = split_train_test_stratified(
         {"mcq": mcq_prompts, "regression": reg_prompts, "binary": bin_prompts},
         test_fraction=args.test_fraction,
+        min_train_per_task=args.min_train_per_task,
         random_state=args.seed,
     )
 
