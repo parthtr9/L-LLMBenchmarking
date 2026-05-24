@@ -1,7 +1,7 @@
 // ResultsMatrix — data-driven from records prop (populated from data.json).
 // Rows = benchmark samples, columns = models from cells, cells = pass/fail + pred.
 
-const MODEL_ORDER = ['longevity_llm', 'claude_sonnet', 'majority_baseline', 'random_baseline'];
+const MODEL_ORDER = ['longevity_llm', 'longevity_llm_thinking', 'claude_sonnet', 'majority_baseline', 'random_baseline'];
 const BASELINE_IDS_MAT = new Set(['majority_baseline', 'random_baseline']);
 
 const ResultsMatrix = ({ records = [], onOpenRecord }) => {

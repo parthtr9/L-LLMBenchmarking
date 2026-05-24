@@ -17,16 +17,13 @@ const AnswersView = ({ records, onOpenRecord }) => {
   }
 
   const allModelIds = [...new Set(records.flatMap(r => Object.keys(r.cells || {})))];
-  const BASELINE_IDS = ['majority_baseline', 'random_baseline'];
-  const modelIds = allModelIds.sort((a, b) => {
-    if (a === 'longevity_llm') return -1;
-    if (b === 'longevity_llm') return 1;
-    if (a === 'longevity_llm_thinking') return -1;
-    if (b === 'longevity_llm_thinking') return 1;
-    const aBase = BASELINE_IDS.includes(a);
-    const bBase = BASELINE_IDS.includes(b);
-    if (aBase && !bBase) return 1;
-    if (!aBase && bBase) return -1;
+  const _morder = MODEL_ORDER || [];
+  const modelIds = allModelIds.slice().sort((a, b) => {
+    const ai = _morder.indexOf(a);
+    const bi = _morder.indexOf(b);
+    if (ai !== -1 && bi !== -1) return ai - bi;
+    if (ai !== -1) return -1;
+    if (bi !== -1) return 1;
     return a.localeCompare(b);
   });
 

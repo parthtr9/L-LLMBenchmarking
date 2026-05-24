@@ -171,6 +171,24 @@ def _regression_metrics(gold: list[float], pred: list[float]) -> dict[str, Any]:
     }
 
 
+# ── task-group normalisation ──────────────────────────────────────────────────
+
+def _normalize_task_group(display_group: str | None, lb_id: str | None = None) -> str:
+    if display_group:
+        if display_group.startswith("Lipidomics"):
+            return "Lipidomics"
+        return display_group
+    # Fall back to lb_id prefix
+    if lb_id:
+        if lb_id.startswith("LB-SEN"):
+            return "Senescence Perturbation"
+        if lb_id.startswith("LB-LIP"):
+            return "Lipidomics"
+        if lb_id.startswith("LB-MET"):
+            return "Metabolite Prediction"
+    return "Other"
+
+
 # ── collect predictions from data.json ───────────────────────────────────────
 
 def _collect(data: dict) -> dict[str, dict[str, dict]]:
@@ -184,6 +202,23 @@ def _collect(data: dict) -> dict[str, dict[str, dict]]:
             bucket[model_id][fmt]["gold"].append(gold_raw)
             bucket[model_id][fmt]["pred"].append(pred_raw)
     return bucket
+
+
+def _collect_by_task(data: dict) -> dict[str, dict[str, dict[str, dict]]]:
+    """Return nested: {task_group: {model_id: {format: {gold:[], pred:[]}}}}"""
+    outer: dict[str, Any] = defaultdict(
+        lambda: defaultdict(lambda: defaultdict(lambda: {"gold": [], "pred": []}))
+    )
+    for sample in data["samples"]:
+        meta = sample.get("metadata") or {}
+        task_group = _normalize_task_group(meta.get("display_group"), sample.get("lb_id"))
+        fmt = (sample.get("format") or "unknown").lower()
+        gold_raw = sample.get("gold") or ""
+        for model_id, cell in (sample.get("cells") or {}).items():
+            pred_raw = cell.get("pred") or ""
+            outer[task_group][model_id][fmt]["gold"].append(gold_raw)
+            outer[task_group][model_id][fmt]["pred"].append(pred_raw)
+    return outer
 
 
 # ── compute metrics table ─────────────────────────────────────────────────────
@@ -226,11 +261,18 @@ def compute_all_metrics(data: dict) -> dict[str, dict[str, dict]]:
 
 # ── dataset summary ───────────────────────────────────────────────────────────
 
-def dataset_summary(train_path: Path | None, test_path: Path | None) -> dict:
+def dataset_summary(train_path: Path | list[Path] | None, test_path: Path | list[Path] | None) -> dict:
+    def _load(paths: Path | list[Path] | None) -> "pd.DataFrame | None":
+        if paths is None:
+            return None
+        if isinstance(paths, Path):
+            paths = [paths]
+        frames = [pd.read_parquet(p) for p in paths if p and p.exists()]
+        return pd.concat(frames, ignore_index=True) if frames else None
+
     summary: dict[str, Any] = {}
-    for split, path in [("train", train_path), ("test", test_path)]:
-        if path and path.exists():
-            df = pd.read_parquet(path)
+    for split, df in [("train", _load(train_path)), ("test", _load(test_path))]:
+        if df is not None:
             def get_accession(meta: Any) -> str | None:
                 if isinstance(meta, str):
                     meta = json.loads(meta)
@@ -502,18 +544,23 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data", type=Path,
                         default=Path("LongevityBench Design System/ui_kits/longevity_bench/public/data.json"))
-    parser.add_argument("--train", type=Path,
-                        default=Path("data/task_a_senescence/processed/task_a_senescence_train.parquet"))
-    parser.add_argument("--test", type=Path,
-                        default=Path("data/task_a_senescence/processed/task_a_senescence_test.parquet"))
+    parser.add_argument("--train", type=Path, action="append", default=[],
+                        help="Train parquet path(s). Repeat flag for multiple datasets.")
+    parser.add_argument("--test", type=Path, action="append", default=[],
+                        help="Test parquet path(s). Repeat flag for multiple datasets.")
     parser.add_argument("--out", type=Path, default=Path("outputs/gap_analysis_report.md"))
     args = parser.parse_args()
 
+    # Fall back to Task A defaults when no paths supplied (standalone usage)
+    train_paths: list[Path] = args.train or [
+        Path("data/task_a_senescence/processed/task_a_senescence_train.parquet")
+    ]
+    test_paths: list[Path] = args.test or [
+        Path("data/task_a_senescence/processed/task_a_senescence_test.parquet")
+    ]
+
     data = json.loads(args.data.read_text())
-    ds = dataset_summary(
-        args.train if args.train.exists() else None,
-        args.test  if args.test.exists()  else None,
-    )
+    ds = dataset_summary(train_paths, test_paths)
     metrics = compute_all_metrics(data)
 
     report = render_report(metrics, ds, data.get("generated_at", "unknown"))
@@ -526,6 +573,43 @@ def main() -> None:
     (_PUBLIC_DIR / "gap_analysis_report.md").write_text(report, encoding="utf-8")
     logger.info("report mirrored → %s", _PUBLIC_DIR / "gap_analysis_report.md")
 
+    # Per-task metrics for dashboard task-switcher filtering
+    task_buckets = _collect_by_task(data)
+    tasks_payload: dict[str, Any] = {}
+    for task_group, task_data_bucket in task_buckets.items():
+        task_metrics: dict[str, dict[str, dict]] = {}
+        for model_id, fmt_data in task_data_bucket.items():
+            task_metrics[model_id] = {}
+            # Reuse the same per-format metric functions via a synthetic data dict
+            synthetic = {"samples": []}  # not used directly — compute inline
+            for fmt, pairs in fmt_data.items():
+                gold_raw = pairs["gold"]
+                pred_raw = pairs["pred"]
+                if fmt in ("mcq",):
+                    gold = [_extract_letter(g) or g for g in gold_raw]
+                    pred = [_extract_letter(p) or p for p in pred_raw]
+                    task_metrics[model_id][fmt] = _mcq_metrics(gold, pred)
+                elif fmt in ("binary", "pairwise"):
+                    gold = [_extract_letter(g) or g for g in gold_raw]
+                    pred = [_extract_letter(p) or p for p in pred_raw]
+                    task_metrics[model_id][fmt] = _binary_metrics(gold, pred)
+                elif fmt in ("regression",):
+                    gold_f = [_extract_number(g) for g in gold_raw]
+                    pred_f = [_extract_number(p) for p in pred_raw]
+                    valid = [(g, p) for g, p in zip(gold_f, pred_f) if g is not None and p is not None]
+                    if valid:
+                        gv, pv = zip(*valid)
+                        task_metrics[model_id][fmt] = _regression_metrics(list(gv), list(pv))
+                        task_metrics[model_id][fmt]["parse_failures"] = len(gold_f) - len(valid)
+                    else:
+                        task_metrics[model_id][fmt] = {"n": 0, "mae": None}
+        tasks_payload[task_group] = {
+            "metrics": task_metrics,
+            "model_display": MODEL_DISPLAY,
+            "model_order": MODEL_ORDER,
+        }
+        logger.info("per-task metrics computed for: %s (%d models)", task_group, len(task_metrics))
+
     # Also write structured JSON for the dashboard UI
     payload = {
         "generated_at": data.get("generated_at", "unknown"),
@@ -533,6 +617,7 @@ def main() -> None:
         "model_display": MODEL_DISPLAY,
         "model_order": MODEL_ORDER,
         "metrics": metrics,
+        "tasks": tasks_payload,
     }
     json_path = args.out.with_suffix(".json")
     json_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")

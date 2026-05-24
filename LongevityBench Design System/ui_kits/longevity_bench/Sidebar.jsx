@@ -38,8 +38,8 @@ const Sidebar = ({ view, setView, runsCount, liveCount }) => {
 
       <div className="nav-section">
         <p className="heading">Library</p>
-        {item('tasks',   'flask',  'Tasks', 6)}
-        {item('models',  'layers', 'Models', 4)}
+        {item('tasks',   'flask',  'Tasks', 2)}
+        {item('models',  'layers', 'Models', 5)}
         {item('senescence', 'flask', 'Senescence', '298')}
         {item('lipidomics', 'flask', 'Lipidomics', '285')}
       </div>
@@ -53,7 +53,7 @@ const Sidebar = ({ view, setView, runsCount, liveCount }) => {
         Caltech Longevity Hackathon · Track 01
         <div className="sponsor">
           <span style={{ color: 'var(--lb-fg-3)' }}>Sponsor</span>
-          <img src="../../assets/insilico-medicine-logo.svg" alt="Insilico Medicine" />
+          <img src="public/insilico-medicine-logo.svg" alt="Insilico Medicine" />
         </div>
       </div>
     </aside>

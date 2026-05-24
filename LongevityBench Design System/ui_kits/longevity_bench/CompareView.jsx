@@ -184,15 +184,13 @@ const CompareView = ({ runs = [], records = [] }) => {
     }
   });
 
+  const _order = MODEL_ORDER || [];
   const models = Object.values(modelMap).sort((a, b) => {
-    if (a.id === 'longevity_llm') return -1;
-    if (b.id === 'longevity_llm') return 1;
-    if (a.id === 'claude_sonnet') return -1;
-    if (b.id === 'claude_sonnet') return 1;
-    const aBase = BASELINE_IDS.includes(a.id);
-    const bBase = BASELINE_IDS.includes(b.id);
-    if (aBase && !bBase) return 1;
-    if (!aBase && bBase) return -1;
+    const ai = _order.indexOf(a.id);
+    const bi = _order.indexOf(b.id);
+    if (ai !== -1 && bi !== -1) return ai - bi;
+    if (ai !== -1) return -1;
+    if (bi !== -1) return 1;
     return a.name.localeCompare(b.name);
   });
 

@@ -158,7 +158,7 @@ function App() {
   } else if (view === 'answers') {
     content = <AnswersView records={visibleRecords} onOpenRecord={setOpenRecord} />;
   } else if (view === 'gap') {
-    content = <GapAnalysisView />;
+    content = <GapAnalysisView activeTask={activeTask} />;
   } else if (view === 'runs') {
     content = <LiveRunsView runs={runs} records={visibleRecords} onOpenRun={handleOpenRun} />;
   } else if (view === 'tasks') {
@@ -663,11 +663,16 @@ function ModelsView({ records = [], runs = [] }) {
     return { ...m, fmtStats, overall, totalSamples: allCells.length, totalPass, avgLatency };
   });
 
-  // Sort: non-baselines by overall desc, then baselines
-  const sorted = [
-    ...modelStats.filter(m => !m.isBaseline).sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0)),
-    ...modelStats.filter(m => m.isBaseline),
-  ];
+  // Sort by canonical MODEL_ORDER; unknowns go after known non-baselines, baselines always last
+  const _morder = MODEL_ORDER || [];
+  const sorted = modelStats.slice().sort((a, b) => {
+    const ai = _morder.indexOf(a.id);
+    const bi = _morder.indexOf(b.id);
+    if (ai !== -1 && bi !== -1) return ai - bi;
+    if (ai !== -1) return -1;
+    if (bi !== -1) return 1;
+    return a.id.localeCompare(b.id);
+  });
 
   const formatsPresent = FORMAT_ORDER.filter(f => records.some(r => r.format === f));
   const bestOverall = sorted.find(m => !m.isBaseline)?.overall;

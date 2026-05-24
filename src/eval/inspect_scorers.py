@@ -73,7 +73,9 @@ def longebench_scorer() -> ...:
             )
 
         # --- default: normalized exact match (binary, pairwise, unknown) ---
-        pred_norm = _normalize(completion)
+        # Try letter extraction first so "The answer is A" still scores correctly.
+        pred_letter = _extract_mcq_letter(completion)
+        pred_norm = _normalize(pred_letter) if pred_letter else _normalize(completion)
         gold_norm = _normalize(gold)
         correct = pred_norm == gold_norm
         return Score(

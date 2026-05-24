@@ -65,19 +65,37 @@ _FORMAT_INSTRUCTIONS: dict[str, str] = {
     "regression": "\n\nAnswer with only a single integer. No units, no explanation.",
 }
 
+# Stricter instructions appended to the user turn for thinking models.
+# These fire after the <think> block so the model sees the constraint
+# immediately before it produces its visible answer.
+_THINKING_USER_SUFFIX: dict[str, str] = {
+    "mcq":        "\n\nIMPORTANT: Your final answer must be exactly one letter — A, B, C, or D. Nothing else.",
+    "binary":     "\n\nIMPORTANT: Your final answer must be exactly one letter — A or B. Nothing else.",
+    "pairwise":   "\n\nIMPORTANT: Your final answer must be exactly one letter — A or B. Nothing else.",
+    "ternary":    "\n\nIMPORTANT: Your final answer must be exactly one label word. Nothing else.",
+    "regression": "\n\nIMPORTANT: Your final answer must be exactly one integer. No units, no words, nothing else.",
+}
 
-def _row_to_sample(row: dict[str, Any], index: int) -> Sample:
+
+def _row_to_sample(row: dict[str, Any], index: int, is_thinking: bool = False) -> Sample:
     messages = _ensure_messages(row["messages"])
     fmt = str(row.get("format") or "").lower()
-    instruction = _FORMAT_INSTRUCTIONS.get(fmt, "")
+    sys_instruction = _FORMAT_INSTRUCTIONS.get(fmt, "")
+    user_suffix = _THINKING_USER_SUFFIX.get(fmt, "") if is_thinking else ""
 
-    # Append concise-answer instruction to system message so model stays under token limit.
+    # messages layout: [system, user, assistant(gold)]
+    # Build input as everything except the final assistant turn.
     processed: list[dict[str, str]] = []
-    for i, m in enumerate(messages[:-1]):
-        if i == 0 and m.get("role") == "system" and instruction:
-            processed.append({"role": "system", "content": m["content"] + instruction})
-        else:
-            processed.append(m)
+    body = messages[:-1]
+    for i, m in enumerate(body):
+        role = m.get("role")
+        content = m["content"]
+        if i == 0 and role == "system" and sys_instruction:
+            content = content + sys_instruction
+        # Append format reminder to the last user message for thinking models.
+        if user_suffix and i == len(body) - 1 and role == "user":
+            content = content + user_suffix
+        processed.append({"role": role, "content": content})
 
     input_msgs = [_to_inspect_message(m) for m in processed]
     target = str(messages[-1]["content"]).strip()
@@ -140,16 +158,18 @@ def load_parquet_samples(
     parquet_path: Path,
     limit: int | None = None,
     fmt_filter: str | None = None,
+    is_thinking: bool = False,
 ) -> list[Sample]:
     df = pd.read_parquet(parquet_path)
     if fmt_filter:
         df = df[df["format"] == fmt_filter]
     if limit is not None:
         df = df.head(limit)
-    samples = [_row_to_sample(row.to_dict(), i) for i, (_, row) in enumerate(df.iterrows())]
+    samples = [_row_to_sample(row.to_dict(), i, is_thinking=is_thinking)
+               for i, (_, row) in enumerate(df.iterrows())]
     logger.info(
-        "loaded %d samples from %s (fmt=%s limit=%s)",
-        len(samples), parquet_path.name, fmt_filter, limit,
+        "loaded %d samples from %s (fmt=%s limit=%s thinking=%s)",
+        len(samples), parquet_path.name, fmt_filter, limit, is_thinking,
     )
     return samples
 
@@ -183,7 +203,12 @@ def parquet_task(
     if not path.exists():
         raise FileNotFoundError(f"Parquet not found: {path}")
 
-    samples = load_parquet_samples(path, limit, fmt_filter)
+    is_thinking: bool = bool(
+        (model_cfg.get("extra_body") or {})
+        .get("chat_template_kwargs", {})
+        .get("enable_thinking", False)
+    )
+    samples = load_parquet_samples(path, limit, fmt_filter, is_thinking=is_thinking)
 
     baseline_type = model_cfg.get("type") == "baseline"
     strategy = model_cfg.get("strategy", "")
@@ -197,6 +222,7 @@ def parquet_task(
     else:
         slvr = litellm_solver(
             model_cfg=model_cfg,
+            model_name=model_name,
             dry_run=dry_run,
             max_tokens=max_tokens,
             temperature=temperature,

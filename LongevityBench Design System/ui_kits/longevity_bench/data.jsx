@@ -18,6 +18,14 @@ function _normalizeTaskGroup(group) {
   return group;
 }
 
+const MODEL_ORDER = [
+  'longevity_llm',
+  'longevity_llm_thinking',
+  'claude_sonnet',
+  'majority_baseline',
+  'random_baseline',
+];
+
 const MODEL_NAMES = {
   longevity_llm:          'L-LLM',
   longevity_llm_thinking: 'L-LLM (think)',
@@ -106,4 +114,4 @@ const ENTITY_HIGHLIGHTS = (text) =>
     .replace(/\[V\](.+?)\[\/V\]/g, '<span class="verify">$1</span>')
     .replace(/\[F\](.+?)\[\/F\]/g, '<span class="fail">$1</span>');
 
-Object.assign(window, { SEED_RUNS, SEED_RECORDS, ENTITY_HIGHLIGHTS, loadDashboardData, MODEL_NAMES, MODEL_COLORS, _taskGroupFromLbId });
+Object.assign(window, { SEED_RUNS, SEED_RECORDS, ENTITY_HIGHLIGHTS, loadDashboardData, MODEL_NAMES, MODEL_COLORS, MODEL_ORDER, _taskGroupFromLbId });

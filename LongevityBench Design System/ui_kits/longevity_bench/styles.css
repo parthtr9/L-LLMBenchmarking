@@ -78,7 +78,7 @@ html, body { margin: 0; padding: 0; background: var(--lb-ink-50); color: var(--l
   line-height: 1.4;
 }
 .sidebar .footer .sponsor { display:flex; align-items: center; gap: 8px; margin-top: 6px; }
-.sidebar .footer .sponsor img { height: 14px; opacity: 0.8; }
+.sidebar .footer .sponsor img { height: 20px; opacity: 0.88; }
 
 /* ---- Main area ---- */
 .main {

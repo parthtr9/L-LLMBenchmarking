@@ -99,7 +99,14 @@ const GapBaselineBadge = ({ value, baseline, isMAE = false }) => {
 
 // ── GapLeaderboard ────────────────────────────────────────────────────────────
 
-const GapLeaderboard = ({ metrics, modelDisplay, modelOrder }) => {
+const GapLeaderboard = ({ metrics, modelDisplay, modelOrder, activeFormat }) => {
+  const isSingleFmt = activeFormat && activeFormat !== 'all';
+  const isMAE = activeFormat === 'regression';
+
+  const scoreFor = (mid) => isSingleFmt
+    ? _primaryScore(metrics[mid]?.[activeFormat], activeFormat)
+    : _overallScore(metrics[mid] || {});
+
   const models = modelOrder
     .filter(mid => metrics[mid])
     .map(mid => ({
@@ -107,27 +114,31 @@ const GapLeaderboard = ({ metrics, modelDisplay, modelOrder }) => {
       name: modelDisplay[mid] || mid,
       color: (MODEL_COLORS || {})[mid] || '#8c948c',
       isBaseline: _GAP_BASELINE_IDS.includes(mid),
-      overall: _overallScore(metrics[mid] || {}),
+      score: scoreFor(mid),
     }));
 
   const nonBaselines = [...models]
-    .filter(m => !m.isBaseline && m.overall != null)
-    .sort((a, b) => b.overall - a.overall);
-  const majorityOverall = _overallScore(metrics['majority_baseline'] || {});
-  const bestScore = nonBaselines[0]?.overall;
+    .filter(m => !m.isBaseline && m.score != null)
+    .sort((a, b) => b.score - a.score);
+  const majorityScore = scoreFor('majority_baseline');
+  const bestScore = nonBaselines[0]?.score;
+
+  const subLabel = isSingleFmt
+    ? (_GAP_FORMAT_LABELS[activeFormat] || activeFormat) + (isMAE ? ' · 1/(1+MAE) score' : ' · balanced accuracy')
+    : 'avg balanced accuracy across MCQ · Binary · Pairwise';
 
   return (
     <div className="card" style={{ marginBottom: 20, padding: '18px 24px' }}>
       <div className="head" style={{ marginBottom: 14 }}>
         <h3>Model leaderboard</h3>
-        <p className="sub">avg balanced accuracy across MCQ · Binary · Pairwise</p>
+        <p className="sub">{subLabel}</p>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {models.map(m => {
           const rankPos = nonBaselines.findIndex(x => x.id === m.id);
           const rank = rankPos >= 0 ? rankPos + 1 : null;
-          const barWidth = bestScore > 0 && m.overall != null
-            ? (m.overall / bestScore) * 100
+          const barWidth = bestScore > 0 && m.score != null
+            ? (m.score / bestScore) * 100
             : 0;
           return (
             <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -165,10 +176,10 @@ const GapLeaderboard = ({ metrics, modelDisplay, modelOrder }) => {
                 width: 54, textAlign: 'right',
                 font: '600 13px var(--lb-font-mono)', color: m.color,
               }}>
-                {m.overall != null ? (m.overall * 100).toFixed(1) + '%' : '—'}
+                {m.score != null ? (m.score * 100).toFixed(1) + '%' : '—'}
               </div>
               {!m.isBaseline && (
-                <GapBaselineBadge value={m.overall} baseline={majorityOverall} />
+                <GapBaselineBadge value={m.score} baseline={majorityScore} isMAE={false} />
               )}
             </div>
           );
@@ -572,7 +583,7 @@ const GapHeadToHead = ({ metrics, modelDisplay, modelOrder }) => {
 
 // ── GapAnalysisView (orchestrator) ────────────────────────────────────────────
 
-const GapAnalysisView = () => {
+const GapAnalysisView = ({ activeTask }) => {
   const [data, setData] = React.useState(null);
   const [err, setErr] = React.useState(null);
   const [activeFormat, setActiveFormat] = React.useState('all');
@@ -586,6 +597,9 @@ const GapAnalysisView = () => {
       .then(d => setData(d))
       .catch(e => setErr(e.message));
   }, []);
+
+  // Reset format tab when task changes
+  React.useEffect(() => { setActiveFormat('all'); }, [activeTask]);
 
   if (err) return (
     <>
@@ -612,7 +626,16 @@ const GapAnalysisView = () => {
     </>
   );
 
-  const { generated_at, dataset, model_display, model_order, metrics } = data;
+  // Select per-task slice when a task is active, fall back to global
+  const taskSlice = (activeTask && activeTask !== 'All Tasks' && data.tasks?.[activeTask])
+    ? data.tasks[activeTask]
+    : null;
+
+  const generated_at = data.generated_at;
+  const dataset = data.dataset;
+  const model_display = taskSlice?.model_display ?? data.model_display;
+  const model_order   = taskSlice?.model_order   ?? data.model_order;
+  const metrics       = taskSlice?.metrics       ?? data.metrics;
 
   const formatsPresent = _GAP_FORMAT_ORDER.filter(f =>
     Object.values(metrics).some(m => m[f])
@@ -623,7 +646,7 @@ const GapAnalysisView = () => {
     <>
       <GapHeader generatedAt={generated_at} dataset={dataset} />
       <GapFormatTabs formats={formatsPresent} active={activeFormat} onChange={setActiveFormat} />
-      <GapLeaderboard metrics={metrics} modelDisplay={model_display} modelOrder={model_order} />
+      <GapLeaderboard metrics={metrics} modelDisplay={model_display} modelOrder={model_order} activeFormat={activeFormat} />
       <GapHeadToHead metrics={metrics} modelDisplay={model_display} modelOrder={model_order} />
       {visibleFormats.map(fmt => (
         <GapFormatPanel

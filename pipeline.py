@@ -26,6 +26,7 @@ LOG_DIR = ROOT / "outputs" / "inspect"
 DATA_JSON = ROOT / "LongevityBench Design System" / "ui_kits" / "longevity_bench" / "public" / "data.json"
 DASHBOARD_DIR = ROOT / "LongevityBench Design System" / "ui_kits" / "longevity_bench"
 GAP_REPORT = ROOT / "outputs" / "gap_analysis_report.md"
+PRED_CACHE = ROOT / "outputs" / "prediction_cache.json"
 PYTHON = sys.executable
 
 
@@ -54,43 +55,59 @@ def run_cmd(cmd: list[str]) -> int:
 
 # ── dataset discovery ─────────────────────────────────────────────────────────
 
-def discover_datasets() -> list[dict]:
+def _find_parquets(task_dir: Path) -> tuple[Path | None, Path | None]:
+    """Return (test_path, train_path) for a task dir.
+
+    Checks processed/ subdir first; falls back to task dir itself.
+    Skips *_test_30.parquet and other non-standard suffixes.
     """
-    Scan data/<task>/processed/ for *_test.parquet and *_train.parquet.
+    for search_dir in [task_dir / "processed", task_dir]:
+        if not search_dir.is_dir():
+            continue
+        test_files = sorted(
+            p for p in search_dir.glob("*_test.parquet")
+            if not p.stem.endswith(("_30", "_100"))  # skip thinking-trace subsets
+        )
+        train_files = sorted(search_dir.glob("*_train.parquet"))
+        if test_files or train_files:
+            return (test_files[0] if test_files else None,
+                    train_files[0] if train_files else None)
+    return None, None
+
+
+def discover_datasets() -> list[dict]:
+    """Scan data/*/ for benchmark parquet pairs.
+
+    Checks data/<task>/processed/ first, then data/<task>/ itself.
     Returns list of {label, task_dir, test_path, train_path, formats, n_test, n_train}.
     """
     datasets = []
-    for processed_dir in sorted(DATA_ROOT.glob("*/processed")):
-        task_dir = processed_dir.parent
-        task_name = task_dir.name
-
-        test_files = sorted(processed_dir.glob("*_test.parquet"))
-        train_files = sorted(processed_dir.glob("*_train.parquet"))
-
-        if not test_files and not train_files:
+    for task_dir in sorted(p for p in DATA_ROOT.iterdir() if p.is_dir() and not p.name.startswith(".")):
+        test_path, train_path = _find_parquets(task_dir)
+        if not test_path and not train_path:
             continue
 
         info: dict = {
-            "label": task_name,
+            "label": task_dir.name,
             "task_dir": task_dir,
-            "test_path": test_files[0] if test_files else None,
-            "train_path": train_files[0] if train_files else None,
+            "test_path": test_path,
+            "train_path": train_path,
             "formats": [],
             "n_test": 0,
             "n_train": 0,
         }
 
-        if info["test_path"]:
+        if test_path:
             try:
-                df = pd.read_parquet(info["test_path"])
+                df = pd.read_parquet(test_path)
                 info["n_test"] = len(df)
                 info["formats"] = sorted(df["format"].dropna().unique().tolist()) if "format" in df.columns else []
             except Exception:
                 pass
 
-        if info["train_path"]:
+        if train_path:
             try:
-                df = pd.read_parquet(info["train_path"])
+                df = pd.read_parquet(train_path)
                 info["n_train"] = len(df)
             except Exception:
                 pass
@@ -149,16 +166,17 @@ def step_choose_models(registry: dict) -> list[str]:
 
 # ── step 2: choose dataset ───────────────────────────────────────────────────
 
-def step_choose_dataset(datasets: list[dict]) -> tuple[Path, str | None, int | None]:
-    """Returns (parquet_path, fmt_filter, limit)."""
+def step_choose_dataset(datasets: list[dict]) -> list[tuple[Path, str | None, int | None]]:
+    """Returns list of (parquet_path, fmt_filter, limit) — one entry per selected dataset."""
     header("STEP 2 — Choose dataset")
 
     if not datasets:
-        print("\n  No datasets found under data/*/processed/")
+        print("\n  No datasets found under data/*/")
         print("  Add a parquet benchmark file there and re-run.")
         sys.exit(1)
 
     print("\n  Available datasets:")
+    print(f"    0) ALL test sets (runs every dataset below in sequence)")
     for i, ds in enumerate(datasets, 1):
         splits = []
         if ds["test_path"]:
@@ -169,11 +187,29 @@ def step_choose_dataset(datasets: list[dict]) -> tuple[Path, str | None, int | N
         print(f"    {i}) {ds['label']:<30s}  [{', '.join(splits)}]  formats: {fmts}")
 
     while True:
-        raw = input("\n  dataset number: ").strip()
-        if raw.isdigit() and 1 <= int(raw) <= len(datasets):
-            ds = datasets[int(raw) - 1]
+        raw = input(f"\n  dataset number [0=all, 1–{len(datasets)}]: ").strip()
+        if raw == "0":
+            selected_datasets = [ds for ds in datasets if ds["test_path"]]
+            run_all = True
             break
-        print(f"  enter 1–{len(datasets)}")
+        if raw.isdigit() and 1 <= int(raw) <= len(datasets):
+            selected_datasets = [datasets[int(raw) - 1]]
+            run_all = False
+            break
+        print(f"  enter 0–{len(datasets)}")
+
+    # When running all, use test split, no format filter
+    if run_all:
+        print(f"\n  Running all {len(selected_datasets)} test sets (no format filter)")
+        raw = input("  sample limit per model per dataset [none=all]: ").strip()
+        limit: int | None = None if (not raw or raw.lower() == "none") else int(raw)
+        result = [(ds["test_path"], None, limit) for ds in selected_datasets]
+        for ds, (path, _, _) in zip(selected_datasets, result):
+            print(f"    {ds['label']}: {path.name} ({ds['n_test']} samples)")
+        return result
+
+    # Single dataset
+    ds = selected_datasets[0]
 
     # Choose split
     available_splits = []
@@ -209,74 +245,99 @@ def step_choose_dataset(datasets: list[dict]) -> tuple[Path, str | None, int | N
             fmt_filter = formats[int(raw) - 1]
 
     # Choose limit
-    print(f"\n  Sample limit per model (default 20, none = all):")
-    raw = input("  limit [20]: ").strip()
-    if not raw:
-        limit: int | None = 20
-    elif raw.lower() == "none":
+    print(f"\n  Sample limit per model (none = all {n_total} samples):")
+    raw = input("  limit [none]: ").strip()
+    if not raw or raw.lower() == "none":
         limit = None
     else:
         try:
             limit = int(raw)
         except ValueError:
-            print("  invalid — using 20")
-            limit = 20
+            print("  invalid — using all")
+            limit = None
 
     print(f"\n  Dataset : {ds['label']} ({split_name})")
     print(f"  Parquet : {parquet_path.name}")
     print(f"  Format  : {fmt_filter or 'all'}")
     print(f"  Limit   : {limit or 'all'}")
-    return parquet_path, fmt_filter, limit
+    return [(parquet_path, fmt_filter, limit)]
 
 
 # ── step 3: run eval ─────────────────────────────────────────────────────────
 
 def step_run_eval(
     models: list[str],
-    parquet_path: Path,
-    fmt_filter: str | None,
-    limit: int | None,
+    dataset_runs: list[tuple[Path, str | None, int | None]],
 ) -> bool:
     header("STEP 3 — Run evaluation")
 
-    print(f"\n  Models  : {', '.join(models)}")
-    print(f"  Parquet : {parquet_path.name}")
-    print(f"  Format  : {fmt_filter or 'all'}")
-    print(f"  Limit   : {limit or 'all'}")
-    print(f"  Log dir : outputs/inspect/")
+    total_samples = sum(
+        (limit or 999999) for _, _, limit in dataset_runs
+    )
+    print(f"\n  Models   : {', '.join(models)}")
+    print(f"  Datasets : {len(dataset_runs)}")
+    for parquet_path, fmt_filter, limit in dataset_runs:
+        print(f"    {parquet_path.name}  fmt={fmt_filter or 'all'}  limit={limit or 'all'}")
+    print(f"  Log dir  : outputs/inspect/")
 
     if not confirm("Run eval now?"):
         print("  Skipping eval.")
         return False
 
-    cmd = [
-        PYTHON, "-m", "src.eval.run_inspect",
-        "--parquet", str(parquet_path),
-        "--models", ",".join(models),
-    ]
-    if fmt_filter:
-        cmd += ["--fmt-filter", fmt_filter]
-    if limit:
-        cmd += ["--limit", str(limit)]
+    any_ok = False
+    for parquet_path, fmt_filter, limit in dataset_runs:
+        print(f"\n  ── {parquet_path.name} ──")
+        cmd = [
+            PYTHON, "-m", "src.eval.run_inspect",
+            "--parquet", str(parquet_path),
+            "--models", ",".join(models),
+        ]
+        if fmt_filter:
+            cmd += ["--fmt-filter", fmt_filter]
+        if limit:
+            cmd += ["--limit", str(limit)]
 
-    print("\n  Starting eval...")
+        rc = run_cmd(cmd)
+        if rc != 0:
+            print(f"\n  Eval exited with code {rc}.")
+            if not confirm("Continue to next dataset?"):
+                print("  Stopping pipeline.")
+                return any_ok
+        else:
+            print(f"\n  {parquet_path.name} complete.")
+            any_ok = True
+
+    return any_ok
+
+
+# ── step 4: cache predictions ────────────────────────────────────────────────
+
+def step_cache_predictions() -> None:
+    header("STEP 4 — Cache LLM predictions")
+
+    print(f"\n  Source : outputs/inspect/<model>/")
+    print(f"  Output : {PRED_CACHE.relative_to(ROOT)}")
+    print("  (Skips majority_baseline and random_baseline)")
+
+    cmd = [
+        PYTHON, "-m", "tools.cache_predictions",
+        "--log-dir", str(LOG_DIR),
+        "--out", str(PRED_CACHE),
+    ]
+
+    print("\n  Caching predictions...")
     rc = run_cmd(cmd)
 
     if rc != 0:
-        print(f"\n  Eval exited with code {rc}. Some samples may have failed.")
-        if not confirm("Continue to export anyway?"):
-            print("  Stopping pipeline.")
-            return False
+        print(f"\n  Cache step exited with code {rc} — continuing anyway.")
     else:
-        print("\n  Eval complete.")
-
-    return True
+        print("\n  Prediction cache updated.")
 
 
-# ── step 4: export logs ──────────────────────────────────────────────────────
+# ── step 5: export logs ──────────────────────────────────────────────────────
 
 def step_export() -> bool:
-    header("STEP 4 — Export logs → dashboard JSON")
+    header("STEP 5 — Export logs → dashboard JSON")
 
     print(f"\n  Source : outputs/inspect/")
     print(f"  Output : {DATA_JSON.relative_to(ROOT)}")
@@ -302,7 +363,7 @@ def step_export() -> bool:
     return True
 
 
-# ── step 5: generate gap analysis report ─────────────────────────────────────
+# ── step 6: generate gap analysis report ─────────────────────────────────────
 
 def _split_siblings(parquet_path: Path) -> tuple[Path | None, Path | None]:
     """Infer train/test parquet siblings for the selected benchmark file."""
@@ -326,13 +387,24 @@ def _split_siblings(parquet_path: Path) -> tuple[Path | None, Path | None]:
     return train_path, test_path
 
 
-def step_gap_report(parquet_path: Path) -> bool:
-    header("STEP 5 — Generate gap analysis report")
+def step_gap_report(dataset_runs: list[tuple[Path, str | None, int | None]]) -> bool:
+    header("STEP 6 — Generate gap analysis report")
 
-    train_path, test_path = _split_siblings(parquet_path)
+    # Collect all train/test siblings across all selected datasets
+    all_train: list[Path] = []
+    all_test: list[Path] = []
+    for parquet_path, _, _ in dataset_runs:
+        train_path, test_path = _split_siblings(parquet_path)
+        if train_path:
+            all_train.append(train_path)
+        if test_path:
+            all_test.append(test_path)
+
     print(f"\n  Data JSON : {DATA_JSON.relative_to(ROOT)}")
-    print(f"  Train     : {train_path.relative_to(ROOT) if train_path else 'not found'}")
-    print(f"  Test      : {test_path.relative_to(ROOT) if test_path else 'not found'}")
+    for p in all_train:
+        print(f"  Train     : {p.relative_to(ROOT)}")
+    for p in all_test:
+        print(f"  Test      : {p.relative_to(ROOT)}")
     print(f"  Output    : {GAP_REPORT.relative_to(ROOT)}")
 
     if not DATA_JSON.exists():
@@ -348,10 +420,10 @@ def step_gap_report(parquet_path: Path) -> bool:
         "--data", str(DATA_JSON),
         "--out", str(GAP_REPORT),
     ]
-    if train_path:
-        cmd += ["--train", str(train_path)]
-    if test_path:
-        cmd += ["--test", str(test_path)]
+    for p in all_train:
+        cmd += ["--train", str(p)]
+    for p in all_test:
+        cmd += ["--test", str(p)]
 
     print("\n  Generating report...")
     rc = run_cmd(cmd)
@@ -364,10 +436,10 @@ def step_gap_report(parquet_path: Path) -> bool:
     return True
 
 
-# ── step 6: serve dashboard ──────────────────────────────────────────────────
+# ── step 7: serve dashboard ──────────────────────────────────────────────────
 
 def step_serve() -> None:
-    header("STEP 6 — Serve dashboard")
+    header("STEP 7 — Serve dashboard")
 
     print(f"\n  URL : http://localhost:8765/")
 
@@ -402,15 +474,18 @@ def main() -> None:
     datasets = discover_datasets()
 
     models = step_choose_models(registry)
-    parquet_path, fmt_filter, limit = step_choose_dataset(datasets)
-    eval_ok = step_run_eval(models, parquet_path, fmt_filter, limit)
+    dataset_runs = step_choose_dataset(datasets)
+    eval_ok = step_run_eval(models, dataset_runs)
+
+    if eval_ok or LOG_DIR.exists():
+        step_cache_predictions()
 
     exported = False
     if eval_ok or LOG_DIR.exists():
         exported = step_export()
 
     if exported or DATA_JSON.exists():
-        step_gap_report(parquet_path)
+        step_gap_report(dataset_runs)
 
     step_serve()
 

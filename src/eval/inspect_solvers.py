@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import os
 import random
+from pathlib import Path
 from typing import Any
+
+_ROOT = Path(__file__).resolve().parent.parent.parent
+_DEFAULT_CACHE = _ROOT / "outputs" / "prediction_cache.json"
 
 from inspect_ai.model import ModelOutput, ModelUsage
 from inspect_ai.solver import Generate, TaskState, solver
@@ -50,6 +55,7 @@ def _result_to_output(result: LiteLLMResult, model_id: str) -> ModelOutput:
 @solver
 def litellm_solver(
     model_cfg: dict[str, Any],
+    model_name: str = "",
     dry_run: bool = False,
     max_tokens: int = 500,
     temperature: float = 0.0,
@@ -60,6 +66,7 @@ def litellm_solver(
 
     Args:
         model_cfg: Entry from config/models.yaml (already loaded as dict).
+        model_name: Registry key (e.g. "claude_sonnet"). Used to look up prediction cache.
         dry_run: Skip model calls; return placeholder output for pipeline testing.
         max_tokens: Max output tokens per call.
         temperature: Sampling temperature.
@@ -77,7 +84,42 @@ def litellm_solver(
     max_concurrency: int = model_cfg.get("max_concurrency", 8)
     semaphore = asyncio.Semaphore(max_concurrency)
 
+    # Load prediction cache once at solver-init time.
+    _cache: dict[str, dict] = {}
+    if model_name and _DEFAULT_CACHE.exists():
+        try:
+            payload = json.loads(_DEFAULT_CACHE.read_text(encoding="utf-8"))
+            _cache = payload.get("entries", {})
+            logger.info(
+                "prediction cache loaded: %d entries (model=%s)", len(_cache), model_name
+            )
+        except Exception as exc:
+            logger.warning("could not load prediction cache: %s", exc)
+
     async def solve(state: TaskState, generate: Generate) -> TaskState:
+        # Cache lookup — skip API call if this (model, lb_id) was already evaluated.
+        lb_id = (state.metadata or {}).get("lb_id")
+        if model_name and lb_id and _cache:
+            hit = _cache.get(f"{model_name}::{lb_id}")
+            if hit and hit.get("pred"):
+                logger.debug("cache hit: %s::%s", model_name, lb_id)
+                state.output = ModelOutput.from_content(
+                    model=model_id, content=hit["pred"]
+                )
+                if state.metadata is None:
+                    state.metadata = {}
+                state.metadata.update(
+                    {
+                        "litellm_error": None,
+                        "latency_s": hit.get("latency_s"),
+                        "reasoning": hit.get("trace"),
+                        "usage": None,
+                        "cache_hit": True,
+                    }
+                )
+                state.completed = True
+                return state
+
         if dry_run:
             state.output = ModelOutput.from_content(
                 model=model_id, content="__dry_run__"
