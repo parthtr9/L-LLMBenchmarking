@@ -52,16 +52,17 @@ Caveman mode is activated via a SessionStart hook in Claude Code settings. If no
 
 ## What we are building
 
-We are extending the LongevityBench framework with two novel benchmark task suites and an automated
+We are extending the LongevityBench framework with three novel benchmark task suites and an automated
 reasoning-trace scorer. The end goal is a structured evaluation of L-LLM (Insilico Medicine's
 fine-tuned Qwen3.5-9B) against GPT-4o, with a gap analysis report showing exactly where and why
 L-LLM succeeds or fails compared to general-purpose models.
 
-**Three deliverables:**
+**Four deliverables:**
 
-1. `task_a_synergyage/` — Gene-combination epistasis prediction benchmark (~200 prompts)
-2. `task_b_mgi/` — Mouse allele → lifespan effect benchmark (~150 prompts)
-3. `trace_scorer/` — Automated biological fact-checker for L-LLM reasoning traces (extra credit)
+1. `task_a_senescence/` — Gene-level differential expression across senescence perturbation experiments benchmark (300 prompts)
+2. `task_b_lipidomics/` — Lipidomics age-prediction benchmark (~150 prompts)
+3. `task_c_metabolite/` — Microbiome–metabolite prediction benchmark (~150 prompts)
+4. `trace_scorer/` — Automated biological fact-checker for L-LLM reasoning traces (extra credit)
 
 All benchmark tasks must be submitted as JSONL files in ChatML format (see spec below).
 
@@ -92,25 +93,30 @@ longevity-bench-x/
 │
 ├── data/
 │   ├── raw/
-│   │   ├── synergyage/              ← downloaded CSVs from synergyage.info
-│   │   └── mgi/                     ← MGI_PhenoGenoMP.rpt and supporting files
+│   │   ├── senescence/              ← Senescent Fibroblast Transcriptome CSVs + CellAge
+│   │   ├── lipidomics/              ← MTBLS4461 lipid profiles from MetaboLights
+│   │   └── metabolite/              ← microbiome-metabolome curated datasets
 │   └── processed/
 │       ├── task_a_train.jsonl
 │       ├── task_a_test.jsonl
 │       ├── task_b_train.jsonl
-│       └── task_b_test.jsonl
+│       ├── task_b_test.jsonl
+│       ├── task_c_train.jsonl
+│       └── task_c_test.jsonl
 │
 ├── src/
 │   ├── data_loaders/
 │   │   ├── __init__.py
-│   │   ├── synergyage_loader.py     ← parses SynergyAge CSVs into structured records
-│   │   └── mgi_loader.py            ← parses MGI phenotype annotation file
+│   │   ├── senescence_loader.py     ← parses Senescent Fibroblast Transcriptome + CellAge CSVs
+│   │   ├── lipidomics_loader.py     ← parses MTBLS4461 lipid profile data
+│   │   └── metabolite_loader.py     ← parses microbiome-metabolome curated datasets
 │   │
 │   ├── prompt_generators/
 │   │   ├── __init__.py
 │   │   ├── base_generator.py        ← abstract base class for all generators
-│   │   ├── task_a_generator.py      ← SynergyAge → ChatML JSONL prompts
-│   │   └── task_b_generator.py      ← MGI → ChatML JSONL prompts
+│   │   ├── task_a_generator.py      ← senescence → ChatML JSONL prompts
+│   │   ├── task_b_generator.py      ← lipidomics → ChatML JSONL prompts
+│   │   └── task_c_generator.py      ← metabolite → ChatML JSONL prompts
 │   │
 │   ├── eval/
 │   │   ├── __init__.py
@@ -143,8 +149,11 @@ longevity-bench-x/
 │   ├── task_a_test.jsonl
 │   ├── task_b_train.jsonl
 │   ├── task_b_test.jsonl
+│   ├── task_c_train.jsonl
+│   ├── task_c_test.jsonl
 │   ├── results_task_a.json
 │   ├── results_task_b.json
+│   ├── results_task_c.json
 │   └── gap_analysis_report.md
 │
 └── tests/
@@ -157,75 +166,171 @@ longevity-bench-x/
 
 ## Data sources
 
-### Task A — SynergyAge
+### Task A — Senescence
 
-- **URL:** https://synergyage.info (download the full CSV export)
-- **What it contains:** Multi-gene longevity intervention experiments across C. elegans,
-  D. melanogaster, mice, and yeast. Each row = a genetic combination with lifespan % change.
+- **URL:** Senescent Human Fibroblast Transcriptome Compendium (119 studies, 1,069 comparisons)
+  filtered through CellAge v3 from https://genomics.senescence.info/cells/
+- **What it contains:** Gene-level differential expression across senescence perturbation
+  experiments in human fibroblasts. Each row = a gene × comparison with LogFC and p-value.
+  Filtered to perturbation comparisons only (where the control condition is a senescent state),
+  so LogFC isolates the perturbation effect on top of senescence.
 - **Columns we care about:**
-  - `gene_1`, `gene_2` (and `gene_3` if present) — intervention genes
-  - `organism` — used for train/test split
-  - `single_gene_1_lifespan_change_pct`, `single_gene_2_lifespan_change_pct`
-  - `combined_lifespan_change_pct` — this is our regression target
-  - `epistasis_type` — synergistic / antagonistic / additive — classification target
-- **Train/test split:** by organism. Train on C. elegans + yeast. Test on D. melanogaster + mouse.
-  Never split randomly — this leaks data.
-- **Minimum N:** 200 prompts total. Filter to rows where `combined_lifespan_change_pct` is numeric.
+  - `Gene` — target gene being measured (filtered to 442 CellAge non-cancer senescence genes)
+  - `Treatment`, `Gene_down`, `Gene_up` — perturbation applied (knockdown, overexpression, drug)
+  - `Sen_type`, `Control_type` — senescence model (OIS, DDIS, REP) and control condition
+  - `Cell_line`, `Organ` — cell line and tissue origin (all lung fibroblasts)
+  - `LogFC`, `Pvalues` — differential expression results (ground truth)
+  - `Acc_no` — GEO accession, used for train/test split
+- **Three task formats (100 prompts each, 300 total):**
+  - **MCQ:** Given metadata only (treatment, senescence type, cell line, timepoint, gene name),
+    predict direction — A. upregulated, B. downregulated, C. no significant change. Metric: accuracy.
+  - **Pairwise:** Given two genes from the same experiment, predict which shows a larger absolute
+    expression change. Binary (A or B), minimum |LogFC| gap ≥ 0.5. Metric: accuracy.
+  - **Regression:** Given metadata only, predict the numeric Log2FC value (capped to ±10).
+    Metric: MAE.
+- **Train/test split:** by GEO accession (`Acc_no`). All prompts from a given study go entirely
+  into train or test. Never split randomly — comparisons within a study share lab protocols,
+  analysis pipelines, and batch effects. 80/20 split (237 train, 63 test).
+- **Minimum N:** 300 prompts total (100 per format). Filtered to high-significance rows:
+  up/downregulated ranked by p-value ascending, no_change ranked by |LogFC| ascending.
+  Ternary label thresholds: |LogFC| > 1.0 and p < 0.05 for significant change.
 
-### Task B — MGI Mouse Allele Phenotypes
+### Task B — Lipidomics
 
-- **URL:** https://www.informatics.jax.org/downloads/reports/index.html
-- **File:** `MGI_PhenoGenoMP.rpt` — tab-separated, allele × phenotype annotations
-- **Filtering logic:**
-  - Keep rows where Mammalian Phenotype Ontology term is MP:0010765 (increased lifespan)
-    or MP:0010767 (decreased lifespan)
-  - Also capture MP:0002058 (normal lifespan) for the "no change" ternary class
+- **URL:** https://www.ebi.ac.uk/metabolights/editor/MTBLS4461/samples
+- **What it contains:** Lipid profiles from human plasma samples with associated donor age.
+  Each row = a sample with quantified lipid species concentrations and demographic metadata.
 - **Columns we care about:**
-  - `allele_symbol`, `allele_name`, `allele_type` (e.g. targeted mutation, spontaneous)
-  - `gene_symbol`, `gene_name`
-  - `genetic_background` (e.g. C57BL/6J)
-  - `phenotype_id`, `phenotype_label`
-- **Train/test split:** by chromosome (pull from MGI gene coordinate data).
-  Train: chromosomes 1–16. Test: chromosomes 17–19 + X.
-- **Minimum N:** 150 prompts total.
+  - Lipid species concentrations (multiple columns per sample)
+  - `Age` — donor age (ground truth for regression tasks)
+  - Demographic metadata (sex, cohort, etc.)
+- **Three task formats (~50 prompts each, ~150 total):**
+  - **MCQ:** Given a lipid profile (subset of lipid species concentrations), predict age bracket —
+    A. young (18–35), B. middle-aged (36–55), C. older (56+). Metric: accuracy.
+  - **Pairwise:** Given lipid profiles from two individuals, predict which is older.
+    Binary (A or B), minimum age gap ≥ 10 years. Metric: accuracy.
+  - **Regression:** Given a lipid profile, predict the numeric age. Metric: MAE.
+- **Train/test split:** by subject ID. All prompts from a given donor go entirely into train or
+  test. Never split randomly — repeated measurements from the same donor leak information.
+  80/20 split.
+- **Minimum N:** 150 prompts total (~50 per format).
+
+### Task C — Metabolite
+
+- **URL:** https://github.com/borenstein-lab/microbiome-metabolome-curated-data
+- **What it contains:** Curated paired microbiome (16S/metagenomic) and metabolomic measurements
+  from multiple cohort studies. Each row = a sample with microbial species abundances and
+  measured metabolite concentrations.
+- **Columns we care about:**
+  - Microbial species/OTU relative abundances
+  - Metabolite concentrations or presence/absence (ground truth)
+  - Study and cohort identifiers
+- **Three task formats (~50 prompts each, ~150 total):**
+  - **MCQ:** Given a microbiome composition (top-N species abundances), predict which metabolite
+    class is most elevated — e.g., A. short-chain fatty acids, B. bile acids, C. amino acids,
+    D. other. Metric: accuracy.
+  - **Pairwise:** Given microbiome profiles from two samples, predict which has a higher
+    concentration of a specified metabolite. Binary (A or B). Metric: accuracy.
+  - **Regression:** Given a microbiome profile, predict the numeric concentration of a specified
+    metabolite. Metric: MAE.
+- **Train/test split:** by study/cohort. All prompts from a given study go entirely into train
+  or test. Never split randomly — samples within a study share sequencing protocols, dietary
+  contexts, and batch effects. 80/20 split.
+- **Minimum N:** 150 prompts total (~50 per format).
 
 ---
 
 ## Prompt format (ChatML JSONL — required by judges)
 
-Every prompt must be a JSON object on a single line with this exact structure:
+Every prompt must follow the XML-tagged structure below. Examples for each task:
 
-```json
-{
-  "task_id": "synergyage_001",
-  "task_name": "epistasis_ternary",
-  "format": "ternary_classification",
-  "split": "test",
-  "messages": [
-    {
-      "role": "system",
-      "content": "You are an expert in aging biology and longevity genetics. Answer concisely and precisely. Output only the requested label or value, with no explanation unless asked."
-    },
-    {
-      "role": "user",
-      "content": "<prompt text here>"
-    }
-  ],
-  "ground_truth": "synergistic",
-  "metadata": {
-    "organism": "C. elegans",
-    "gene_1": "daf-2",
-    "gene_2": "age-1",
-    "single_1_pct": -100.0,
-    "single_2_pct": -100.0,
-    "source_db": "SynergyAge",
-    "source_id": "SYN-0042"
-  }
-}
+### Task A — Senescence example
+
+```xml
+<question>
+You are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 6d post-senescence induction, knockdown of ITCH is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of IGFBP7 (insulin like growth factor binding protein 7) measured by RNA-seq:
+</question>
+<options>
+A. increases (upregulated) B. decreases (downregulated) C. no significant change
+</options>
+<experiment>
+Cell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: knockdown of ITCH. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.
+</experiment>
+<gene_context>
+In this experiment, knocked down gene(s): ITCH.
+</gene_context>
+<answer>
+C
+</answer>
+<follow_up>
+Gene: IGFBP7 (insulin like growth factor binding protein 7). Log2FC=-0.7841, p=1.90e-02. GEO accession: GSE101766. According to CellAge, IGFBP7 induces cellular senescence (senescence type: Oncogene-induced). CellAge PMID: 18267069.
+</follow_up>
 ```
 
-**Required fields on every record:** `task_id`, `task_name`, `format`, `split`, `messages`,
-`ground_truth`, `metadata.source_db`, `metadata.source_id`.
+### Task B — Lipidomics example
+
+```xml
+<question>
+You are presented with a plasma lipidomics profile from a human donor. Given the following lipid species concentrations, predict the donor's age in years. Respond with only a numeric value rounded to the nearest integer.
+</question>
+<lipid_profile>
+CE(16:0): 1245.3 µM, CE(18:1): 2301.7 µM, SM(d18:1/16:0): 312.4 µM, PC(34:1): 1876.2 µM, LPC(18:0): 45.8 µM, TG(52:2): 567.1 µM.
+</lipid_profile>
+<sample_context>
+Sex: Female. Cohort: healthy controls. Measurement platform: LC-MS/MS. Study: MTBLS4461.
+</sample_context>
+<answer>
+62
+</answer>
+<follow_up>
+Donor age: 62 years. Notable age-associated lipid shifts: elevated CE(16:0) and reduced LPC(18:0) relative to young-cohort median. Study: MTBLS4461.
+</follow_up>
+```
+
+### Task C — Metabolite example
+
+```xml
+<question>
+You are presented with a gut microbiome profile from a human stool sample. Given the following species relative abundances, predict which metabolite class is most elevated in the paired metabolomics data.
+</question>
+<options>
+A. short-chain fatty acids B. bile acids C. amino acids D. other
+</options>
+<microbiome_profile>
+Bacteroides vulgatus: 18.2%, Faecalibacterium prausnitzii: 12.7%, Roseburia intestinalis: 8.4%, Akkermansia muciniphila: 3.1%, Prevotella copri: 0.2%.
+</microbiome_profile>
+<sample_context>
+Sequencing method: 16S rRNA V4 region. Cohort: healthy adults. Study: Franzosa et al. 2019.
+</sample_context>
+<answer>
+A
+</answer>
+<follow_up>
+Dominant SCFA producers (Faecalibacterium, Roseburia) compose >20% relative abundance. Butyrate concentration: 142.3 µM (top quartile for cohort). Study: Franzosa et al. 2019.
+</follow_up>
+```
+
+### Row schema (all tasks)
+
+Each JSONL row uses this schema:
+
+```
+{'lb_id': 'LB-SEN-REG-0002', 'pool': 'senescence_perturbation_regression', 'display_name': 'Senescence Perturbation / Regression', 'display_group': 'Senescence Perturbation', 'domain': 'transcriptomics', 'format': 'regression', 'metric': 'mae', 'units': 'log2fc', 'messages': [{'role': 'system', 'content': '...'}, {'role': 'user', 'content': '...'}, {'role': 'assistant', 'content': '...'}], 'has_reasoning': False, 'metadata': '{"follow_up": "...", ...}'}
+```
+
+Column	Type	Notes
+lb_id	string	Stable task identifier, e.g. LB-SEN-MCQ-0001, LB-LIP-REG-0042, LB-MET-PW-0015
+pool	string	Source task slug, e.g. senescence_perturbation_regression, lipidomics_age_regression, metabolite_prediction_mcq
+display_name	string	Human-readable task name
+display_group	string	Task family this row belongs to (Senescence Perturbation, Lipidomics Age, Metabolite Prediction)
+domain	string	transcriptomics, lipidomics, metabolomics, or multi-omics
+format	string	binary, multiclass, ternary, pairwise, regression, generation
+metric	string	Scoring metric: accuracy, mae, or jaccard
+units	string | null	Units for regression/pairwise tasks (log2fc, years, µM) where applicable
+task	string	Free-text task description embedded in the source data
+messages	list of dicts	OpenAI-style chat messages (role, content)
+has_reasoning	bool	True if the gold completion contains a reasoning trace
+metadata	string | null	JSON-encoded per-row provenance (sample IDs, source dataset metadata)
 
 **Token limit:** No prompt may exceed 30,000 tokens when tokenized with cl100k_base.
 Use `tiktoken` to check before writing to disk:
@@ -483,7 +588,7 @@ We are a small team moving fast. Keep it simple:
 - `feat/<your-name>/<short-description>` — feature branches. Merge via PR or direct push
   if you've verified it runs end-to-end.
 - Commit messages: imperative, lowercase, under 72 chars.
-  Examples: `add synergyage csv loader`, `fix ternary label mapping`, `add ncbi retry logic`
+  Examples: `add senescence csv loader`, `fix ternary label mapping`, `add ncbi retry logic`
 - If you break something, say so in Slack immediately. No judgment — we're under 48 hours.
 
 ---
@@ -495,24 +600,28 @@ We are a small team moving fast. Keep it simple:
 pip install -r requirements.txt
 
 # 2. Download raw data (do this first, Saturday morning)
-python src/data_loaders/synergyage_loader.py --download
-python src/data_loaders/mgi_loader.py --download
+python src/data_loaders/senescence_loader.py --download
+python src/data_loaders/lipidomics_loader.py --download
+python src/data_loaders/metabolite_loader.py --download
 
 # 3. Generate prompts
 python src/prompt_generators/task_a_generator.py --output data/processed/
 python src/prompt_generators/task_b_generator.py --output data/processed/
+python src/prompt_generators/task_c_generator.py --output data/processed/
 
 # 4. Validate prompt files (checks token limits, JSONL format, N >= 50)
 python src/eval/validate_prompts.py --dir data/processed/
 
 # 5. Run evaluation (will take ~1–2 hours depending on API rate limits)
-python src/eval/runner.py --tasks task_a task_b --models llm gpt4o majority random
+python src/eval/runner.py --tasks task_a task_b task_c --models llm gpt4o majority random
 
 # 6. Score results
 python src/eval/scorer.py --results outputs/
 
 # 7. Run trace scorer on L-LLM outputs
 python src/trace_scorer/trace_scorer.py --input outputs/results_task_a.json
+python src/trace_scorer/trace_scorer.py --input outputs/results_task_b.json
+python src/trace_scorer/trace_scorer.py --input outputs/results_task_c.json
 
 # 8. Generate gap analysis report
 python src/analysis/gap_analysis.py --output outputs/gap_analysis_report.md
@@ -521,6 +630,26 @@ python src/analysis/gap_analysis.py --output outputs/gap_analysis_report.md
 ---
 
 ## Biological domain notes (read before writing any prompts)
+
+### Senescence biology (Task A)
+- Perturbation experiments compare a treatment (knockdown, overexpression, drug) against
+  a senescent control. LogFC reflects perturbation effect, not senescence induction.
+- Key senescence types: OIS (oncogene-induced), DDIS (DNA damage-induced), REP (replicative).
+- CellAge genes have annotated effects: "Induces" or "Inhibits" cellular senescence.
+
+### Lipidomics and aging (Task B)
+- Plasma lipid profiles shift with age: certain ceramides and sphingomyelins increase,
+  some lysophosphatidylcholines decrease.
+- Age prediction from lipidomics is a well-studied problem — models should show some competence.
+- Common lipid classes: CE (cholesteryl esters), PC (phosphatidylcholines), SM (sphingomyelins),
+  LPC (lysophosphatidylcholines), TG (triglycerides).
+
+### Microbiome–metabolome interactions (Task C)
+- Gut microbiome composition predicts certain fecal/plasma metabolite concentrations.
+- Key metabolite classes: SCFAs (butyrate, propionate, acetate from fiber fermenters),
+  bile acids (modified by Clostridium, Bacteroides), amino acid derivatives.
+- Major SCFA producers: Faecalibacterium, Roseburia, Eubacterium.
+- Bacteroides/Prevotella ratio is a well-known enterotype axis.
 
 ### C. elegans gene naming conventions
 - Genes: lowercase, 3 letters + hyphen + number. Examples: `daf-2`, `age-1`, `clk-1`, `eat-2`
@@ -547,12 +676,15 @@ Use balanced accuracy and macro F1 (not plain accuracy) in all reported metrics.
 
 ## What done looks like (Sunday PM checklist)
 
-- [ ] `data/processed/task_a_train.jsonl` — ≥100 prompts, all formats present
-- [ ] `data/processed/task_a_test.jsonl` — ≥50 prompts, organism-split from train
+- [ ] `data/processed/task_a_train.jsonl` — ≥200 prompts, all formats present
+- [ ] `data/processed/task_a_test.jsonl` — ≥100 prompts, accession-split from train
 - [ ] `data/processed/task_b_train.jsonl` — ≥100 prompts, all formats present
-- [ ] `data/processed/task_b_test.jsonl` — ≥50 prompts, chromosome-split from train
+- [ ] `data/processed/task_b_test.jsonl` — ≥50 prompts, subject-split from train
+- [ ] `data/processed/task_c_train.jsonl` — ≥100 prompts, all formats present
+- [ ] `data/processed/task_c_test.jsonl` — ≥50 prompts, study-split from train
 - [ ] `outputs/results_task_a.json` — L-LLM + GPT-4o + baselines, all scored
 - [ ] `outputs/results_task_b.json` — same
+- [ ] `outputs/results_task_c.json` — same
 - [ ] `outputs/gap_analysis_report.md` — key finding: where L-LLM beats GPT-4o and where it fails
 - [ ] `outputs/trace_faithfulness_scores.json` — correlation between trace score and accuracy
 - [ ] All JSONL files pass token limit validation (< 30K tokens per prompt)
@@ -567,6 +699,8 @@ don't re-litigate them.
 
 | Decision | Rationale | Who decided | When |
 |----------|-----------|-------------|------|
-| Train/test split for Task A by organism, not random | Random split leaks data — same organism's genes appear in both splits | — | — |
-| Report macro F1 as primary metric (not accuracy) | Class imbalance in both tasks makes accuracy misleading | — | — |
+| Train/test split for Task A by GEO accession, not random | Random split leaks data — comparisons within a study share protocols and batch effects | — | — |
+| Train/test split for Task B by subject, not random | Repeated measurements from same donor leak information | — | — |
+| Train/test split for Task C by study/cohort, not random | Samples within a study share sequencing protocols, dietary contexts, and batch effects | — | — |
+| Report macro F1 as primary metric (not accuracy) | Class imbalance in all three tasks makes accuracy misleading | — | — |
 | Use cl100k_base tokenizer for length checks | Required by track spec | — | — |
