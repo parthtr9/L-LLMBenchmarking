@@ -259,14 +259,16 @@ models:
 - **Three task formats (target 100 each, 298 total after balance constraints):**
   - **MCQ (99 prompts):** Given experiment metadata (treatment, senescence type, cell line,
     timepoint, gene name), predict direction — A. upregulated, B. downregulated,
-    C. no significant change. Balanced 33/33/33 across classes. Metric: balanced accuracy.
+    C. no significant change. Balanced 33/33/33 across classes. Metric: `accuracy`
+    (3 balanced classes, so plain accuracy ≡ balanced accuracy).
   - **Pairwise (99 prompts):** Given two genes from the same experiment, predict which
     shows a larger absolute expression change. Binary (A or B), minimum |LogFC| gap ≥ 0.5
-    so there is always a clear winner. Metric: accuracy.
+    so there is always a clear winner. Metric: `balanced accuracy`.
   - **Binary significance (100 prompts):** Given experiment metadata, predict whether the
     perturbation produces a significant change at all — A. significant (|LogFC| > 1.0 AND
     p < 0.05), B. not significant. Direction is NOT revealed in the answer. 50/50 balanced.
-    Metric: balanced accuracy. (Replaces the original "predict numeric Log2FC" regression task.)
+    Metric: `accuracy` (50/50 balanced, so plain accuracy ≡ balanced accuracy).
+    (Replaces the original "predict numeric Log2FC" regression task.)
 - **Label thresholds:** |LogFC| > 1.0 AND p < 0.05 for significant change. Ternary labels
   use signed LogFC against the same threshold.
 - **Filtering for prompt quality:**
@@ -309,11 +311,13 @@ models:
      formats, generates prompts, and writes the stratified group split.
 - **Three task formats — 285 total prompts (228 train / 57 test):**
   - **MCQ (85 prompts):** Given the full lipid profile, predict age bracket —
-    A. 20–39, B. 40–59, C. 60–79, D. 80+. Metric: accuracy.
+    A. 20–39, B. 40–59, C. 60–79, D. 80+. Metric: `off-by-one accuracy`
+    (credits adjacent-bracket predictions because age brackets are ordinal).
   - **Regression (100 prompts):** Given lipid profile + diabetes status, predict numeric
-    age in years (integer). Metric: MAE.
+    age in years (integer). Metric: `mae`.
   - **Binary (100 prompts):** Given lipid profile + age, predict diabetes status —
-    A. Yes (diabetic), B. No (non-diabetic). Metric: balanced accuracy.
+    A. Yes (diabetic), B. No (non-diabetic). Metric: `accuracy`
+    (class prior in MTBLS4461 is ~61/39 No/Yes — also report majority baseline).
   - Disjoint sampling: scarce 80+ bracket goes to MCQ first, then binary, then
     regression draws from leftovers. No sample appears in more than one task.
 - **Train/test split:** stratified by task format, grouped by `individual_id`. Each
