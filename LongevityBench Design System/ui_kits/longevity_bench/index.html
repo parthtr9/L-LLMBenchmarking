@@ -169,6 +169,8 @@ function App() {
     content = <TaskDataView taskKey="task_a" title="Senescence Perturbation" subtitle="Task A · Gene-level differential expression · 298 prompts" />;
   } else if (view === 'lipidomics') {
     content = <TaskDataView taskKey="task_b" title="Lipidomics" subtitle="Task B · Age & diabetes prediction from plasma lipid profiles · 285 prompts" />;
+  } else if (view === 'settings') {
+    content = <SettingsView />;
   } else {
     content = <GenericPlaceholder view={view} />;
   }
@@ -932,6 +934,227 @@ function ModelsView({ records = [], runs = [] }) {
             </div>
           </div>
         ))}
+      </div>
+    </>
+  );
+}
+
+// ── SettingsView ──────────────────────────────────────────────────────────────
+
+const ENV_FIELDS = [
+  { key: 'HF_TOKEN',        label: 'HuggingFace Token',   required: true,  hint: 'Required for L-LLM (longevity_llm, longevity_llm_thinking). Classic read token from huggingface.co/settings/tokens.' },
+  { key: 'HF_ENDPOINT_URL', label: 'HF Endpoint URL',     required: true,  hint: 'vLLM-compatible OpenAI-format endpoint URL provided by hackathon organizers.' },
+  { key: 'ANTHROPIC_API_KEY', label: 'Anthropic API Key', required: true,  hint: 'Required for claude_sonnet model. Get from console.anthropic.com.' },
+  { key: 'NCBI_API_KEY',    label: 'NCBI API Key',         required: false, hint: 'Optional. Raises mygene.info / NCBI rate limit from 3 to 10 req/s.' },
+];
+
+const LS_KEY = 'lb_env_vars';
+
+function _loadEnv() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch { return {}; }
+}
+function _saveEnv(obj) { localStorage.setItem(LS_KEY, JSON.stringify(obj)); }
+function _parseEnvText(text) {
+  const out = {};
+  for (const line of text.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eq = trimmed.indexOf('=');
+    if (eq < 1) continue;
+    const k = trimmed.slice(0, eq).trim();
+    let v = trimmed.slice(eq + 1).trim();
+    if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) v = v.slice(1, -1);
+    if (k) out[k] = v;
+  }
+  return out;
+}
+function _mask(val) {
+  if (!val || val.length <= 8) return '••••••••';
+  return val.slice(0, 4) + '••••' + val.slice(-4);
+}
+
+function SettingsView() {
+  const [env, setEnv]         = React.useState(_loadEnv);
+  const [revealed, setRevealed] = React.useState({});
+  const [editing, setEditing]  = React.useState({});
+  const [editVals, setEditVals] = React.useState({});
+  const [toast, setToast]      = React.useState(null);
+  const fileRef = React.useRef();
+
+  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2800); };
+
+  const handleUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const parsed = _parseEnvText(ev.target.result);
+      const merged = { ...env, ...parsed };
+      _saveEnv(merged);
+      setEnv(merged);
+      showToast(`Loaded ${Object.keys(parsed).length} variables from ${file.name}`);
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const handleEdit = (key) => {
+    setEditing(prev => ({ ...prev, [key]: true }));
+    setEditVals(prev => ({ ...prev, [key]: env[key] || '' }));
+  };
+
+  const handleSave = (key) => {
+    const updated = { ...env, [key]: editVals[key] };
+    _saveEnv(updated);
+    setEnv(updated);
+    setEditing(prev => ({ ...prev, [key]: false }));
+    showToast('Saved');
+  };
+
+  const handleDelete = (key) => {
+    const updated = { ...env };
+    delete updated[key];
+    _saveEnv(updated);
+    setEnv(updated);
+    setEditing(prev => ({ ...prev, [key]: false }));
+  };
+
+  const handleDownload = () => {
+    const lines = ['# LongevityBench .env — generated from dashboard settings', ''];
+    ENV_FIELDS.forEach(f => {
+      if (env[f.key]) lines.push(`${f.key}=${env[f.key]}`);
+    });
+    const extras = Object.keys(env).filter(k => !ENV_FIELDS.find(f => f.key === k));
+    if (extras.length) { lines.push(''); lines.push('# Additional'); extras.forEach(k => lines.push(`${k}=${env[k]}`)); }
+    const blob = new Blob([lines.join('\n') + '\n'], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = '.env'; a.click();
+    URL.revokeObjectURL(url);
+    showToast('Downloaded .env');
+  };
+
+  const allRequired = ENV_FIELDS.filter(f => f.required).every(f => env[f.key]);
+
+  return (
+    <>
+      <div className="page-head">
+        <div>
+          <div className="lb-eyebrow" style={{ marginBottom: 6 }}>Local only — stored in browser localStorage</div>
+          <h1>Settings</h1>
+          <div className="sub">API keys and environment configuration · values never leave your browser</div>
+        </div>
+        <div className="actions">
+          <button className="btn small ghost" onClick={() => fileRef.current.click()}>Upload .env</button>
+          <button className="btn small secondary" onClick={handleDownload}>Download .env</button>
+          <input ref={fileRef} type="file" accept=".env,text/plain" style={{ display: 'none' }} onChange={handleUpload} />
+        </div>
+      </div>
+
+      {/* Status banner */}
+      <div style={{ marginBottom: 16, padding: '10px 16px', borderRadius: 6, border: '1px solid', display: 'flex', alignItems: 'center', gap: 10, font: '400 13px var(--lb-font-sans)',
+        background: allRequired ? 'var(--lb-success-bg)' : 'var(--lb-warning-bg)',
+        borderColor: allRequired ? 'var(--lb-green-300)' : '#e0b84a',
+        color: allRequired ? 'var(--lb-green-700)' : '#8a5d12',
+      }}>
+        <span style={{ fontWeight: 600 }}>{allRequired ? 'All required keys set' : 'Missing required keys'}</span>
+        <span style={{ color: 'inherit', opacity: 0.75 }}>
+          {allRequired ? '— ready to run all models' : '— some models will fail without their key'}
+        </span>
+      </div>
+
+      {/* Toast */}
+      {toast && (
+        <div style={{ position: 'fixed', bottom: 24, right: 24, background: 'var(--lb-fg-1)', color: '#fff', padding: '10px 18px', borderRadius: 8, font: '400 13px var(--lb-font-sans)', zIndex: 400, boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>
+          {toast}
+        </div>
+      )}
+
+      {/* Env var fields */}
+      <div className="card" style={{ overflow: 'hidden', marginBottom: 16 }}>
+        <div className="head"><h3>Environment variables</h3><p className="sub">click a row to edit · stored in localStorage</p></div>
+        <table className="lb" style={{ tableLayout: 'fixed', width: '100%' }}>
+          <thead>
+            <tr>
+              <th style={{ width: '24%' }}>Variable</th>
+              <th style={{ width: '8%' }}>Required</th>
+              <th style={{ width: '30%' }}>Value</th>
+              <th>Description</th>
+              <th style={{ width: '110px' }}></th>
+            </tr>
+          </thead>
+          <tbody>
+            {ENV_FIELDS.map(f => {
+              const val = env[f.key] || '';
+              const isSet = !!val;
+              const isEditing = editing[f.key];
+              const isRevealed = revealed[f.key];
+              return (
+                <tr key={f.key}>
+                  <td style={{ fontFamily: 'var(--lb-font-mono)', fontSize: 12, fontWeight: 600, color: 'var(--lb-fg-1)' }}>{f.key}</td>
+                  <td>
+                    {f.required
+                      ? <span style={{ fontSize: 11, fontWeight: 600, color: isSet ? 'var(--lb-green-700)' : 'var(--lb-error)' }}>{isSet ? 'SET' : 'MISSING'}</span>
+                      : <span style={{ fontSize: 11, color: 'var(--lb-fg-4)' }}>{isSet ? 'SET' : 'optional'}</span>}
+                  </td>
+                  <td style={{ padding: '8px 12px' }}>
+                    {isEditing ? (
+                      <input
+                        autoFocus
+                        type="text"
+                        value={editVals[f.key] || ''}
+                        onChange={e => setEditVals(prev => ({ ...prev, [f.key]: e.target.value }))}
+                        onKeyDown={e => { if (e.key === 'Enter') handleSave(f.key); if (e.key === 'Escape') setEditing(prev => ({ ...prev, [f.key]: false })); }}
+                        style={{ width: '100%', font: '400 12px var(--lb-font-mono)', padding: '4px 8px', border: '1px solid var(--lb-border)', borderRadius: 4, outline: 'none', boxSizing: 'border-box' }}
+                      />
+                    ) : (
+                      <span
+                        style={{ fontFamily: 'var(--lb-font-mono)', fontSize: 12, color: isSet ? 'var(--lb-fg-2)' : 'var(--lb-fg-4)', cursor: 'pointer' }}
+                        onClick={() => handleEdit(f.key)}
+                        title="Click to edit"
+                      >
+                        {isSet ? (isRevealed ? val : _mask(val)) : '— click to set'}
+                      </span>
+                    )}
+                  </td>
+                  <td style={{ font: '400 12px var(--lb-font-sans)', color: 'var(--lb-fg-3)', lineHeight: 1.5 }}>{f.hint}</td>
+                  <td style={{ padding: '6px 12px' }}>
+                    <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                      {isEditing ? (
+                        <>
+                          <button className="btn small" style={{ background: 'var(--lb-green-600)', color: '#fff', border: 'none' }} onClick={() => handleSave(f.key)}>Save</button>
+                          <button className="btn small secondary" onClick={() => setEditing(prev => ({ ...prev, [f.key]: false }))}>Cancel</button>
+                        </>
+                      ) : (
+                        <>
+                          {isSet && (
+                            <button className="btn small ghost" onClick={() => setRevealed(prev => ({ ...prev, [f.key]: !prev[f.key] }))}>
+                              {isRevealed ? 'Hide' : 'Show'}
+                            </button>
+                          )}
+                          <button className="btn small ghost" onClick={() => handleEdit(f.key)}>Edit</button>
+                          {isSet && <button className="btn small ghost" style={{ color: 'var(--lb-error)' }} onClick={() => handleDelete(f.key)}>×</button>}
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Usage note */}
+      <div className="card" style={{ padding: '16px 20px' }}>
+        <div style={{ font: '500 13px var(--lb-font-sans)', color: 'var(--lb-fg-1)', marginBottom: 8 }}>How to apply these settings</div>
+        <ol style={{ margin: 0, paddingLeft: 20, font: '400 13px var(--lb-font-sans)', color: 'var(--lb-fg-2)', lineHeight: 1.8 }}>
+          <li>Click <strong>Download .env</strong> to export the current values as a <code>.env</code> file.</li>
+          <li>Place the downloaded file at the repo root (next to <code>pipeline.py</code>).</li>
+          <li>Run <code>python pipeline.py</code> — it loads <code>.env</code> automatically via python-dotenv.</li>
+        </ol>
+        <div style={{ marginTop: 12, padding: '8px 12px', background: 'var(--lb-ink-50)', borderRadius: 6, font: '400 12px var(--lb-font-sans)', color: 'var(--lb-fg-3)' }}>
+          Values stored in localStorage are only visible to you in this browser and are never transmitted anywhere. Never commit your <code>.env</code> file to git.
+        </div>
       </div>
     </>
   );
