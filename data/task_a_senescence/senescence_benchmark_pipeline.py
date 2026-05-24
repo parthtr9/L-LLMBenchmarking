@@ -948,7 +948,7 @@ def generate_pairwise_prompt(
         'display_group': 'Senescence Perturbation',
         'domain': 'transcriptomics',
         'format': 'pairwise',
-        'metric': 'accuracy',
+        'metric': 'balanced accuracy',
         'units': 'direction',
         'messages': messages,
         'task': 'senescence_perturbation_pairwise',
@@ -956,10 +956,6 @@ def generate_pairwise_prompt(
         'metadata': json.dumps(metadata),
     }
 
-
-# ---------------------------------------------------------------------------
-# 5e. REGRESSION PROMPT GENERATOR (predict Log2FC)
-# ---------------------------------------------------------------------------
 
 def generate_significance_prompt(row: pd.Series, lb_id_counter: int) -> dict:
     """
@@ -1257,53 +1253,81 @@ def split_train_test_by_accession(
     random_state: int = 42,
 ) -> tuple[list[dict], list[dict], dict]:
     """
-    Split prompts into train/test sets by GEO accession to prevent data leakage.
+    Split prompts into train/test by GEO accession, stratified by format.
 
-    All prompts from a given accession go entirely into train or test.
-    Accessions are greedily assigned to the test set (smallest first) until
-    the target test fraction is reached, ensuring diversity in the test set
-    rather than dumping a single large accession into it.
+    All prompts from a given accession go entirely into train or test
+    (prevents within-study leakage). Within that constraint, accessions
+    are picked so each format (mcq / pairwise / binary) hits its own
+    test_fraction target — not just the global fraction.
+
+    Algorithm: at each step, find the format with the largest unmet test
+    deficit, then add the smallest available accession that contributes
+    to that format. Smallest-first preserves the existing diversity
+    principle (more distinct studies in test).
 
     Returns: (train_prompts, test_prompts, split_report)
     """
     rng = np.random.RandomState(random_state)
 
-    # Extract accession from metadata for each prompt
-    accession_map = {}  # accession -> list of prompt indices
-    treatment_map = {}  # accession -> set of treatments
+    # Extract accession + format from metadata for each prompt
+    accession_map: dict = {}        # accession -> list of prompt indices
+    treatment_map: dict = {}        # accession -> set of treatments
+    format_counts_by_acc: dict = {} # accession -> {format: count}
     for i, p in enumerate(prompts):
         meta = json.loads(p['metadata'])
-        acc = meta.get('accession', meta.get('accession', ''))
-        treat = meta.get('treatment', meta.get('treatment', ''))
+        acc = meta.get('accession', '')
+        treat = meta.get('treatment', '')
+        fmt = p['format']
         accession_map.setdefault(acc, []).append(i)
         treatment_map.setdefault(acc, set()).add(treat)
+        format_counts_by_acc.setdefault(acc, {})
+        format_counts_by_acc[acc][fmt] = format_counts_by_acc[acc].get(fmt, 0) + 1
 
-    # Sort accessions by prompt count (ascending) for greedy test fill
+    # Per-format totals and per-format test targets
+    format_totals: dict = {}
+    for counts in format_counts_by_acc.values():
+        for fmt, n in counts.items():
+            format_totals[fmt] = format_totals.get(fmt, 0) + n
+    format_targets = {fmt: int(round(n * test_fraction)) for fmt, n in format_totals.items()}
+
     acc_sizes = {acc: len(idxs) for acc, idxs in accession_map.items()}
-    sorted_accs = sorted(acc_sizes.keys(), key=lambda a: acc_sizes[a])
 
-    # Shuffle within same-size groups for randomness
-    size_groups = {}
-    for acc in sorted_accs:
-        size_groups.setdefault(acc_sizes[acc], []).append(acc)
-    shuffled_accs = []
-    for size in sorted(size_groups.keys()):
-        group = size_groups[size]
-        rng.shuffle(group)
-        shuffled_accs.extend(group)
+    # Random tiebreak among equal-size accessions: shuffle once, then use
+    # shuffled-index as the stable secondary sort key inside the greedy loop
+    accs_shuffled = list(accession_map.keys())
+    rng.shuffle(accs_shuffled)
+    cand_order = {acc: i for i, acc in enumerate(accs_shuffled)}
 
-    total = len(prompts)
-    target_test = int(total * test_fraction)
+    test_accs: set = set()
+    test_format_counts = {fmt: 0 for fmt in format_totals}
+    available = set(accs_shuffled)
 
-    test_accs = set()
-    test_count = 0
-    for acc in shuffled_accs:
-        if test_count >= target_test:
+    def deficit(fmt: str) -> int:
+        return format_targets[fmt] - test_format_counts[fmt]
+
+    while any(deficit(fmt) > 0 for fmt in format_totals):
+        # Format with the largest unmet test deficit
+        unmet = {fmt: deficit(fmt) for fmt in format_totals if deficit(fmt) > 0}
+        target_fmt = max(unmet, key=unmet.get)
+
+        # Smallest available accession that contributes to target_fmt
+        candidates = [acc for acc in available
+                      if format_counts_by_acc[acc].get(target_fmt, 0) > 0]
+        if not candidates:
+            print(f"    ⚠ No accessions left to fill {target_fmt} deficit "
+                  f"({unmet[target_fmt]} short)")
             break
-        test_accs.add(acc)
-        test_count += acc_sizes[acc]
+        candidates.sort(key=lambda a: (acc_sizes[a], cand_order[a]))
+        best_acc = candidates[0]
+
+        test_accs.add(best_acc)
+        available.remove(best_acc)
+        for fmt, n in format_counts_by_acc[best_acc].items():
+            test_format_counts[fmt] += n
 
     train_accs = set(accession_map.keys()) - test_accs
+
+    total = len(prompts)
 
     # Build train/test prompt lists
     test_idxs = set()
@@ -1331,6 +1355,21 @@ def split_train_test_by_accession(
         test_treatments.update(treatment_map[acc])
     leaked_treatments = train_treatments & test_treatments
 
+    # Per-format split stats (stratification proof)
+    train_fmt_counts = pd.Series([p['format'] for p in train_prompts]).value_counts().to_dict()
+    test_fmt_counts = pd.Series([p['format'] for p in test_prompts]).value_counts().to_dict()
+    per_format = {}
+    for fmt, total_n in format_totals.items():
+        n_test = int(test_fmt_counts.get(fmt, 0))
+        n_train = int(train_fmt_counts.get(fmt, 0))
+        per_format[fmt] = {
+            'total': total_n,
+            'n_train': n_train,
+            'n_test': n_test,
+            'test_fraction': round(n_test / total_n, 4) if total_n else 0.0,
+            'target_test': format_targets[fmt],
+        }
+
     # Build split report
     report = {
         'train_accessions': sorted(train_accs),
@@ -1340,6 +1379,8 @@ def split_train_test_by_accession(
         'n_train_prompts': len(train_prompts),
         'n_test_prompts': len(test_prompts),
         'actual_test_fraction': round(len(test_prompts) / total, 4),
+        'target_test_fraction': test_fraction,
+        'per_format': per_format,
         'treatment_leakage': {
             'n_leaked': len(leaked_treatments),
             'leaked_treatments': sorted(leaked_treatments),
@@ -1349,21 +1390,23 @@ def split_train_test_by_accession(
     }
 
     # Print report
-    print(f"\n  Train/Test split by accession:")
+    print(f"\n  Train/Test split by accession (format-stratified):")
     print(f"    Train: {len(train_prompts)} prompts from {len(train_accs)} accessions")
     print(f"    Test:  {len(test_prompts)} prompts from {len(test_accs)} accessions")
-    print(f"    Actual test fraction: {report['actual_test_fraction']:.1%}")
+    print(f"    Actual test fraction: {report['actual_test_fraction']:.1%} "
+          f"(target {test_fraction:.0%})")
+
+    # Per-format stratification check
+    print(f"    Per-format test stratification:")
+    for fmt, stats in per_format.items():
+        print(f"      {fmt:13s} train={stats['n_train']:4d}  test={stats['n_test']:4d}  "
+              f"test_frac={stats['test_fraction']:.1%}  (target ~{stats['target_test']})")
 
     # Label balance per split
     for name, subset in [('Train', train_prompts), ('Test', test_prompts)]:
         labels = [p['messages'][-1]['content'] for p in subset]
         counts = pd.Series(labels).value_counts().to_dict()
         print(f"    {name} label balance: {counts}")
-
-    # Format balance per split
-    for name, subset in [('Train', train_prompts), ('Test', test_prompts)]:
-        formats = pd.Series([p['format'] for p in subset]).value_counts().to_dict()
-        print(f"    {name} format balance: {formats}")
 
     if leaked_treatments:
         print(f"    ⚠ Treatment leakage: {len(leaked_treatments)} treatments appear in both splits")

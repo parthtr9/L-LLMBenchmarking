@@ -39,7 +39,7 @@ Balanced benchmark set: 1521 prompts
   Unique accessions: 60
   Unique treatments: 132
   Unique cell lines: 11
-Balanced dataset saved to: processed/task_a_senescence_balanced.csv
+Balanced dataset saved to: data/task_a_senescence/processed/task_a_senescence_balanced.csv
 
 --- Step 7: Exploratory Data Analysis ---
 
@@ -295,30 +295,33 @@ Three-way split:
 
 --- Step 11: Train/Test split by accession ---
 
-  Train/Test split by accession:
-    Train: 239 prompts from 15 accessions
-    Test:  59 prompts from 28 accessions
-    Actual test fraction: 19.8%
-    Train label balance: {'A': 109, 'B': 108, 'C': 22}
-    Test label balance: {'B': 27, 'A': 21, 'C': 11}
-    Train format balance: {'binary': 83, 'pairwise': 81, 'mcq': 75}
-    Test format balance: {'mcq': 24, 'pairwise': 18, 'binary': 17}
-    ✓ No treatment leakage across splits
+  Train/Test split by accession (format-stratified):
+    Train: 225 prompts from 13 accessions
+    Test:  73 prompts from 30 accessions
+    Actual test fraction: 24.5% (target 20%)
+    Per-format test stratification:
+      mcq           train=  70  test=  29  test_frac=29.3%  (target ~20)
+      pairwise      train=  77  test=  22  test_frac=22.2%  (target ~20)
+      binary        train=  78  test=  22  test_frac=22.0%  (target ~20)
+    Train label balance: {'A': 105, 'B': 100, 'C': 20}
+    Test label balance: {'B': 35, 'A': 25, 'C': 13}
+    ⚠ Treatment leakage: 1 treatments appear in both splits
+      Leaked: ['shp53']
 
 --- Step 12: Save outputs ---
-  Parquet saved: processed/task_a_senescence_train.parquet (239 rows)
-  JSON saved:    processed/task_a_senescence_train.json (239 entries)
-  Parquet saved: processed/task_a_senescence_test.parquet (59 rows)
-  JSON saved:    processed/task_a_senescence_test.json (59 entries)
+  Parquet saved: data/task_a_senescence/processed/task_a_senescence_train.parquet (225 rows)
+  JSON saved:    data/task_a_senescence/processed/task_a_senescence_train.json (225 entries)
+  Parquet saved: data/task_a_senescence/processed/task_a_senescence_test.parquet (73 rows)
+  JSON saved:    data/task_a_senescence/processed/task_a_senescence_test.json (73 entries)
 
 --- Step 13: Summary ---
-Summary saved to: processed/task_a_senescence_summary.json
+Summary saved to: data/task_a_senescence/processed/task_a_senescence_summary.json
   Total prompts:            298
   MCQ prompts:              99
   Pairwise prompts:         99
   Significance prompts:     100
-  Train prompts:            239
-  Test prompts:             59
+  Train prompts:            225
+  Test prompts:             73
 
 --- Example MCQ prompt ---
 lb_id: LB-SEN-MCQ-0001

@@ -57,6 +57,77 @@ def _result_to_output(result: LiteLLMResult, model_id: str) -> ModelOutput:
     return output
 
 
+_LETTER_SETS: dict[str, str] = {
+    "mcq":      "ABCD",
+    "binary":   "AB",
+    "pairwise": "AB",
+    "ternary":  "ABC",
+}
+
+_ANSWER_MARKER_PATTERNS: list[str] = [
+    r"\\boxed\{\s*([A-D])\s*\}",
+    r"final\s+answer\s*[:\-=]\s*\**\s*([A-D])\s*\**",
+    r"answer\s*[:\-=]\s*\**\s*([A-D])\s*\**",
+    r"the\s+(?:correct\s+)?(?:answer|choice|option)\s+is\s*\**\s*([A-D])\s*\**",
+    r"</think>\s*\**\s*([A-D])\b",
+]
+
+_BOUNDARY_LETTER_RE = re.compile(r"(?<![A-Za-z])([A-D])(?![A-Za-z])")
+_NUMBER_RE = re.compile(r"-?\d+(?:\.\d+)?")
+
+
+def _coerce_to_format(text: str, fmt: str) -> tuple[str, bool]:
+    """Coerce raw model output into a format-valid string.
+
+    Forces:
+      mcq → single letter A-D
+      binary / pairwise → single letter A or B
+      ternary → single letter A-C
+      regression → single numeric token (integer string)
+
+    Returns (coerced_text, was_coerced). If the raw text is already a clean
+    valid label, was_coerced is False. Falls back to first valid letter / "0"
+    if nothing parseable is found, so the downstream scorer always gets a
+    well-formed answer.
+    """
+    raw = (text or "").strip()
+    fmt = (fmt or "").lower()
+
+    if fmt in _LETTER_SETS:
+        valid = _LETTER_SETS[fmt]
+
+        # already-valid single letter
+        if len(raw) == 1 and raw.upper() in valid:
+            return raw.upper(), raw != raw.upper()
+
+        # 1. explicit answer markers (boxed, "answer:", "</think> A", etc.)
+        for pat in _ANSWER_MARKER_PATTERNS:
+            for m in reversed(re.findall(pat, raw, re.IGNORECASE)):
+                if m.upper() in valid:
+                    return m.upper(), True
+
+        # 2. last standalone letter in the valid set
+        for m in reversed(_BOUNDARY_LETTER_RE.findall(raw)):
+            if m.upper() in valid:
+                return m.upper(), True
+
+        # 3. nothing parseable — default to first valid letter
+        return valid[0], True
+
+    if fmt == "regression":
+        nums = _NUMBER_RE.findall(raw)
+        if nums:
+            # round to int (regression target is an integer string)
+            try:
+                coerced = str(int(round(float(nums[-1]))))
+            except (ValueError, OverflowError):
+                coerced = nums[-1]
+            return coerced, coerced != raw
+        return "0", True
+
+    return raw, False
+
+
 @solver
 def litellm_solver(
     model_cfg: dict[str, Any],
@@ -108,8 +179,10 @@ def litellm_solver(
             hit = _cache.get(f"{model_name}::{lb_id}")
             if hit and hit.get("pred"):
                 logger.debug("cache hit: %s::%s", model_name, lb_id)
+                fmt = str((state.metadata or {}).get("format", "")).lower()
+                coerced_pred, _ = _coerce_to_format(hit["pred"], fmt)
                 state.output = ModelOutput.from_content(
-                    model=model_id, content=hit["pred"]
+                    model=model_id, content=coerced_pred
                 )
                 if state.metadata is None:
                     state.metadata = {}
@@ -148,12 +221,31 @@ def litellm_solver(
         state.output = _result_to_output(result, model_id)
         if state.metadata is None:
             state.metadata = {}
+
+        # Format-coercion harness: force output to be a valid label for the
+        # sample's format (MCQ letter, binary letter, integer for regression).
+        # Thinking models often leak chain-of-thought past the answer; this
+        # guarantees the scorer never sees an unparseable completion.
+        fmt = str(state.metadata.get("format", "")).lower()
+        raw_completion = state.output.completion or ""
+        coerced, was_coerced = _coerce_to_format(raw_completion, fmt)
+        if was_coerced:
+            usage = state.output.usage
+            state.output = ModelOutput.from_content(model=model_id, content=coerced)
+            state.output.usage = usage
+            logger.debug(
+                "coerced output (fmt=%s) raw=%r → %r",
+                fmt, raw_completion[:80], coerced,
+            )
+
         state.metadata.update(
             {
                 "litellm_error": result.error,
                 "latency_s": result.latency_s,
                 "reasoning": result.reasoning_text,
                 "usage": result.usage,
+                "raw_completion": raw_completion,
+                "format_coerced": was_coerced,
             }
         )
         state.completed = True

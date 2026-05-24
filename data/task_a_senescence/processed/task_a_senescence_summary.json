@@ -54,14 +54,12 @@
       "GSE101766",
       "GSE122079",
       "GSE122918",
-      "GSE127116",
       "GSE128711",
+      "GSE132370",
       "GSE133292",
       "GSE134747",
-      "GSE178115",
       "GSE190998",
       "GSE19864",
-      "GSE200479",
       "GSE24810",
       "GSE40349",
       "GSE53379",
@@ -72,15 +70,17 @@
       "GSE101750",
       "GSE101758",
       "GSE103938",
+      "GSE127116",
       "GSE132369",
-      "GSE132370",
       "GSE140961",
       "GSE141991",
       "GSE144752",
       "GSE145650",
       "GSE155903",
       "GSE156648",
+      "GSE178115",
       "GSE196610",
+      "GSE200479",
       "GSE212085",
       "GSE213993",
       "GSE214409",
@@ -97,16 +97,42 @@
       "GSE93535",
       "GSE98240"
     ],
-    "n_train_accessions": 15,
-    "n_test_accessions": 28,
-    "n_train_prompts": 239,
-    "n_test_prompts": 59,
-    "actual_test_fraction": 0.198,
+    "n_train_accessions": 13,
+    "n_test_accessions": 30,
+    "n_train_prompts": 225,
+    "n_test_prompts": 73,
+    "actual_test_fraction": 0.245,
+    "target_test_fraction": 0.2,
+    "per_format": {
+      "mcq": {
+        "total": 99,
+        "n_train": 70,
+        "n_test": 29,
+        "test_fraction": 0.2929,
+        "target_test": 20
+      },
+      "pairwise": {
+        "total": 99,
+        "n_train": 77,
+        "n_test": 22,
+        "test_fraction": 0.2222,
+        "target_test": 20
+      },
+      "binary": {
+        "total": 100,
+        "n_train": 78,
+        "n_test": 22,
+        "test_fraction": 0.22,
+        "target_test": 20
+      }
+    },
     "treatment_leakage": {
-      "n_leaked": 0,
-      "leaked_treatments": [],
-      "n_train_only": 57,
-      "n_test_only": 29
+      "n_leaked": 1,
+      "leaked_treatments": [
+        "shp53"
+      ],
+      "n_train_only": 52,
+      "n_test_only": 33
     }
   }
 }
