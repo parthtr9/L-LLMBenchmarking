@@ -1,0 +1,396 @@
+============================================================
+SENESCENCE PERTURBATION BENCHMARK PIPELINE
+  Formats: MCQ + Pairwise + Regression (1/3 each)
+  Split:   80/20 train/test by GEO accession
+============================================================
+
+--- Step 1: Load dataset ---
+Loaded dataset: 13,248,345 rows, 1069 comparisons
+
+--- Step 2: Filter to perturbation comparisons ---
+After perturbation filter: 3,061,511 rows, 244 comparisons
+  Control types: {'DDIS': np.int64(48), 'OIS': np.int64(180), 'REP': np.int64(16)}
+  Unique treatments: 132
+
+--- Step 3: Load CellAge ---
+Loaded CellAge: 949 entries
+After removing cancer lines: 487 entries, 442 unique genes
+
+--- Step 4: Intersect with CellAge genes ---
+After CellAge intersection: 93,278 rows, 438 genes, 244 comparisons
+
+--- Step 5: Assign ternary labels ---
+Label distribution:
+  no_change: 83,914
+  downregulated: 5,053
+  upregulated: 4,311
+
+--- Step 6: Subsample for balance ---
+
+Balanced benchmark set: 1521 prompts
+  Per class: 507
+  Unique genes: 413
+  Unique comparisons: 243
+  Unique accessions: 60
+  Unique treatments: 132
+  Unique cell lines: 11
+Balanced dataset saved to: processed/task_a_senescence_balanced.csv
+
+--- Step 7: Exploratory Data Analysis ---
+
+============================================================
+EXPLORATORY DATA ANALYSIS — BALANCED BENCHMARK SET
+============================================================
+
+--------------------------------------------------
+OVERALL
+--------------------------------------------------
+  Total rows (prompts):     1,521
+  Unique genes:             413
+  Unique comparisons:       243
+  Unique accessions (GSE):  60
+  Unique treatments:        132
+  Unique cell lines:        11
+  Unique senescence types:  4
+
+--------------------------------------------------
+LABEL DISTRIBUTION
+--------------------------------------------------
+  no_change               507  (33.3%)
+  upregulated             507  (33.3%)
+  downregulated           507  (33.3%)
+
+--------------------------------------------------
+LogFC STATISTICS BY LABEL
+--------------------------------------------------
+  upregulated:
+    mean |LogFC| = 226.373
+    median |LogFC| = 1.413
+    range = [1.001, 31104.330]
+    mean p-value = 4.6196e-03
+  downregulated:
+    mean |LogFC| = 141.945
+    median |LogFC| = 1.465
+    range = [-8901.000, -1.001]
+    mean p-value = 5.5376e-03
+  no_change:
+    mean |LogFC| = 12.608
+    median |LogFC| = 0.236
+    range = [-1600.700, 2557.900]
+    mean p-value = 3.9370e-01
+
+--------------------------------------------------
+STRATIFICATION: SENESCENCE TYPE
+--------------------------------------------------
+direction  downregulated  no_change  upregulated   All
+Sen_type                                              
+DDIS                  75         92           73   240
+OIS                  325        350          348  1023
+OSKM                  20         12           16    48
+REP                   42         34           27   103
+All                  462        488          464  1414
+
+--------------------------------------------------
+STRATIFICATION: CONTROL TYPE
+--------------------------------------------------
+direction     downregulated  no_change  upregulated   All
+Control_type                                             
+DDIS                    101        105           98   304
+OIS                     364        367          382  1113
+REP                      42         35           27   104
+All                     507        507          507  1521
+
+--------------------------------------------------
+STRATIFICATION: CELL LINE
+--------------------------------------------------
+direction  downregulated  no_change  upregulated   All
+Cell_line                                             
+BJ                    56         26           55   137
+FL2                    4          1            4     9
+HDF                   39         23           21    83
+HDF161                 1          2            0     3
+HFF                    9         14           13    36
+HMF3A                 17         22           20    59
+IMR                  335        332          353  1020
+MRC                    5          3            5    13
+MRC5                   0          3            0     3
+Tig3                   7         10            6    23
+WI38                  34         71           30   135
+All                  507        507          507  1521
+
+--------------------------------------------------
+STRATIFICATION: TISSUE ORIGIN
+--------------------------------------------------
+direction  downregulated  no_change  upregulated   All
+Organ                                                 
+Lung                 385        420          398  1203
+Skin                 122         87          109   318
+All                  507        507          507  1521
+
+--------------------------------------------------
+STRATIFICATION: TOP 20 TREATMENTS
+--------------------------------------------------
+                           n_prompts  n_up  n_down  n_nc  n_genes
+Treatment                                                        
+shp53                            106    45      24    37       87
+rapamycin                         64    23      23    18       59
+clobetasol                        62    27      28     7       56
+digoxin                           46    14      15    17       44
+CCCP                              37    13      15     9       37
+shp53pRb                          36    21       5    10       32
+compoundA                         34    12      15     7       32
+siLTR10                           32     5      15    12       31
+ouabain                           30    13      14     3       30
+Y27632_KU60019                    29     9      15     5       29
+KU60019                           28     7      15     6       28
+shp16p21                          27    13       4    10       25
+Y27632                            26     5       9    12       26
+digoxin_caspase_inhibitor         26     9       8     9       26
+siRELA1                           26     6       3    17       25
+shBRD4                            25    11      10     4       24
+siJUN1                            25     4       4    17       24
+SmallT_E6_E7                      24    10      10     4       22
+shpRb                             23     8       6     9       22
+shRELA                            22     7      10     5       21
+
+--------------------------------------------------
+STRATIFICATION: TOP 20 QUERIED GENES
+--------------------------------------------------
+        n_prompts  n_up  n_down  n_nc  n_comparisons
+Gene                                                
+NEK4            8     3       2     3              8
+VCAN            8     3       2     3              8
+MCU             8     3       2     3              8
+LOX             8     3       3     2              8
+ID1             8     3       3     2              8
+SMC1A           8     3       2     3              8
+SOD2            8     2       3     3              8
+IL6             8     3       2     3              8
+BTG3            8     2       3     3              8
+XAF1            8     3       3     2              8
+IL1A            7     3       2     2              7
+ENTPD7          7     1       3     3              7
+NEK2            7     2       2     3              7
+PPM1D           7     3       1     3              7
+CD34            7     1       3     3              7
+PTTG1           7     1       3     3              7
+EWSR1           7     2       3     2              7
+MCM7            7     3       3     1              7
+CDKN2A          7     3       2     2              7
+CKAP2           7     2       2     3              7
+
+--------------------------------------------------
+STRATIFICATION: TOP 15 ACCESSIONS
+--------------------------------------------------
+           n_prompts  n_comparisons  n_treatments  n_genes
+Acc_no                                                    
+GSE101766        193             43            42      137
+GSE74324         134             19             7       98
+GSE122079        119             13             4      101
+GSE134747         96              9             2       78
+GSE178115         83              9             3       71
+GSE53379          79             13             1       65
+GSE103938         64              7             1       59
+GSE122918         60             18             3       55
+GSE24810          59             11             7       49
+GSE2487           57              5             3       53
+GSE40349          52              7             3       44
+GSE127116         46              8             2       45
+GSE19864          45              6             3       40
+GSE128711         35              6             3       30
+GSE190998         29              4             2       27
+
+--------------------------------------------------
+STRATIFICATION: TIMEPOINTS
+--------------------------------------------------
+  10d           178
+  12d           141
+  14d            10
+  15d            28
+  1d             98
+  2.5d            2
+  20d             4
+  21d             6
+  28d            16
+  2d             23
+  3d             82
+  4d             40
+  5d             23
+  6d            312
+  7d            358
+  8d            106
+  9d              5
+
+--------------------------------------------------
+DISTRIBUTION: PROMPTS PER GENE
+--------------------------------------------------
+  min:    1
+  25th:   2
+  median: 4
+  75th:   5
+  max:    8
+  mean:   3.7
+
+--------------------------------------------------
+DISTRIBUTION: PROMPTS PER COMPARISON
+--------------------------------------------------
+  min:    1
+  25th:   3
+  median: 6
+  75th:   9
+  max:    14
+  mean:   6.3
+
+--------------------------------------------------
+SPLITTING FEASIBILITY (by Acc_no)
+--------------------------------------------------
+  Accessions needed for 80% of prompts: 17
+  Remaining accessions for test set:    43
+  Largest accession: GSE101766 (193 prompts, 12.7%)
+  Singleton accessions (1 prompt): 2
+
+============================================================
+END EDA
+============================================================
+
+
+--- Step 8: Filter to high-significance rows ---
+
+High-significance filter (target 100 per class × 3 formats):
+  Kept 900 rows (min class: 300)
+  upregulated: 300 rows, median p=2.72e-08, median |LogFC|=1.348
+  downregulated: 300 rows, median p=3.46e-07, median |LogFC|=1.404
+  no_change: 300 rows, median p=5.68e-01, median |LogFC|=0.098
+
+--- Step 9: Split into MCQ / Pairwise / Regression ---
+
+Three-way split:
+  MCQ partition:        225 rows
+  Pairwise partition:   450 rows
+  Regression partition: 225 rows
+  MCQ label balance: {'no_change': 75, 'downregulated': 75, 'upregulated': 75}
+  Pairwise label balance: {'downregulated': 150, 'no_change': 150, 'upregulated': 150}
+  Regression label balance: {'downregulated': 75, 'upregulated': 75, 'no_change': 75}
+
+--- Step 10: Generate prompts ---
+  MCQ prompts: 100 (target 100) | tissues: {'Lung': 66, 'Skin': 34}
+  Built 103 pairwise pairs from 188 comparisons (min |LogFC| gap = 0.5, 66 pairs skipped below threshold)
+  Pairwise prompts: 100 (target 100) | tissues: {'Lung': 86, 'Skin': 14}
+  Regression prompts: 100 (target 100) | tissues: {'Lung': 69, 'Skin': 31}
+
+--- Step 11: Train/Test split by accession ---
+
+  Train/Test split by accession:
+    Train: 236 prompts from 16 accessions
+    Test:  64 prompts from 31 accessions
+    Actual test fraction: 21.3%
+    Train label balance: {'B': 73, 'A': 63, 'C': 22, '-10.0': 4, '0.0': 4, '10.0': 3, '1.02': 2, '-1.11': 2, '-0.04': 2, '0.2': 2, '-1.01': 2, '1.68': 1, '1.32': 1, '-0.03': 1, '-2.24': 1, '1.15': 1, '0.26': 1, '-0.06': 1, '-0.0': 1, '2.34': 1, '2.15': 1, '-1.43': 1, '-2.69': 1, '1.24': 1, '-3.6': 1, '0.05': 1, '-1.31': 1, '1.19': 1, '-0.29': 1, '-1.57': 1, '-1.04': 1, '2.28': 1, '-3.28': 1, '-1.33': 1, '1.23': 1, '1.64': 1, '-2.46': 1, '-2.07': 1, '1.4': 1, '-1.21': 1, '1.44': 1, '0.16': 1, '-1.96': 1, '-1.13': 1, '1.83': 1, '1.05': 1, '-2.08': 1, '-1.51': 1, '2.71': 1, '-6.25': 1, '1.01': 1, '-1.92': 1, '-1.03': 1, '0.14': 1, '1.18': 1, '1.13': 1, '1.39': 1, '0.08': 1, '-0.1': 1, '-1.44': 1, '-1.68': 1, '-0.08': 1, '1.31': 1, '1.26': 1, '-0.15': 1, '-1.36': 1, '-1.41': 1, '1.2': 1}
+    Test label balance: {'B': 19, 'A': 13, 'C': 10, '0.09': 2, '10.0': 2, '0.14': 1, '0.11': 1, '1.11': 1, '-1.15': 1, '0.06': 1, '0.03': 1, '-1.37': 1, '-1.56': 1, '-0.26': 1, '1.57': 1, '-1.1': 1, '1.18': 1, '1.34': 1, '-1.33': 1, '0.0': 1, '0.19': 1, '-1.32': 1, '1.3': 1}
+    Train format balance: {'binary': 81, 'regression': 78, 'mcq': 77}
+    Test format balance: {'mcq': 23, 'regression': 22, 'binary': 19}
+    ⚠ Treatment leakage: 2 treatments appear in both splits
+      Leaked: ['CCCP', 'shp53']
+
+--- Step 12: Save outputs ---
+  Parquet saved: processed/task_a_senescence_train.parquet (236 rows)
+  JSON saved:    processed/task_a_senescence_train.json (236 entries)
+  Parquet saved: processed/task_a_senescence_test.parquet (64 rows)
+  JSON saved:    processed/task_a_senescence_test.json (64 entries)
+
+--- Step 13: Summary ---
+Summary saved to: processed/task_a_senescence_summary.json
+  Total prompts:       300
+  MCQ prompts:         100
+  Pairwise prompts:    100
+  Regression prompts:  100
+  Train prompts:       236
+  Test prompts:        64
+
+--- Example MCQ prompt ---
+lb_id: LB-SEN-MCQ-0001
+pool: senescence_perturbation_mcq
+format: mcq
+metric: accuracy
+
+[system]
+You are a biomedical AI specialized in aging biology and cellular senescence, trained on genomic, transcriptomic, and epigenomic data.
+
+[user]
+<question>
+You are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (RAF) at 1d post-senescence induction, treatment with clobetasol (targeting GR) at dose 2nM_2h is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of EWSR1 (EWS RNA binding protein 1) measured by microarray:
+</question>
+<options>
+A. increases (upregulated) B. decreases (downregulated) C. no significant change
+</options>
+<experiment>
+Cell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (RAF). Perturbation: treatment with clobetasol (targeting GR) at dose 2nM_2h. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 8. Differential expression analysis: Limma.
+</experiment>
+<gene_context>
+In this experiment, overexpressed gene(s): GR.
+</gene_context>
+
+[assistant]
+C
+
+[follow_up]
+Gene: EWSR1 (EWS RNA binding protein 1). Log2FC=0.2149, p=9.58e-01. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE134747. According to CellAge, EWSR1 induces cellular senescence. CellAge PMID: 21030557.
+
+--- Example PAIRWISE prompt ---
+lb_id: LB-SEN-PAIR-0001
+pool: senescence_perturbation_pairwise
+format: binary
+metric: accuracy
+
+[system]
+You are a biomedical AI specialized in aging biology and cellular senescence, trained on genomic, transcriptomic, and epigenomic data.
+
+[user]
+<question>
+In a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 12d post-senescence induction, shRNA knockdown of p53_pRb is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:
+
+Gene A: JAK2 (Janus kinase 2)
+Gene B: E2F1 (E2F transcription factor 1)
+
+Which gene shows a larger absolute change in mRNA expression (|Log2FC|)?
+</question>
+<options>
+A. Gene A shows a larger absolute change B. Gene B shows a larger absolute change
+</options>
+<experiment>
+Cell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of p53_pRb. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.
+</experiment>
+<gene_context>
+In this experiment, knocked down gene(s): p53_pRb.
+</gene_context>
+
+[assistant]
+B
+
+[follow_up]
+Gene A: JAK2 (Janus kinase 2), Log2FC=-0.0596, p=7.75e-01. Gene B: E2F1 (E2F transcription factor 1), Log2FC=1.6267, p=1.79e-15. |Log2FC_A|=0.0596, |Log2FC_B|=1.6267. GEO accession: GSE74324.
+
+--- Example REGRESSION prompt ---
+lb_id: LB-SEN-REG-0001
+pool: senescence_perturbation_regression
+format: regression
+metric: mae
+
+[system]
+You are a biomedical AI specialized in aging biology and cellular senescence, trained on genomic, transcriptomic, and epigenomic data.
+
+[user]
+<question>
+You are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 6d post-senescence induction, treatment with ouabain (targeting IONpump) is applied. Compared to untreated oncogene-induced senescent cells, predict the Log2 fold-change (Log2FC) in mRNA expression of HBP1 (HMG-box transcription factor 1) measured by RNA-seq. Respond with only a numeric value rounded to two decimal places (positive = upregulated, negative = downregulated).
+</question>
+<experiment>
+Cell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: treatment with ouabain (targeting IONpump). Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.
+</experiment>
+<gene_context>
+In this experiment, knocked down gene(s): IONpump.
+</gene_context>
+
+[assistant]
+1.68
+
+[follow_up]
+Gene: HBP1 (HMG-box transcription factor 1). Log2FC=1.6794, p=4.19e-13. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE122079. According to CellAge, HBP1 induces cellular senescence (senescence type: Oncogene-induced). CellAge PMID: 16966377.

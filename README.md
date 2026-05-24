@@ -224,3 +224,21 @@ litellm_client.py   async acomplete()  →  litellm.acompletion()
 ```
 
 Scorers: regression MAE · MCQ letter extraction · set Jaccard · normalized exact match.
+
+## Generating + Using Task A (Senescence)
+
+### Prompt Generation
+1. Download `Total_Data.csv` from https://research.ncl.ac.uk/cellularsenescence/downloadingdata/ to `data/task_a_senescence/raw/`. 
+2. `cd data/task_a_senescence`
+```bash
+python senescence_benchmark_pipeline.py \
+    --dataset raw/Total_Data.csv \
+    --cellage raw/cellage3.tsv \
+  --output-dir processed > processed/task_a_senescence_stdout.txt
+```
+
+### Usage
+
+Prompts are stored in parquet file and have the same tabular format as LongevityBench tasks (see https://huggingface.co/datasets/insilicomedicine/longebench).
+
+Prompts are split into 80-20 train-test split. 
