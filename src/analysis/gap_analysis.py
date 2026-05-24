@@ -34,11 +34,20 @@ _NUMBER_RE = re.compile(r"-?\d+(?:\.\d+)?")
 _LETTER_RE  = re.compile(r"(?<![A-Za-z])([A-F])(?![A-Za-z])")
 
 MODEL_DISPLAY = {
-    "longevity_llm":     "L-LLM",
-    "claude_sonnet":     "Claude Sonnet",
-    "majority_baseline": "Majority",
-    "random_baseline":   "Random",
+    "longevity_llm":          "L-LLM",
+    "longevity_llm_thinking": "L-LLM (think)",
+    "claude_sonnet":          "Claude Sonnet",
+    "majority_baseline":      "Majority",
+    "random_baseline":        "Random",
 }
+
+MODEL_ORDER = [
+    "longevity_llm",
+    "longevity_llm_thinking",
+    "claude_sonnet",
+    "majority_baseline",
+    "random_baseline",
+]
 
 
 # ── extraction helpers ────────────────────────────────────────────────────────
@@ -115,12 +124,28 @@ def _binary_metrics(gold: list[str], pred: list[str]) -> dict[str, Any]:
             class_acc[lbl] = round(
                 sum(g == p for g, p, m in zip(gold, pred, mask) if m) / sum(mask), 4
             )
+    pred_counts = {lbl: int(sum(p == lbl for p in pred)) for lbl in labels}
+    gold_counts = {lbl: int(sum(g == lbl for g in gold)) for lbl in labels}
+    pred_frac = {
+        lbl: round(pred_counts[lbl] / len(pred), 4) if pred else 0.0
+        for lbl in labels
+    }
+    gold_frac = {
+        lbl: round(gold_counts[lbl] / len(gold), 4) if gold else 0.0
+        for lbl in labels
+    }
+    # Positive = model over-predicts A relative to gold distribution.
+    a_bias = pred_frac["A"] - gold_frac["A"]
     return {
         "n": len(gold),
         "accuracy": round(acc, 4),
         "balanced_accuracy": round(bal, 4),
         "ci_accuracy": [round(x, 4) for x in ci_acc],
         "class_accuracy": class_acc,
+        "gold_distribution": gold_counts,
+        "prediction_distribution": pred_counts,
+        "prediction_fraction": pred_frac,
+        "a_bias": round(a_bias, 4),
     }
 
 
@@ -206,11 +231,18 @@ def dataset_summary(train_path: Path | None, test_path: Path | None) -> dict:
     for split, path in [("train", train_path), ("test", test_path)]:
         if path and path.exists():
             df = pd.read_parquet(path)
+            def get_accession(meta: Any) -> str | None:
+                if isinstance(meta, str):
+                    meta = json.loads(meta)
+                if not isinstance(meta, dict):
+                    return None
+                return meta.get("accession") or meta.get("acc_no") or meta.get("Acc_no")
+
             summary[split] = {
                 "n": len(df),
                 "formats": df["format"].value_counts().to_dict() if "format" in df.columns else {},
                 "accessions": df["metadata"].apply(
-                    lambda m: json.loads(m).get("acc_no") if isinstance(m, str) else (m or {}).get("acc_no")
+                    get_accession
                 ).nunique() if "metadata" in df.columns else None,
             }
             if "format" in df.columns:
@@ -248,6 +280,33 @@ def _fmt_cm(cm_info: dict) -> str:
     return "\n".join(rows)
 
 
+def _ordered_models(metrics: dict[str, dict[str, dict]]) -> list[str]:
+    ordered = [mid for mid in MODEL_ORDER if mid in metrics]
+    ordered.extend(sorted(mid for mid in metrics if mid not in ordered))
+    return ordered
+
+
+def _format_label(fmt: str) -> str:
+    if fmt == "binary":
+        return "binary/significance"
+    return fmt
+
+
+def _render_coverage_table(metrics: dict[str, dict[str, dict]], formats: list[str]) -> list[str]:
+    lines = ["## 2. Evaluation Coverage\n"]
+    header = "| Model | " + " | ".join(_format_label(fmt) for fmt in formats) + " |"
+    sep = "|---|" + "---|" * len(formats)
+    lines.extend([header, sep])
+    for mid in _ordered_models(metrics):
+        row = [MODEL_DISPLAY.get(mid, mid)]
+        for fmt in formats:
+            n = metrics.get(mid, {}).get(fmt, {}).get("n")
+            row.append(str(n) if n is not None else "—")
+        lines.append("| " + " | ".join(row) + " |")
+    lines.append("")
+    return lines
+
+
 def render_report(
     metrics: dict[str, dict[str, dict]],
     ds: dict,
@@ -281,16 +340,18 @@ def render_report(
     a("**Split logic:** Train/test split by GEO accession — all samples from one study stay together. ")
     a("Prevents label leakage from shared batch effects and analysis pipelines.\n")
 
-    # ── main results table
-    a("## 2. Main Results\n")
+    # ── coverage + main results table
     formats_present = sorted({fmt for m in metrics.values() for fmt in m})
+    lines.extend(_render_coverage_table(metrics, formats_present))
+
+    a("## 3. Main Results\n")
 
     for fmt in formats_present:
-        a(f"### Format: `{fmt}`\n")
+        a(f"### Format: `{_format_label(fmt)}`\n")
         if fmt in ("mcq",):
             a("| Model | N | Accuracy | Macro F1 | Balanced Acc | CI (F1) |")
             a("|---|---|---|---|---|---|")
-            for mid in ["longevity_llm", "claude_sonnet", "majority_baseline", "random_baseline"]:
+            for mid in _ordered_models(metrics):
                 if mid not in metrics or fmt not in metrics[mid]:
                     continue
                 m = metrics[mid][fmt]
@@ -300,7 +361,7 @@ def render_report(
             a("")
             # confusion matrices
             a("**Confusion matrices:**\n")
-            for mid in ["longevity_llm", "claude_sonnet"]:
+            for mid in _ordered_models(metrics):
                 if mid not in metrics or fmt not in metrics[mid]:
                     continue
                 cm_info = metrics[mid][fmt].get("confusion_matrix")
@@ -309,10 +370,10 @@ def render_report(
                     a(_fmt_cm(cm_info))
                     a("")
 
-        elif fmt in ("binary", "pairwise"):
+        elif fmt == "binary":
             a("| Model | N | Accuracy | Balanced Acc | Acc(A) | Acc(B) | CI (Acc) |")
             a("|---|---|---|---|---|---|---|")
-            for mid in ["longevity_llm", "claude_sonnet", "majority_baseline", "random_baseline"]:
+            for mid in _ordered_models(metrics):
                 if mid not in metrics or fmt not in metrics[mid]:
                     continue
                 m = metrics[mid][fmt]
@@ -322,10 +383,29 @@ def render_report(
                 a(f"| {name} | {m['n']} | {m['accuracy']:.3f} | {m['balanced_accuracy']:.3f} | {ca.get('A','—')} | {ca.get('B','—')} | {ci} |")
             a("")
 
+        elif fmt == "pairwise":
+            a("| Model | N | Accuracy | Balanced Acc | Pred A% | Pred B% | A-bias | CI (Acc) |")
+            a("|---|---|---|---|---|---|---|---|")
+            for mid in _ordered_models(metrics):
+                if mid not in metrics or fmt not in metrics[mid]:
+                    continue
+                m = metrics[mid][fmt]
+                name = MODEL_DISPLAY.get(mid, mid)
+                pf = m.get("prediction_fraction", {})
+                ci = _fmt_ci(m.get("ci_accuracy"))
+                pred_a = pf.get("A", "—")
+                pred_b = pf.get("B", "—")
+                if isinstance(pred_a, float):
+                    pred_a = f"{100 * pred_a:.1f}%"
+                if isinstance(pred_b, float):
+                    pred_b = f"{100 * pred_b:.1f}%"
+                a(f"| {name} | {m['n']} | {m['accuracy']:.3f} | {m['balanced_accuracy']:.3f} | {pred_a} | {pred_b} | {m.get('a_bias','—')} | {ci} |")
+            a("")
+
         elif fmt in ("regression",):
             a("| Model | N | MAE | Median AE | Spearman r | Sign Acc | CI (MAE) |")
             a("|---|---|---|---|---|---|---|")
-            for mid in ["longevity_llm", "claude_sonnet", "majority_baseline", "random_baseline"]:
+            for mid in _ordered_models(metrics):
                 if mid not in metrics or fmt not in metrics[mid]:
                     continue
                 m = metrics[mid][fmt]
@@ -338,10 +418,10 @@ def render_report(
             a("")
 
     # ── failure analysis
-    a("## 3. Failure Analysis\n")
+    a("## 4. Failure Analysis\n")
     a("### MCQ — class-level errors")
     if "mcq" in formats_present:
-        for mid in ["longevity_llm", "claude_sonnet"]:
+        for mid in _ordered_models(metrics):
             if mid not in metrics or "mcq" not in metrics[mid]:
                 continue
             m = metrics[mid]["mcq"]
@@ -359,14 +439,9 @@ def render_report(
                 if count > 0:
                     a(f"- gold={true_lbl} predicted as {pred_lbl}: {count}×")
 
-    a("\n### Regression — direction errors")
-    if "regression" in formats_present:
-        bucket = _collect({"samples": []})  # placeholder
-        a("See confusion of sign (positive vs negative Log2FC) in sign_accuracy metric above.\n")
-
-    a("\n### Binary — A/B prediction bias")
+    a("\n### Binary/significance — class-wise accuracy")
     if "binary" in formats_present:
-        for mid in ["longevity_llm", "claude_sonnet", "majority_baseline", "random_baseline"]:
+        for mid in _ordered_models(metrics):
             if mid not in metrics or "binary" not in metrics[mid]:
                 continue
             m = metrics[mid]["binary"]
@@ -375,19 +450,46 @@ def render_report(
             a(f"- **{name}**: class A acc={ca.get('A','—')}, class B acc={ca.get('B','—')}")
     a("")
 
+    a("### Pairwise — A/B prediction bias")
+    if "pairwise" in formats_present:
+        for mid in _ordered_models(metrics):
+            if mid not in metrics or "pairwise" not in metrics[mid]:
+                continue
+            m = metrics[mid]["pairwise"]
+            pf = m.get("prediction_fraction", {})
+            name = MODEL_DISPLAY.get(mid, mid)
+            pred_a = pf.get("A")
+            pred_b = pf.get("B")
+            pred_a_str = f"{100 * pred_a:.1f}%" if isinstance(pred_a, float) else "—"
+            pred_b_str = f"{100 * pred_b:.1f}%" if isinstance(pred_b, float) else "—"
+            a(f"- **{name}**: predicted A={pred_a_str}, predicted B={pred_b_str}, A-bias={m.get('a_bias','—')}")
+    a("")
+
+    if "regression" in formats_present:
+        a("### Regression — direction errors")
+        a("See sign_accuracy in the regression metrics table above.\n")
+
     # ── baseline comparison
-    a("## 4. Baseline Summary\n")
-    a("| Baseline | MCQ acc | Binary acc | Regression MAE |")
-    a("|---|---|---|---|")
+    a("## 5. Baseline Summary\n")
+    baseline_formats = [fmt for fmt in ("mcq", "binary", "pairwise", "regression") if fmt in formats_present]
+    header_names = {
+        "mcq": "MCQ acc",
+        "binary": "Binary acc",
+        "pairwise": "Pairwise acc",
+        "regression": "Regression MAE",
+    }
+    a("| Baseline | " + " | ".join(header_names[fmt] for fmt in baseline_formats) + " |")
+    a("|---|" + "---|" * len(baseline_formats))
     for mid in ["majority_baseline", "random_baseline"]:
         name = MODEL_DISPLAY.get(mid, mid)
-        mcq_acc = metrics.get(mid, {}).get("mcq", {}).get("accuracy", "—")
-        bin_acc = metrics.get(mid, {}).get("binary", {}).get("accuracy", "—")
-        reg_mae = metrics.get(mid, {}).get("regression", {}).get("mae", "—")
-        a(f"| {name} | {mcq_acc} | {bin_acc} | {reg_mae} |")
+        vals = []
+        for fmt in baseline_formats:
+            key = "mae" if fmt == "regression" else "accuracy"
+            vals.append(str(metrics.get(mid, {}).get(fmt, {}).get(key, "—")))
+        a("| " + " | ".join([name] + vals) + " |")
     a("")
     a("_Majority baseline uses per-format most-frequent label from training split._  ")
-    a("_Random baseline draws uniformly from valid label set per format (A/B/C for MCQ, A/B for binary, 0 for regression)._\n")
+    a("_Random baseline draws uniformly from valid label set per format (A/B/C for MCQ, A/B for binary/pairwise)._\n")
 
     return "\n".join(lines)
 
@@ -419,19 +521,41 @@ def main() -> None:
     args.out.write_text(report, encoding="utf-8")
     logger.info("report written → %s", args.out)
 
+    _PUBLIC_DIR = Path("LongevityBench Design System/ui_kits/longevity_bench/public")
+    _PUBLIC_DIR.mkdir(parents=True, exist_ok=True)
+    (_PUBLIC_DIR / "gap_analysis_report.md").write_text(report, encoding="utf-8")
+    logger.info("report mirrored → %s", _PUBLIC_DIR / "gap_analysis_report.md")
+
+    # Also write structured JSON for the dashboard UI
+    payload = {
+        "generated_at": data.get("generated_at", "unknown"),
+        "dataset": ds,
+        "model_display": MODEL_DISPLAY,
+        "model_order": MODEL_ORDER,
+        "metrics": metrics,
+    }
+    json_path = args.out.with_suffix(".json")
+    json_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    (_PUBLIC_DIR / "gap_analysis_data.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    logger.info("data JSON → %s", json_path)
+
     # Print quick summary to stdout
     print("\n=== Quick Results ===")
-    for fmt in ("mcq", "binary", "regression"):
+    for fmt in ("mcq", "binary", "pairwise", "regression"):
         print(f"\n{fmt.upper()}:")
-        for mid in ["longevity_llm", "claude_sonnet", "majority_baseline", "random_baseline"]:
+        for mid in _ordered_models(metrics):
             m = metrics.get(mid, {}).get(fmt)
             if not m:
                 continue
             name = MODEL_DISPLAY.get(mid, mid)
             if fmt == "regression":
                 val = f"MAE={m.get('mae','?')}"
+            elif fmt == "mcq":
+                val = f"acc={m.get('accuracy','?')} macro_f1={m.get('macro_f1','?')} bal_acc={m.get('balanced_accuracy','?')}"
+            elif fmt == "pairwise":
+                val = f"acc={m.get('accuracy','?')} bal_acc={m.get('balanced_accuracy','?')} a_bias={m.get('a_bias','?')}"
             else:
-                val = f"acc={m.get('accuracy','?')} f1={m.get('macro_f1','?')}"
+                val = f"acc={m.get('accuracy','?')} bal_acc={m.get('balanced_accuracy','?')}"
             print(f"  {name:<20} {val}")
 
 

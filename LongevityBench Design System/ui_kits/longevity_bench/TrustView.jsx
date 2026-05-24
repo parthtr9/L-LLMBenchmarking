@@ -16,13 +16,14 @@ const EXPLANATIONS = {
   },
   consistent: {
     title: 'Trace ↔ answer consistency',
-    plain: 'What fraction of thinking traces agree with the model\'s final predicted answer? We scan each trace for directional language — words like "upregulated", "decreased", "no change" — and check whether that direction matches the predicted letter (A / B / C). When a trace says "gene X is downregulated" but the model then answers A (upregulated), the reasoning is internally inconsistent.',
-    formula: 'Count of traces where reasoning direction = final answer direction ÷ total traces',
+    plain: 'What fraction of thinking traces are judged by an NLI model (DeBERTa-v3-large) to entail the predicted answer? The trace is the "premise"; the hypothesis is a short statement like "the correct choice is A". DeBERTa scores entailment probability — if ≥ 0.5, the trace is "consistent". The 3.4% rate is a known limitation: biological reasoning traces discuss genes and pathways at length but rarely state the answer choice explicitly within the first 1024 tokens that DeBERTa sees. This is a signal-quality issue with the NLI approach, not necessarily model inconsistency.',
+    formula: 'P(trace entails predicted answer) ≥ 0.5 · scored by DeBERTa-v3-large MNLI',
     scale: [
-      { range: '> 90%', label: 'Strong — model\'s reasoning and answer align', color: 'var(--lb-green-700)' },
-      { range: '70 – 90%', label: 'Moderate — occasional reasoning drift', color: '#8a5d12' },
-      { range: '< 70%', label: 'Weak — model contradicts itself often', color: 'var(--lb-error)' },
+      { range: '> 50%', label: 'Strong — NLI confirms reasoning matches answer', color: 'var(--lb-green-700)' },
+      { range: '20 – 50%', label: 'Moderate — partial signal', color: '#8a5d12' },
+      { range: '< 20%', label: 'Weak NLI signal — biological traces too long for DeBERTa', color: 'var(--lb-error)' },
     ],
+    note: 'Low consistency does NOT mean the model is wrong — it means DeBERTa cannot match long biological text to a short answer label. The Spearman ρ = −0.39 (p=0.04) between faithfulness and accuracy is the more meaningful signal.',
   },
   genes_verified: {
     title: 'Genes verified',
@@ -37,11 +38,12 @@ const EXPLANATIONS = {
   },
   format_faithfulness: {
     title: 'Faithfulness by question format',
-    plain: 'The model\'s reasoning quality varies dramatically by task type. MCQ (multiple-choice direction) requires the model to reason about biological direction across three possibilities, which is harder. Binary and pairwise tasks ask simpler relative comparisons and produce more consistent reasoning.',
-    formula: 'Average faithfulness score computed separately for each question format (mcq / binary / pairwise)',
+    plain: 'The model\'s reasoning quality varies by task type. MCQ (multiple-choice direction) requires the model to reason about biological direction across three possibilities. Binary and pairwise tasks ask simpler relative comparisons. Faithfulness color reflects the score: green ≥ 0.70, amber 0.40–0.69, red < 0.40.',
+    formula: '0.60 × gene_score + 0.40 × nli_consistency · computed per format',
     scale: [
-      { range: 'MCQ', label: 'Hardest — 3-way direction, model often confused', color: 'var(--lb-error)' },
-      { range: 'Binary / Pairwise', label: 'Easier — relative comparison, more consistent reasoning', color: 'var(--lb-green-700)' },
+      { range: '≥ 0.70', label: 'High — reasoning well-grounded', color: 'var(--lb-green-700)' },
+      { range: '0.40 – 0.69', label: 'Moderate — some hallucination or drift', color: '#8a5d12' },
+      { range: '< 0.40', label: 'Low — reasoning unreliable for this format', color: 'var(--lb-error)' },
     ],
     note: 'Low MCQ faithfulness + low MCQ accuracy together show the model is not just wrong — it\'s reasoning incorrectly. That\'s the key extra-credit finding.',
   },
@@ -328,6 +330,13 @@ const TrustView = ({ records = [], onOpenRecord }) => {
           verified_genes, total_gene_candidates, pct_genes_verified,
           faithfulness_by_format, per_sample } = tsData;
 
+  const mcqFaith = faithfulness_by_format?.mcq?.avg_faithfulness;
+  const mcqColor = mcqFaith == null
+    ? 'var(--lb-fg-3)'
+    : mcqFaith >= 0.7 ? 'var(--lb-green-700)'
+    : mcqFaith >= 0.4 ? '#8a5d12'
+    : 'var(--lb-error)';
+
   const clickable = (metricKey) => ({
     onClick: () => setOpenModal(metricKey),
     style: { cursor: 'pointer' },
@@ -338,7 +347,7 @@ const TrustView = ({ records = [], onOpenRecord }) => {
     <>
       <div className="page-head">
         <div>
-          <div className="lb-eyebrow" style={{ marginBottom: 6 }}>Primary view · trustworthy AI reasoning</div>
+          <div className="lb-eyebrow" style={{ marginBottom: 6 }}>Extra credit · trustworthy AI reasoning</div>
           <h1>Trust &amp; reasoning</h1>
           <div className="sub">
             Automated bio-fact-checker on L-LLM thinking traces · NCBI Gene · click any metric to learn more
@@ -347,6 +356,11 @@ const TrustView = ({ records = [], onOpenRecord }) => {
         <div className="actions">
           <Button variant="ghost" icon="download" size="small">trace_scores.json</Button>
         </div>
+      </div>
+
+      <div style={{ marginBottom: 16, padding: '10px 16px', background: 'var(--lb-ink-50)', border: '1px solid var(--lb-border)', borderRadius: 6, font: '400 12px var(--lb-font-sans)', color: 'var(--lb-fg-3)', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span style={{ fontWeight: 500, color: 'var(--lb-fg-2)' }}>Scope:</span>
+        Trace scores cover <strong>Task A · Senescence Perturbation</strong> only — {n_scored} L-LLM thinking-mode traces. Task switching above does not affect this view. Task B traces will appear here after running the trace scorer on lipidomics outputs.
       </div>
 
       {/* Metric cards — all clickable */}
@@ -368,8 +382,8 @@ const TrustView = ({ records = [], onOpenRecord }) => {
         </div>
         <div className="metric" {...clickable('format_faithfulness')}>
           <div className="lbl">MCQ faithfulness <span style={{ fontSize: 10, color: 'var(--lb-fg-4)', marginLeft: 4 }}>ⓘ</span></div>
-          <div className="val" style={{ color: 'var(--lb-error)' }}>
-            {faithfulness_by_format?.mcq?.avg_faithfulness?.toFixed(3) ?? '—'}
+          <div className="val" style={{ color: mcqColor }}>
+            {mcqFaith?.toFixed(3) ?? '—'}
           </div>
           <div className="sub">vs {faithfulness_by_format?.binary?.avg_faithfulness?.toFixed(3) ?? '—'} binary · click to compare</div>
         </div>

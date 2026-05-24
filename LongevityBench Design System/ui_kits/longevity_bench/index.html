@@ -8,6 +8,7 @@
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/marked@9.1.6/marked.min.js"></script>
 </head>
 <body>
 <div id="root"></div>
@@ -25,12 +26,33 @@
 <script type="text/babel" src="RecordDrawer.jsx"></script>
 <script type="text/babel" src="NewRunModal.jsx"></script>
 <script type="text/babel" src="AnswersView.jsx"></script>
+<script type="text/babel" src="GapAnalysisView.jsx"></script>
 
 <script type="text/babel" data-presets="env,react">
+function TaskSwitcher({ tasks, active, onSelect }) {
+  if (tasks.length < 2) return null;
+  return (
+    <div className="task-switcher">
+      <span className="task-switcher__label">Task</span>
+      {tasks.map(({ group, count }) => (
+        <button
+          key={group}
+          className={'task-switcher__btn' + (active === group ? ' active' : '')}
+          onClick={() => onSelect(group)}
+        >
+          {group}
+          <span className="task-switcher__count">{count}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function App() {
-  const [view, setView] = React.useState('trust');
+  const [view, setView] = React.useState('matrix');
   const [runs, setRuns] = React.useState(SEED_RUNS);
   const [records, setRecords] = React.useState(SEED_RECORDS);
+  const [activeTask, setActiveTask] = React.useState(null);
   const [openRun, setOpenRun] = React.useState(null);
   const [openRecord, setOpenRecord] = React.useState(null);
   const [showModal, setShowModal] = React.useState(false);
@@ -42,9 +64,30 @@ function App() {
       if (data && data.runs.length > 0) {
         setRuns(data.runs);
         setRecords(data.records);
+        // auto-select All Tasks if multiple tasks, else first task
+        const groups = [...new Set(data.records.map(r => r.taskGroup).filter(Boolean))];
+        setActiveTask(groups.length > 1 ? 'All Tasks' : (groups[0] || null));
       }
     });
   }, []);
+
+  // Derive unique tasks with counts for the switcher
+  const allTaskGroups = React.useMemo(() => {
+    const counts = {};
+    records.forEach(r => {
+      const g = r.taskGroup || 'Other';
+      counts[g] = (counts[g] || 0) + 1;
+    });
+    const groups = Object.entries(counts).map(([group, count]) => ({ group, count }));
+    if (groups.length < 2) return groups;
+    return [{ group: 'All Tasks', count: records.length }, ...groups];
+  }, [records]);
+
+  // Filter records to active task (when multiple tasks exist)
+  const visibleRecords = React.useMemo(() => {
+    if (!activeTask || activeTask === 'All Tasks' || allTaskGroups.length < 2) return records;
+    return records.filter(r => r.taskGroup === activeTask);
+  }, [records, activeTask, allTaskGroups]);
 
   const handleOpenRun = (run) => {
     setOpenRun(run);
@@ -94,6 +137,7 @@ function App() {
       compare: 'Model comparison',
       answers: 'Answers',
       runs: 'Live runs',
+      gap: 'Gap analysis',
       tasks: 'Tasks', models: 'Models', traces: 'Traces',
       synergyage: 'SynergyAge', mgi: 'MGI',
       settings: 'Settings',
@@ -104,21 +148,27 @@ function App() {
   // Body
   let content;
   if (view === 'run-detail' && openRun) {
-    content = <RunDetail run={openRun} records={records} onOpenRecord={setOpenRecord} />;
+    content = <RunDetail run={openRun} records={visibleRecords} onOpenRecord={setOpenRecord} />;
   } else if (view === 'trust') {
-    content = <TrustView records={records} onOpenRecord={setOpenRecord} />;
+    content = <TrustView records={visibleRecords} onOpenRecord={setOpenRecord} />;
   } else if (view === 'matrix') {
-    content = <ResultsMatrix records={records} onOpenRecord={setOpenRecord} />;
+    content = <ResultsMatrix records={visibleRecords} onOpenRecord={setOpenRecord} />;
   } else if (view === 'compare') {
-    content = <CompareView runs={runs} />;
+    content = <CompareView runs={runs} records={visibleRecords} />;
   } else if (view === 'answers') {
-    content = <AnswersView records={records} onOpenRecord={setOpenRecord} />;
+    content = <AnswersView records={visibleRecords} onOpenRecord={setOpenRecord} />;
+  } else if (view === 'gap') {
+    content = <GapAnalysisView />;
   } else if (view === 'runs') {
-    content = <LiveRunsView runs={runs} onOpenRun={handleOpenRun} />;
+    content = <LiveRunsView runs={runs} records={visibleRecords} onOpenRun={handleOpenRun} />;
   } else if (view === 'tasks') {
-    content = <TasksPlaceholder />;
+    content = <TasksView records={visibleRecords} runs={runs} />;
   } else if (view === 'models') {
-    content = <ModelsPlaceholder />;
+    content = <ModelsView records={visibleRecords} runs={runs} />;
+  } else if (view === 'senescence') {
+    content = <TaskDataView taskKey="task_a" title="Senescence Perturbation" subtitle="Task A · Gene-level differential expression · 298 prompts" />;
+  } else if (view === 'lipidomics') {
+    content = <TaskDataView taskKey="task_b" title="Lipidomics" subtitle="Task B · Age & diabetes prediction from plasma lipid profiles · 285 prompts" />;
   } else {
     content = <GenericPlaceholder view={view} />;
   }
@@ -132,6 +182,13 @@ function App() {
           onNewRun={() => setShowModal(true)}
           onRefresh={() => { setToast({ msg: 'Refreshed', kind: 'info' }); setTimeout(() => setToast(null), 1600); }}
         />
+        {!['senescence', 'lipidomics'].includes(view) && (
+          <TaskSwitcher
+            tasks={allTaskGroups}
+            active={activeTask}
+            onSelect={setActiveTask}
+          />
+        )}
         <div className="content">
           {view === 'run-detail' && (
             <Button variant="ghost" size="small" onClick={handleBackToRuns} className="back-btn">
@@ -173,61 +230,545 @@ function GenericPlaceholder({ view }) {
   );
 }
 
-function TasksPlaceholder() {
-  const tasks = [
-    { id: 'LB-0038', name: 'epistasis_ternary',  format: 'ternary',    n: 200, db: 'SynergyAge', icon: 'dnaHelix' },
-    { id: 'LB-0042', name: 'lifespan_mae',        format: 'regression', n: 150, db: 'MGI',         icon: 'bacteria' },
-    { id: 'LB-0051', name: 'gene_pathway_mcq',    format: 'mcq',        n: 200, db: 'NCBI + KEGG', icon: 'molecule' },
-    { id: 'LB-0067', name: 'organism_pairwise',   format: 'pairwise',   n: 100, db: 'SynergyAge', icon: 'microscope' },
-    { id: 'LB-0072', name: 'negation_binary',     format: 'binary',     n: 200, db: 'mixed',       icon: 'flaskConical' },
-    { id: 'LB-0090', name: 'set_generation',      format: 'set',        n: 50,  db: 'WormBase',    icon: 'beaker' },
-  ];
+function TasksView({ records = [], runs = [] }) {
+  const FORMAT_ICON = { mcq: 'table', binary: 'check', pairwise: 'layers', regression: 'chart' };
+  const GROUP_ICON  = {
+    'Senescence Perturbation': 'flask',
+    'Lipidomics': 'flask',
+    'Metabolite Prediction': 'flask',
+  };
+
+  // Derive task groups from actual records
+  const groupMap = {};
+  records.forEach(r => {
+    const g = r.taskGroup || 'Other';
+    if (!groupMap[g]) groupMap[g] = { formats: {}, lbIds: new Set(), samples: 0 };
+    groupMap[g].samples++;
+    groupMap[g].formats[r.format] = (groupMap[g].formats[r.format] || 0) + 1;
+    if (r.lbId) groupMap[g].lbIds.add(r.lbId.split('-').slice(0, 2).join('-'));
+  });
+
+  const groups = Object.entries(groupMap).map(([name, info]) => ({
+    name,
+    samples: info.samples,
+    formats: Object.entries(info.formats).sort((a, b) => b[1] - a[1]),
+    prefix: [...info.lbIds][0] || '—',
+    icon: GROUP_ICON[name] || 'layers',
+  }));
+
+  // Derive model list from runs
+  const modelMap = {};
+  runs.forEach(r => {
+    if (!modelMap[r.modelId]) modelMap[r.modelId] = { name: r.model, color: (MODEL_COLORS||{})[r.modelId] || '#8c948c', runsCount: 0 };
+    modelMap[r.modelId].runsCount++;
+  });
+  const models = Object.values(modelMap);
+
+  if (records.length === 0) return (
+    <>
+      <div className="page-head"><div><h1>Tasks</h1><div className="sub">No data loaded.</div></div></div>
+      <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+        <div className="lb-eyebrow" style={{ marginBottom: 8 }}>No data</div>
+        <p className="lb-p" style={{ color: 'var(--lb-fg-3)' }}>Run eval then export logs to populate tasks.</p>
+      </div>
+    </>
+  );
+
   return (
     <>
-      <div className="page-head"><div><h1>Tasks</h1><div className="sub">6 LongeBench tasks · benchmark + extra splits</div></div></div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
-        {tasks.map(t => (
-          <div key={t.id} className="card" style={{ padding: 16, display: 'flex', gap: 14, alignItems: 'center' }}>
-            <div style={{ width: 44, height: 44, color: 'var(--lb-green-600)', flexShrink: 0 }}>
-              <img src={`../../assets/scicons/${t.icon}.svg`} alt="" style={{ width: '100%', height: '100%' }} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ marginBottom: 4 }}><Pill brand>{t.id}</Pill></div>
-              <div style={{ font: '500 14px var(--lb-font-sans)', color: 'var(--lb-fg-1)' }}>{t.name.replace(/_/g, ' ')}</div>
-              <div className="lb-meta" style={{ marginTop: 2 }}>{t.format} · {t.db} · n={t.n}</div>
+      <div className="page-head">
+        <div>
+          <div className="lb-eyebrow" style={{ marginBottom: 6 }}>Derived from loaded records</div>
+          <h1>Tasks</h1>
+          <div className="sub">{groups.length} task group{groups.length !== 1 ? 's' : ''} · {records.length} total samples · {models.length} models evaluated</div>
+        </div>
+      </div>
+
+      {/* Task group cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14, marginBottom: 24 }}>
+        {groups.map(g => (
+          <div key={g.name} className="card" style={{ padding: 18 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+              <div style={{
+                width: 40, height: 40, borderRadius: 8, flexShrink: 0,
+                background: 'var(--lb-green-50)', border: '1px solid var(--lb-green-200)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: 'var(--lb-green-600)',
+              }}>
+                <Icon name={g.icon} size={20} stroke={1.5} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ font: '600 14px var(--lb-font-sans)', color: 'var(--lb-fg-1)', marginBottom: 3 }}>
+                  {g.name}
+                </div>
+                <div className="lb-meta" style={{ marginBottom: 8 }}>
+                  {g.samples} samples · {g.formats.length} format{g.formats.length !== 1 ? 's' : ''}
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                  {g.formats.map(([fmt, n]) => (
+                    <span key={fmt} style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
+                      padding: '2px 8px', borderRadius: 3,
+                      background: 'var(--lb-bg-2)', border: '1px solid var(--lb-border)',
+                      font: '400 11px var(--lb-font-sans)', color: 'var(--lb-fg-3)',
+                    }}>
+                      <Icon name={FORMAT_ICON[fmt] || 'dot'} size={11} stroke={2} />
+                      {fmt} ({n})
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Models evaluated */}
+      {models.length > 0 && (
+        <div className="card" style={{ overflow: 'hidden' }}>
+          <div className="head">
+            <h3>Models evaluated</h3>
+            <p className="sub">{models.length} models · {runs.length} total runs</p>
+          </div>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="lb">
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th style={{ textAlign: 'right' }}>Runs</th>
+                  <th style={{ textAlign: 'right' }}>Samples</th>
+                  <th style={{ textAlign: 'right' }}>Correct</th>
+                  <th style={{ textAlign: 'right' }}>Avg score</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(modelMap).map(([mid, m]) => {
+                  const cells = records.map(r => r.cells?.[mid]).filter(Boolean);
+                  const nPass = cells.filter(c => c.pass).length;
+                  const scored = cells.filter(c => c.score != null);
+                  const avg = scored.length > 0 ? scored.reduce((s, c) => s + c.score, 0) / scored.length : null;
+                  return (
+                    <tr key={mid}>
+                      <td style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ width: 10, height: 10, borderRadius: 2, background: m.color, flexShrink: 0 }} />
+                        <span style={{ font: '500 13px var(--lb-font-sans)', color: 'var(--lb-fg-1)' }}>{m.name}</span>
+                      </td>
+                      <td className="mono" style={{ textAlign: 'right' }}>{m.runsCount}</td>
+                      <td className="mono" style={{ textAlign: 'right' }}>{cells.length}</td>
+                      <td className="mono" style={{ textAlign: 'right' }}>
+                        {cells.length > 0 ? `${nPass} (${(nPass/cells.length*100).toFixed(0)}%)` : '—'}
+                      </td>
+                      <td className="mono" style={{ textAlign: 'right' }}>
+                        {avg != null ? avg.toFixed(3) : '—'}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+// ── TaskDataView — train/test browser for a single task ──────────────────────
+function TaskDataView({ taskKey, title, subtitle }) {
+  const [data, setData] = React.useState(null);
+  const [err, setErr] = React.useState(null);
+  const [split, setSplit] = React.useState('all');
+  const [fmt, setFmt] = React.useState('all');
+  const [search, setSearch] = React.useState('');
+  const [expanded, setExpanded] = React.useState(null);
+
+  React.useEffect(() => {
+    setData(null); setErr(null);
+    fetch(`./public/${taskKey}_data.json`)
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+      .then(d => setData(d))
+      .catch(e => setErr(e.message));
+  }, [taskKey]);
+
+  if (err) return (
+    <>
+      <div className="page-head"><div><h1>{title}</h1><div className="sub">Data not found.</div></div></div>
+      <div className="card" style={{ padding: 32 }}>
+        <p style={{ color: 'var(--lb-fg-3)', fontSize: 13 }}>Run export script to generate <code>public/{taskKey}_data.json</code>.</p>
+        <p style={{ fontFamily: 'var(--lb-font-mono)', fontSize: 11, color: 'var(--lb-fg-4)', marginTop: 6 }}>{err}</p>
+      </div>
+    </>
+  );
+  if (!data) return <div className="page-head"><div><h1>{title}</h1><div className="sub">Loading…</div></div></div>;
+
+  const rows = data.rows || [];
+  const formats = ['all', ...new Set(rows.map(r => r.format).filter(Boolean))];
+  const splits = ['all', 'train', 'test'];
+
+  const filtered = rows.filter(r =>
+    (split === 'all' || r.split === split) &&
+    (fmt === 'all' || r.format === fmt) &&
+    (search === '' || r.lb_id.toLowerCase().includes(search.toLowerCase()) ||
+     r.question.toLowerCase().includes(search.toLowerCase()))
+  );
+
+  // Summary stats
+  const trainRows = rows.filter(r => r.split === 'train');
+  const testRows  = rows.filter(r => r.split === 'test');
+  const fmtCounts = {};
+  rows.forEach(r => { fmtCounts[r.format] = (fmtCounts[r.format] || 0) + 1; });
+
+  const SPLIT_COLOR = { train: 'var(--lb-green-500)', test: '#c98b1c' };
+  const FORMAT_ICON = { mcq: 'table', binary: 'check', pairwise: 'layers', regression: 'chart' };
+
+  return (
+    <>
+      <div className="page-head">
+        <div>
+          <div className="lb-eyebrow" style={{ marginBottom: 6 }}>{taskKey.replace('_', ' ').toUpperCase()} · benchmark dataset</div>
+          <h1>{title}</h1>
+          <div className="sub">{subtitle}</div>
+        </div>
+      </div>
+
+      {/* Summary metric strip */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 20 }}>
+        <div className="metric">
+          <div className="lbl">Train</div>
+          <div className="val">{trainRows.length}</div>
+          <div className="sub">prompts</div>
+        </div>
+        <div className="metric">
+          <div className="lbl">Test</div>
+          <div className="val">{testRows.length}</div>
+          <div className="sub">{((testRows.length / rows.length) * 100).toFixed(0)}% held out</div>
+        </div>
+        <div className="metric">
+          <div className="lbl">Formats</div>
+          <div className="val">{Object.keys(fmtCounts).length}</div>
+          <div className="sub">{Object.keys(fmtCounts).join(' · ')}</div>
+        </div>
+        <div className="metric">
+          <div className="lbl">Total</div>
+          <div className="val">{rows.length}</div>
+          <div className="sub">prompts</div>
+        </div>
+      </div>
+
+      {/* Format breakdown bar */}
+      <div className="card" style={{ padding: '14px 20px', marginBottom: 20 }}>
+        <div style={{ font: '500 11px var(--lb-font-sans)', color: 'var(--lb-fg-4)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 10 }}>Format breakdown</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {Object.entries(fmtCounts).map(([f, n]) => (
+            <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <Icon name={FORMAT_ICON[f] || 'dot'} size={13} stroke={1.5} style={{ color: 'var(--lb-fg-3)', flexShrink: 0 }} />
+              <span style={{ width: 80, font: '500 12px var(--lb-font-sans)', color: 'var(--lb-fg-2)' }}>{f}</span>
+              <div style={{ flex: 1, height: 6, background: 'var(--lb-ink-100)', borderRadius: 3, overflow: 'hidden' }}>
+                <div style={{ width: `${(n / rows.length) * 100}%`, height: '100%', background: 'var(--lb-green-500)', borderRadius: 3 }} />
+              </div>
+              <span style={{ width: 36, textAlign: 'right', font: '500 12px var(--lb-font-mono)', color: 'var(--lb-fg-3)' }}>{n}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 5 }}>
+          {splits.map(s => (
+            <button key={s} onClick={() => setSplit(s)} style={{
+              padding: '4px 12px', borderRadius: 4,
+              border: '1px solid var(--lb-border)',
+              background: split === s ? (s === 'train' ? 'var(--lb-green-500)' : s === 'test' ? '#c98b1c' : 'var(--lb-green-500)') : 'transparent',
+              color: split === s ? '#fff' : 'var(--lb-fg-3)',
+              font: '500 12px var(--lb-font-sans)', cursor: 'pointer',
+            }}>{s}</button>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 5 }}>
+          {formats.map(f => (
+            <button key={f} onClick={() => setFmt(f)} style={{
+              padding: '4px 12px', borderRadius: 4,
+              border: '1px solid var(--lb-border)',
+              background: fmt === f ? 'var(--lb-ink-200)' : 'transparent',
+              color: fmt === f ? 'var(--lb-fg-1)' : 'var(--lb-fg-4)',
+              font: '500 12px var(--lb-font-sans)', cursor: 'pointer',
+            }}>{f}</button>
+          ))}
+        </div>
+        <input
+          type="text" placeholder="Search LB-ID or question…" value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{
+            marginLeft: 'auto', padding: '4px 10px', borderRadius: 4,
+            border: '1px solid var(--lb-border)', background: 'var(--lb-bg-1)',
+            color: 'var(--lb-fg-1)', font: '400 12px var(--lb-font-sans)',
+            width: 220, outline: 'none',
+          }}
+        />
+      </div>
+
+      {/* Table */}
+      <div className="card" style={{ overflow: 'hidden' }}>
+        <div className="head">
+          <h3>Prompts</h3>
+          <p className="sub">{filtered.length} of {rows.length} · click row to expand question</p>
+        </div>
+        <div style={{ overflowX: 'auto' }}>
+          <table className="lb" style={{ minWidth: 600 }}>
+            <thead>
+              <tr>
+                <th style={{ width: 36 }}>#</th>
+                <th>LB-ID</th>
+                <th style={{ textAlign: 'center' }}>Split</th>
+                <th style={{ textAlign: 'center' }}>Format</th>
+                <th>Gold answer</th>
+                <th>Question (truncated)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((r, i) => {
+                const isOpen = expanded === (r.lb_id + i);
+                return (
+                  <React.Fragment key={r.lb_id + i}>
+                    <tr
+                      onClick={() => setExpanded(isOpen ? null : (r.lb_id + i))}
+                      style={{ cursor: 'pointer', background: isOpen ? 'var(--lb-bg-1)' : 'transparent' }}
+                    >
+                      <td className="id">{String(i + 1).padStart(3, '0')}</td>
+                      <td style={{ fontFamily: 'var(--lb-font-mono)', fontSize: 11 }}>{r.lb_id}</td>
+                      <td style={{ textAlign: 'center' }}>
+                        <span style={{
+                          display: 'inline-block', padding: '2px 8px', borderRadius: 3, fontSize: 10,
+                          fontFamily: 'var(--lb-font-mono)', fontWeight: 600,
+                          background: r.split === 'train' ? 'rgba(34,139,34,0.1)' : 'rgba(201,139,28,0.12)',
+                          color: r.split === 'train' ? 'var(--lb-green-700)' : '#8a5d12',
+                        }}>{r.split}</span>
+                      </td>
+                      <td style={{ textAlign: 'center' }}>
+                        <span className="badge neutral">{r.format}</span>
+                      </td>
+                      <td className="mono" style={{ fontWeight: 600, color: 'var(--lb-green-700)', maxWidth: 80 }}>
+                        {String(r.gold).slice(0, 20)}
+                      </td>
+                      <td style={{ fontSize: 12, color: 'var(--lb-fg-3)', maxWidth: 320 }}>
+                        <span style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          {r.question.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()}
+                        </span>
+                      </td>
+                    </tr>
+                    {isOpen && (
+                      <tr style={{ background: 'var(--lb-bg-1)' }}>
+                        <td colSpan={6} style={{ padding: '12px 16px 16px' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                            <div>
+                              <div style={{ font: '500 10px var(--lb-font-sans)', color: 'var(--lb-fg-4)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Question</div>
+                              <pre style={{ font: '400 11px var(--lb-font-mono)', color: 'var(--lb-fg-2)', whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0, maxHeight: 200, overflow: 'auto' }}>
+                                {r.question}
+                              </pre>
+                            </div>
+                            {r.follow_up && (
+                              <div>
+                                <div style={{ font: '500 10px var(--lb-font-sans)', color: 'var(--lb-fg-4)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Follow-up / provenance</div>
+                                <pre style={{ font: '400 11px var(--lb-font-mono)', color: 'var(--lb-fg-3)', whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0, maxHeight: 200, overflow: 'auto' }}>
+                                  {r.follow_up}
+                                </pre>
+                              </div>
+                            )}
+                          </div>
+                          <div style={{ marginTop: 10, display: 'flex', gap: 16 }}>
+                            <span style={{ font: '400 11px var(--lb-font-sans)', color: 'var(--lb-fg-4)' }}>
+                              Pool: <span style={{ fontFamily: 'var(--lb-font-mono)', fontSize: 10 }}>{r.pool}</span>
+                            </span>
+                            <span style={{ font: '400 11px var(--lb-font-sans)', color: 'var(--lb-fg-4)' }}>
+                              Metric: <span style={{ fontFamily: 'var(--lb-font-mono)', fontSize: 10 }}>{r.metric}</span>
+                            </span>
+                            <span style={{ font: '400 11px var(--lb-font-sans)', color: 'var(--lb-fg-4)' }}>
+                              Domain: <span style={{ fontFamily: 'var(--lb-font-mono)', fontSize: 10 }}>{r.domain}</span>
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
     </>
   );
 }
 
-function ModelsPlaceholder() {
-  const models = [
-    { id: 'longevity-llm', name: 'L-LLM',          sub: 'Insilico · Qwen3.5-9B fine-tuned', f1: 0.62, color: 'var(--lb-green-500)' },
-    { id: 'gpt-4o',        name: 'GPT-4o',         sub: 'OpenAI · general purpose',          f1: 0.58, color: '#2a6dc8' },
-    { id: 'majority',      name: 'Majority class', sub: 'baseline · most-frequent label',    f1: 0.42, color: '#c98b1c' },
-    { id: 'random',        name: 'Random uniform', sub: 'baseline · 1000 seeds avg.',        f1: 0.33, color: '#8c948c' },
+function ModelsView({ records = [], runs = [] }) {
+  const FORMAT_ORDER = ['mcq', 'binary', 'pairwise', 'regression'];
+  const BASELINE_IDS = ['majority_baseline', 'random_baseline'];
+  const MODEL_SUBTITLES = {
+    longevity_llm:          'Insilico Medicine · Qwen3.5-9B fine-tuned on longevity literature',
+    longevity_llm_thinking: 'Insilico Medicine · Qwen3.5-9B with extended reasoning traces',
+    claude_sonnet:          'Anthropic · Claude Sonnet 4.5 · general purpose',
+    majority_baseline:      'Baseline · predicts most-frequent label per format',
+    random_baseline:        'Baseline · uniform random draw · 1000 seeds averaged',
+  };
+
+  // Derive model list from runs
+  const modelOrder = [];
+  const modelMap = {};
+  runs.forEach(r => {
+    if (!modelMap[r.modelId]) {
+      modelMap[r.modelId] = {
+        id: r.modelId,
+        name: r.model,
+        color: (MODEL_COLORS || {})[r.modelId] || '#8c948c',
+        isBaseline: BASELINE_IDS.includes(r.modelId),
+        runsCount: 0,
+      };
+      modelOrder.push(r.modelId);
+    }
+    modelMap[r.modelId].runsCount++;
+  });
+
+  // Compute per-model per-format stats from records
+  const modelIds = Object.keys(modelMap);
+
+  if (modelIds.length === 0) return (
+    <>
+      <div className="page-head"><div><h1>Models</h1><div className="sub">No data loaded.</div></div></div>
+      <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+        <div className="lb-eyebrow" style={{ marginBottom: 8 }}>No data</div>
+        <p className="lb-p" style={{ color: 'var(--lb-fg-3)' }}>Run eval then export logs to populate models.</p>
+      </div>
+    </>
+  );
+
+  const modelStats = modelIds.map(mid => {
+    const m = modelMap[mid];
+    const fmtStats = {};
+    FORMAT_ORDER.forEach(fmt => {
+      const fmtRecs = records.filter(r => r.format === fmt && r.cells?.[mid]);
+      if (fmtRecs.length === 0) return;
+      const cells = fmtRecs.map(r => r.cells[mid]).filter(c => c.score != null);
+      if (cells.length === 0) return;
+      const avg = cells.reduce((s, c) => s + c.score, 0) / cells.length;
+      const nPass = cells.filter(c => c.pass).length;
+      fmtStats[fmt] = { avg, n: fmtRecs.length, nPass };
+    });
+    const vals = Object.values(fmtStats).map(s => s.avg);
+    const overall = vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+    const allCells = records.map(r => r.cells?.[mid]).filter(Boolean);
+    const totalPass = allCells.filter(c => c.pass).length;
+    const latencies = allCells.map(c => c.latency_s).filter(v => v != null);
+    const avgLatency = latencies.length > 0 ? latencies.reduce((a, b) => a + b, 0) / latencies.length : null;
+    return { ...m, fmtStats, overall, totalSamples: allCells.length, totalPass, avgLatency };
+  });
+
+  // Sort: non-baselines by overall desc, then baselines
+  const sorted = [
+    ...modelStats.filter(m => !m.isBaseline).sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0)),
+    ...modelStats.filter(m => m.isBaseline),
   ];
+
+  const formatsPresent = FORMAT_ORDER.filter(f => records.some(r => r.format === f));
+  const bestOverall = sorted.find(m => !m.isBaseline)?.overall;
+
   return (
     <>
-      <div className="page-head"><div><h1>Models</h1><div className="sub">Targets used in evaluation</div></div></div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
-        {models.map(m => (
-          <div key={m.id} className="card" style={{ padding: 18 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 6, background: m.color, display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 500, fontSize: 13 }}>{m.name.slice(0, 2)}</div>
-              <div>
-                <div style={{ fontWeight: 500 }}>{m.name}</div>
-                <div className="lb-meta">{m.sub}</div>
+      <div className="page-head">
+        <div>
+          <div className="lb-eyebrow" style={{ marginBottom: 6 }}>Derived from eval runs</div>
+          <h1>Models</h1>
+          <div className="sub">{sorted.length} models · {runs.length} runs · {records.length} samples evaluated</div>
+        </div>
+      </div>
+
+      {/* Model cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 14, marginBottom: 24 }}>
+        {sorted.map(m => (
+          <div key={m.id} className="card" style={{ padding: 18, opacity: m.isBaseline ? 0.85 : 1 }}>
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 14 }}>
+              <div style={{
+                width: 40, height: 40, borderRadius: 8, background: m.color,
+                display: 'grid', placeItems: 'center', flexShrink: 0,
+                color: '#fff', font: '700 14px var(--lb-font-mono)',
+              }}>
+                {m.name.slice(0, 2).toUpperCase()}
               </div>
-              <div style={{ marginLeft: 'auto', fontFamily: 'var(--lb-font-mono)', fontSize: 22, fontWeight: 500 }}>{m.f1.toFixed(2)}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ font: '600 14px var(--lb-font-sans)', color: 'var(--lb-fg-1)', marginBottom: 2 }}>
+                  {m.name}
+                  {m.isBaseline && <span style={{ marginLeft: 6, font: '400 10px var(--lb-font-sans)', color: 'var(--lb-fg-4)' }}>baseline</span>}
+                </div>
+                <div className="lb-meta" style={{ lineHeight: 1.4 }}>
+                  {MODEL_SUBTITLES[m.id] || m.id}
+                </div>
+              </div>
+              <div style={{ font: '700 20px var(--lb-font-mono)', color: m.color, flexShrink: 0 }}>
+                {m.overall != null ? (m.overall * 100).toFixed(1) + '%' : '—'}
+              </div>
             </div>
-            <div style={{ display: 'flex', gap: 6 }}>
-              {[0.6, 0.7, 0.5, 0.65, 0.8, 0.55, 0.7, 0.85].map((h, i) => (
-                <div key={i} style={{ flex: 1, height: 36 * h, background: m.color, opacity: 0.3 + i * 0.08, borderRadius: 2 }} />
-              ))}
+
+            {/* Overall bar vs best */}
+            {m.overall != null && bestOverall > 0 && (
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ height: 6, background: 'var(--lb-ink-100)', borderRadius: 3, overflow: 'hidden' }}>
+                  <div style={{
+                    width: `${(m.overall / bestOverall) * 100}%`, height: '100%',
+                    background: m.color, opacity: m.isBaseline ? 0.4 : 0.85,
+                    borderRadius: 3, transition: 'width 0.4s ease',
+                  }} />
+                </div>
+              </div>
+            )}
+
+            {/* Per-format scores */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 14 }}>
+              {formatsPresent.map(fmt => {
+                const s = m.fmtStats[fmt];
+                if (!s) return (
+                  <div key={fmt} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ font: '400 11px var(--lb-font-sans)', color: 'var(--lb-fg-4)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{fmt}</span>
+                    <span style={{ font: '500 11px var(--lb-font-mono)', color: 'var(--lb-fg-5)' }}>—</span>
+                  </div>
+                );
+                const color = s.avg >= 0.6 ? 'var(--lb-green-500)' : s.avg >= 0.4 ? '#c98b1c' : 'var(--lb-error)';
+                return (
+                  <div key={fmt}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+                      <span style={{ font: '400 11px var(--lb-font-sans)', color: 'var(--lb-fg-3)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{fmt}</span>
+                      <span style={{ font: '500 11px var(--lb-font-mono)', color }}>
+                        {s.avg.toFixed(3)} <span style={{ color: 'var(--lb-fg-4)', fontWeight: 400 }}>n={s.n}</span>
+                      </span>
+                    </div>
+                    <div style={{ height: 3, background: 'var(--lb-ink-100)', borderRadius: 2 }}>
+                      <div style={{ width: `${s.avg * 100}%`, height: '100%', background: color, borderRadius: 2, transition: 'width 0.3s' }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Footer stats */}
+            <div style={{ display: 'flex', gap: 16, paddingTop: 10, borderTop: '1px solid var(--lb-border)' }}>
+              <div>
+                <div style={{ font: '400 10px var(--lb-font-sans)', color: 'var(--lb-fg-4)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Correct</div>
+                <div style={{ font: '600 13px var(--lb-font-mono)', color: 'var(--lb-fg-1)', marginTop: 2 }}>
+                  {m.totalSamples > 0 ? `${m.totalPass}/${m.totalSamples}` : '—'}
+                </div>
+              </div>
+              <div>
+                <div style={{ font: '400 10px var(--lb-font-sans)', color: 'var(--lb-fg-4)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Avg latency</div>
+                <div style={{ font: '600 13px var(--lb-font-mono)', color: 'var(--lb-fg-1)', marginTop: 2 }}>
+                  {m.avgLatency != null ? m.avgLatency.toFixed(1) + 's' : '—'}
+                </div>
+              </div>
+              <div>
+                <div style={{ font: '400 10px var(--lb-font-sans)', color: 'var(--lb-fg-4)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Runs</div>
+                <div style={{ font: '600 13px var(--lb-font-mono)', color: 'var(--lb-fg-1)', marginTop: 2 }}>
+                  {m.runsCount}
+                </div>
+              </div>
             </div>
           </div>
         ))}

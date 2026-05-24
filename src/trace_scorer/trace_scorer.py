@@ -1,16 +1,20 @@
-"""Score L-LLM thinking traces for biological faithfulness.
+"""Score L-LLM thinking traces — V4 (keyword consistency).
 
-Reads data.json (exported from Inspect AI logs), finds all samples that have
-a thinking trace from longevity_llm_thinking, and scores each trace:
+2-component faithfulness formula:
+    faithfulness = 0.60 * gene_score
+                 + 0.40 * keyword_consistency
 
-    faithfulness = 0.4 * gene_score + 0.3 * pathway_score + 0.3 * consistency
+gene_score          — MyGene.info batch lookup: fraction of cited gene symbols that
+                      exist in human/mouse/rat/fly/nematode/yeast namespaces.
+keyword_consistency — Directional keyword scan: does the trace use up/down/no-change
+                      language consistent with the predicted answer label?
+                      Negation detection prevents "does NOT decrease" → down mismatch.
+                      Returns 0.5 for pairwise/unknown (no directional semantics).
 
-where:
-  gene_score      = verified_genes / total_candidate_genes  (BioThings mygene.info)
-  pathway_score   = 0.0  (reserved; set to 0 when no pathway verifier is active)
-  consistency     = 1.0 if trace direction matches final answer else 0.0
+Replaces DeBERTa NLI (V3) which gave 3.4% consistency because biological traces
+are too long — truncation at 1024 chars missed conclusions.
 
-Output: outputs/trace_faithfulness_scores.json
+Output: outputs/trace_faithfulness_scores.json + public/trace_faithfulness_scores.json
 """
 
 from __future__ import annotations
@@ -21,11 +25,12 @@ import json
 import logging
 from pathlib import Path
 
-import aiohttp
+import numpy as np
+import scipy.stats
 
-from .consistency_checker import check_consistency
+from .consistency_checker import nli_score
 from .entity_extractor import extract_gene_candidates
-from .verifiers.ncbi_verifier import NCBIVerifier
+from .verifiers.mygene_verifier import MyGeneVerifier
 
 logger = logging.getLogger(__name__)
 
@@ -37,45 +42,44 @@ _PUBLIC_OUT = Path(
     "LongevityBench Design System/ui_kits/longevity_bench/public/trace_faithfulness_scores.json"
 )
 _THINKING_MODEL = "longevity_llm_thinking"
-_MAX_CONCURRENT = 5
+_MAX_CONCURRENT = 8
 
 
-def _faithfulness(gene_score: float, consistent: bool) -> float:
-    pathway_score = 0.0  # no pathway verifier in this build
-    raw = 0.4 * gene_score + 0.3 * pathway_score + 0.3 * float(consistent)
-    # Renormalise to [0,1] accounting for missing pathway component
-    return round(raw / 0.7, 4)
+def _faithfulness(gene_score: float, nli_consistency: float) -> float:
+    return round(0.60 * gene_score + 0.40 * nli_consistency, 4)
 
 
 async def _score_sample(
     sample: dict,
-    verifier: NCBIVerifier,
-    session: aiohttp.ClientSession,
-    sem: asyncio.Semaphore,
+    mygene_verifier: MyGeneVerifier,
+    gene_sem: asyncio.Semaphore,
 ) -> dict:
     cell = sample.get("cells", {}).get(_THINKING_MODEL, {})
     trace: str = cell.get("trace") or ""
     pred: str = (cell.get("pred") or "").strip()
     fmt: str = (sample.get("format") or "").lower()
     gold: str = (sample.get("gold") or "").strip()
-    score_val: float | None = cell.get("score")
+    score_val = cell.get("score")
     passed: bool = cell.get("pass") or (score_val is not None and score_val >= 0.5)
 
     candidates = extract_gene_candidates(trace) if trace else []
 
+    # ── Tier 0: gene verification ───────────────────────────────────────────
     gene_score = 0.0
     verified_genes: list[str] = []
     unverified_genes: list[str] = []
-
-    async with sem:
+    async with gene_sem:
         if candidates:
-            results = await verifier.verify_batch(candidates, session)
-            verified_genes = [g for g, ok in results.items() if ok]
-            unverified_genes = [g for g, ok in results.items() if not ok]
-            gene_score = len(verified_genes) / len(candidates)
+            results = await mygene_verifier.verify_batch(candidates)
+            verified_genes = [g for g, r in results.items() if r.get("verified")]
+            unverified_genes = [g for g, r in results.items() if not r.get("verified")]
+            gene_score = len(verified_genes) / len(candidates) if candidates else 0.0
 
-    consistent = check_consistency(trace, pred, fmt)
-    faith = _faithfulness(gene_score, consistent)
+    # ── Tier 1: keyword consistency ─────────────────────────────────────────
+    kw_consistency = nli_score(trace, pred, fmt) if trace else 0.5
+    consistent = kw_consistency >= 0.75
+
+    faith = _faithfulness(gene_score, kw_consistency)
 
     return {
         "id": sample["id"],
@@ -89,7 +93,7 @@ async def _score_sample(
         "verified_genes": verified_genes,
         "unverified_genes": unverified_genes,
         "gene_score": round(gene_score, 4),
-        "pathway_score": 0.0,
+        "nli_consistency": round(kw_consistency, 4),
         "consistent": consistent,
         "faithfulness": faith,
     }
@@ -98,93 +102,127 @@ async def _score_sample(
 async def _run(data_path: Path, out_path: Path) -> None:
     data = json.loads(data_path.read_text(encoding="utf-8"))
 
-    # Filter samples that have a thinking trace
     samples_with_trace = [
         s for s in data["samples"]
-        if (s.get("cells", {}).get(_THINKING_MODEL, {}).get("trace"))
+        if s.get("cells", {}).get(_THINKING_MODEL, {}).get("trace")
     ]
     logger.info(
         "%d samples total, %d have %s traces",
         len(data["samples"]), len(samples_with_trace), _THINKING_MODEL,
     )
-
     if not samples_with_trace:
         logger.error(
-            "No thinking traces found in data.json. "
-            "Re-run eval with --models longevity_llm_thinking, then re-export."
+            "No thinking traces found. Re-run eval with --models longevity_llm_thinking then re-export."
         )
         return
 
-    verifier = NCBIVerifier()
-    sem = asyncio.Semaphore(_MAX_CONCURRENT)
+    mygene_verifier = MyGeneVerifier()
+    gene_sem = asyncio.Semaphore(_MAX_CONCURRENT)
 
-    connector = aiohttp.TCPConnector(limit=10)
-    async with aiohttp.ClientSession(connector=connector) as session:
-        tasks = [
-            _score_sample(s, verifier, session, sem)
-            for s in samples_with_trace
-        ]
-        results = await asyncio.gather(*tasks)
+    tasks = [
+        _score_sample(s, mygene_verifier, gene_sem)
+        for s in samples_with_trace
+    ]
+    results = await asyncio.gather(*tasks)
 
-    verifier.save_cache()
+    mygene_verifier.save_cache()
 
-    # Aggregate
+    # ── Aggregate ────────────────────────────────────────────────────────────
     n = len(results)
-    avg_faith = sum(r["faithfulness"] for r in results) / n if n else 0.0
+    avg_faith = sum(r["faithfulness"] for r in results) / n
     n_consistent = sum(1 for r in results if r["consistent"])
-    n_with_trace = sum(1 for r in results if r["trace_present"])
     total_genes = sum(r["gene_candidates"] for r in results)
     verified_total = sum(len(r["verified_genes"]) for r in results)
+    avg_nli = sum(r["nli_consistency"] for r in results) / n
+    avg_gene = sum(r["gene_score"] for r in results) / n
+
+    # ── Spearman faithfulness vs correctness ─────────────────────────────────
+    faiths = np.array([r["faithfulness"] for r in results])
+    passes = np.array([int(r["pass"]) for r in results])
+    rho, p_val = scipy.stats.spearmanr(faiths, passes)
+
+    try:
+        rng = np.random.default_rng(42)
+        n_boot = len(faiths)
+        boot_rhos = []
+        for _ in range(1000):
+            idx = rng.integers(0, n_boot, size=n_boot)
+            r_b, _ = scipy.stats.spearmanr(faiths[idx], passes[idx])
+            if not np.isnan(r_b):
+                boot_rhos.append(float(r_b))
+        boot_rhos_arr = np.array(boot_rhos)
+        ci_vals = [
+            round(float(np.percentile(boot_rhos_arr, 2.5)), 4),
+            round(float(np.percentile(boot_rhos_arr, 97.5)), 4),
+        ]
+    except Exception:
+        ci_vals = [None, None]
+
+    spearman_result = {
+        "rho": round(float(rho), 4),
+        "p_value": round(float(p_val), 4),
+        "ci_95": ci_vals,
+    }
+
+    # ── Per-format breakdown ─────────────────────────────────────────────────
+    faithfulness_by_format: dict = {}
+    for fmt in ("mcq", "binary", "pairwise"):
+        fmtr = [r for r in results if r["format"] == fmt]
+        if fmtr:
+            faithfulness_by_format[fmt] = {
+                "n": len(fmtr),
+                "avg_faithfulness": round(sum(r["faithfulness"] for r in fmtr) / len(fmtr), 4),
+                "avg_accuracy": round(sum(1 for r in fmtr if r["pass"]) / len(fmtr), 4),
+                "avg_gene_score": round(sum(r["gene_score"] for r in fmtr) / len(fmtr), 4),
+                "avg_nli": round(sum(r["nli_consistency"] for r in fmtr) / len(fmtr), 4),
+            }
 
     summary = {
         "model": _THINKING_MODEL,
+        "scorer_version": "v4",
+        "formula": "0.60 * gene_score + 0.40 * keyword_consistency",
         "n_scored": n,
-        "n_with_trace": n_with_trace,
+        "n_with_trace": sum(1 for r in results if r["trace_present"]),
         "avg_faithfulness": round(avg_faith, 4),
+        "avg_gene_score": round(avg_gene, 4),
+        "avg_nli_consistency": round(avg_nli, 4),
         "n_consistent": n_consistent,
         "pct_consistent": round(n_consistent / n * 100, 1) if n else 0.0,
         "total_gene_candidates": total_genes,
         "verified_genes": verified_total,
         "pct_genes_verified": round(verified_total / total_genes * 100, 1) if total_genes else 0.0,
-        "faithfulness_by_format": {},
-        "per_sample": results,
+        "spearman_vs_correctness": spearman_result,
+        "faithfulness_by_format": faithfulness_by_format,
+        "per_sample": list(results),
     }
-
-    for fmt in ("mcq", "binary", "pairwise"):
-        fmt_results = [r for r in results if r["format"] == fmt]
-        if fmt_results:
-            summary["faithfulness_by_format"][fmt] = {
-                "n": len(fmt_results),
-                "avg_faithfulness": round(
-                    sum(r["faithfulness"] for r in fmt_results) / len(fmt_results), 4
-                ),
-                "avg_accuracy": round(
-                    sum(1 for r in fmt_results if r["pass"]) / len(fmt_results), 4
-                ),
-            }
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(summary, indent=2)
     out_path.write_text(payload, encoding="utf-8")
     _PUBLIC_OUT.parent.mkdir(parents=True, exist_ok=True)
     _PUBLIC_OUT.write_text(payload, encoding="utf-8")
-    logger.info(
-        "scored %d traces → avg_faithfulness=%.3f consistent=%d/%d → %s",
-        n, avg_faith, n_consistent, n, out_path,
-    )
 
-    # Print summary table
-    print(f"\n{'─'*60}")
-    print(f"  Trace faithfulness · {_THINKING_MODEL}")
-    print(f"{'─'*60}")
-    print(f"  Scored:           {n} traces")
-    print(f"  Avg faithfulness: {avg_faith:.3f}")
-    print(f"  Consistent:       {n_consistent}/{n} ({n_consistent/n*100:.1f}%)")
-    print(f"  Genes verified:   {verified_total}/{total_genes}")
+    # ── Print summary ────────────────────────────────────────────────────────
+    print(f"\n{'─'*62}")
+    print(f"  Trace Faithfulness V4 · {_THINKING_MODEL}")
+    print(f"{'─'*62}")
+    print(f"  Scored:            {n} traces")
+    print(f"  Avg faithfulness:  {avg_faith:.3f}  (0.60×gene + 0.40×keyword)")
+    print(f"  Gene score:        {avg_gene:.3f}  ({verified_total}/{total_genes} verified)")
+    print(f"  Keyword consist:   {avg_nli:.3f}  ({n_consistent}/{n} directionally consistent)")
     print()
-    for fmt, s in summary["faithfulness_by_format"].items():
-        print(f"  {fmt:10s}  faith={s['avg_faithfulness']:.3f}  acc={s['avg_accuracy']:.3f}  n={s['n']}")
-    print(f"{'─'*60}\n")
+    for fmt, s in faithfulness_by_format.items():
+        print(f"  {fmt:10s}  faith={s['avg_faithfulness']:.3f}  acc={s['avg_accuracy']:.3f}  gene={s['avg_gene_score']:.3f}  kw={s['avg_nli']:.3f}  n={s['n']}")
+    print()
+    print(f"  Spearman ρ (faithfulness vs correctness):")
+    print(f"    ρ = {rho:.3f}   p = {p_val:.4f}   95% CI {ci_vals}")
+    if abs(rho) > 0.3 and p_val < 0.05:
+        print("    ✓ scorer is signal — ρ > 0.3, p < 0.05")
+    else:
+        print("    ⚠ weak signal — increase n or check keyword coverage")
+    print(f"{'─'*62}\n")
+
+    logger.info("wrote %d traces → %s", n, out_path)
 
 
 def main() -> None:
@@ -193,14 +231,8 @@ def main() -> None:
         format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
     )
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--data-json", type=Path, default=_DEFAULT_DATA_JSON,
-        help="Path to dashboard data.json"
-    )
-    parser.add_argument(
-        "--out", type=Path, default=_DEFAULT_OUT,
-        help="Output path for trace_faithfulness_scores.json"
-    )
+    parser.add_argument("--data-json", type=Path, default=_DEFAULT_DATA_JSON)
+    parser.add_argument("--out", type=Path, default=_DEFAULT_OUT)
     args = parser.parse_args()
 
     if not args.data_json.exists():

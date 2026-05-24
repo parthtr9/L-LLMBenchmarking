@@ -122,6 +122,49 @@ html, body { margin: 0; padding: 0; background: var(--lb-ink-50); color: var(--l
 .topbar .right { margin-left: auto; display:flex; align-items: center; gap: 10px; }
 .profile { width: 28px; height: 28px; border-radius: 50%; background: var(--lb-green-700); color: #fff; display:grid; place-items: center; font: 500 12px var(--lb-font-sans); }
 
+/* ---- Task switcher ---- */
+.task-switcher {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--lb-border);
+  background: var(--lb-surface);
+  flex-shrink: 0;
+}
+.task-switcher__label {
+  font: 400 11px var(--lb-font-sans);
+  color: var(--lb-fg-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-right: 6px;
+}
+.task-switcher__btn {
+  padding: 5px 14px;
+  border-radius: 4px;
+  border: 1px solid var(--lb-border);
+  background: transparent;
+  color: var(--lb-fg-3);
+  font: 500 12px var(--lb-font-sans);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  white-space: nowrap;
+}
+.task-switcher__btn:hover {
+  border-color: var(--lb-green-500);
+  color: var(--lb-green-600);
+}
+.task-switcher__btn.active {
+  background: var(--lb-green-500);
+  border-color: var(--lb-green-500);
+  color: #fff;
+}
+.task-switcher__count {
+  font: 400 11px var(--lb-font-mono);
+  opacity: 0.75;
+  margin-left: 4px;
+}
+
 /* ---- Content area ---- */
 .content { padding: 28px 32px 40px; max-width: 1280px; width: 100%; }
 

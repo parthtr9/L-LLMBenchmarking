@@ -3,7 +3,6 @@
 
 const AnswersView = ({ records, onOpenRecord }) => {
   const [fmtFilter, setFmtFilter] = React.useState('all');
-  const [taskFilter, setTaskFilter] = React.useState('all');
 
   if (!records || records.length === 0) {
     return (
@@ -17,9 +16,7 @@ const AnswersView = ({ records, onOpenRecord }) => {
     );
   }
 
-  // Derive unique models from cells across all records
   const allModelIds = [...new Set(records.flatMap(r => Object.keys(r.cells || {})))];
-  // Order: L-LLM first, baselines last
   const BASELINE_IDS = ['majority_baseline', 'random_baseline'];
   const modelIds = allModelIds.sort((a, b) => {
     if (a === 'longevity_llm') return -1;
@@ -34,23 +31,7 @@ const AnswersView = ({ records, onOpenRecord }) => {
   });
 
   const formats = ['all', ...new Set(records.map(r => r.format).filter(Boolean))];
-  const tasks = ['all', ...new Set(records.map(r => {
-    // group by task prefix (LB-SEN, LB-0038, etc.)
-    const lb = r.lbId || '';
-    if (lb.startsWith('LB-SEN')) return 'Senescence';
-    if (lb.startsWith('LB-0')) return lb.split('-').slice(0, 2).join('-');
-    return lb || 'Unknown';
-  }).filter(Boolean))];
-
-  const filtered = records.filter(r => {
-    if (fmtFilter !== 'all' && r.format !== fmtFilter) return false;
-    if (taskFilter !== 'all') {
-      const lb = r.lbId || '';
-      const group = lb.startsWith('LB-SEN') ? 'Senescence' : (lb.startsWith('LB-0') ? lb.split('-').slice(0, 2).join('-') : lb);
-      if (group !== taskFilter) return false;
-    }
-    return true;
-  });
+  const filtered = records.filter(r => fmtFilter === 'all' || r.format === fmtFilter);
 
   // Compute per-model accuracy on filtered set
   const modelStats = {};
@@ -70,22 +51,17 @@ const AnswersView = ({ records, onOpenRecord }) => {
           <h1>Answers</h1>
           <div className="sub">{filtered.length} records · {modelIds.length} models · click row to inspect</div>
         </div>
-        <div className="actions" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <span className="lb-meta" style={{ marginRight: 4 }}>Task:</span>
-          {tasks.map(t => (
-            <button key={t} onClick={() => setTaskFilter(t)}
-              style={{ padding: '4px 10px', borderRadius: 4, border: '1px solid var(--lb-border)', background: taskFilter === t ? 'var(--lb-green-500)' : 'var(--lb-bg-2)', color: taskFilter === t ? '#fff' : 'var(--lb-fg-2)', font: '500 12px var(--lb-font-sans)', cursor: 'pointer' }}>
-              {t}
-            </button>
-          ))}
-          <span className="lb-meta" style={{ marginLeft: 8, marginRight: 4 }}>Format:</span>
-          {formats.map(f => (
-            <button key={f} onClick={() => setFmtFilter(f)}
-              style={{ padding: '4px 10px', borderRadius: 4, border: '1px solid var(--lb-border)', background: fmtFilter === f ? 'var(--lb-green-500)' : 'var(--lb-bg-2)', color: fmtFilter === f ? '#fff' : 'var(--lb-fg-2)', font: '500 12px var(--lb-font-sans)', cursor: 'pointer' }}>
-              {f}
-            </button>
-          ))}
-        </div>
+      </div>
+
+      {/* Format filter bar */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center', marginBottom: 18 }}>
+        <span style={{ font: '400 11px var(--lb-font-sans)', color: 'var(--lb-fg-4)', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: 4 }}>Format</span>
+        {formats.map(f => (
+          <button key={f} onClick={() => setFmtFilter(f)}
+            style={{ padding: '4px 12px', borderRadius: 4, border: '1px solid var(--lb-border)', background: fmtFilter === f ? 'var(--lb-green-500)' : 'transparent', color: fmtFilter === f ? '#fff' : 'var(--lb-fg-3)', font: '500 12px var(--lb-font-sans)', cursor: 'pointer' }}>
+            {f}
+          </button>
+        ))}
       </div>
 
       {/* Per-model accuracy summary cards */}

@@ -25,6 +25,7 @@ DATA_ROOT = ROOT / "data"
 LOG_DIR = ROOT / "outputs" / "inspect"
 DATA_JSON = ROOT / "LongevityBench Design System" / "ui_kits" / "longevity_bench" / "public" / "data.json"
 DASHBOARD_DIR = ROOT / "LongevityBench Design System" / "ui_kits" / "longevity_bench"
+GAP_REPORT = ROOT / "outputs" / "gap_analysis_report.md"
 PYTHON = sys.executable
 
 
@@ -301,10 +302,72 @@ def step_export() -> bool:
     return True
 
 
-# ── step 5: serve dashboard ──────────────────────────────────────────────────
+# ── step 5: generate gap analysis report ─────────────────────────────────────
+
+def _split_siblings(parquet_path: Path) -> tuple[Path | None, Path | None]:
+    """Infer train/test parquet siblings for the selected benchmark file."""
+    name = parquet_path.name
+    train_path: Path | None = None
+    test_path: Path | None = None
+
+    if name.endswith("_test.parquet"):
+        test_path = parquet_path
+        train_path = parquet_path.with_name(name.replace("_test.parquet", "_train.parquet"))
+    elif name.endswith("_train.parquet"):
+        train_path = parquet_path
+        test_path = parquet_path.with_name(name.replace("_train.parquet", "_test.parquet"))
+    else:
+        test_path = parquet_path
+
+    if train_path is not None and not train_path.exists():
+        train_path = None
+    if test_path is not None and not test_path.exists():
+        test_path = None
+    return train_path, test_path
+
+
+def step_gap_report(parquet_path: Path) -> bool:
+    header("STEP 5 — Generate gap analysis report")
+
+    train_path, test_path = _split_siblings(parquet_path)
+    print(f"\n  Data JSON : {DATA_JSON.relative_to(ROOT)}")
+    print(f"  Train     : {train_path.relative_to(ROOT) if train_path else 'not found'}")
+    print(f"  Test      : {test_path.relative_to(ROOT) if test_path else 'not found'}")
+    print(f"  Output    : {GAP_REPORT.relative_to(ROOT)}")
+
+    if not DATA_JSON.exists():
+        print("\n  Dashboard JSON not found. Run export first.")
+        return False
+
+    if not confirm("Generate gap analysis report now?"):
+        print("  Skipping gap analysis report.")
+        return False
+
+    cmd = [
+        PYTHON, "-m", "src.analysis.gap_analysis",
+        "--data", str(DATA_JSON),
+        "--out", str(GAP_REPORT),
+    ]
+    if train_path:
+        cmd += ["--train", str(train_path)]
+    if test_path:
+        cmd += ["--test", str(test_path)]
+
+    print("\n  Generating report...")
+    rc = run_cmd(cmd)
+
+    if rc != 0:
+        print(f"\n  Gap analysis failed (exit code {rc}).")
+        return False
+
+    print("\n  Gap analysis report complete.")
+    return True
+
+
+# ── step 6: serve dashboard ──────────────────────────────────────────────────
 
 def step_serve() -> None:
-    header("STEP 5 — Serve dashboard")
+    header("STEP 6 — Serve dashboard")
 
     print(f"\n  URL : http://localhost:8765/")
 
@@ -327,7 +390,7 @@ def step_serve() -> None:
 
 def main() -> None:
     print("\n  LongevityBench Pipeline")
-    print("  eval → export → dashboard\n")
+    print("  eval → export → report → dashboard\n")
 
     if not MODELS_YAML.exists():
         print(f"  ERROR: config/models.yaml not found")
@@ -342,8 +405,12 @@ def main() -> None:
     parquet_path, fmt_filter, limit = step_choose_dataset(datasets)
     eval_ok = step_run_eval(models, parquet_path, fmt_filter, limit)
 
+    exported = False
     if eval_ok or LOG_DIR.exists():
-        step_export()
+        exported = step_export()
+
+    if exported or DATA_JSON.exists():
+        step_gap_report(parquet_path)
 
     step_serve()
 

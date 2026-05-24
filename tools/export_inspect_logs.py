@@ -101,6 +101,7 @@ def _extract_cell(sample: Any) -> dict[str, Any]:
         "pred": None, "score": None, "pass": None,
         "latency_s": None, "tokens": None,
         "trace": None, "reasoning_present": False,
+        "mae": None,
     }
     # Model output
     if sample.output and sample.output.completion:
@@ -122,6 +123,9 @@ def _extract_cell(sample: Any) -> dict[str, Any]:
                 cell["pass"] = float(v) >= 0.5
             else:
                 cell["pred"] = str(v)
+        # Pull MAE from score metadata for regression samples
+        if first.metadata and first.metadata.get("mae") is not None:
+            cell["mae"] = round(float(first.metadata["mae"]), 2)
     # latency stored in metadata by litellm_solver
     if sample.metadata and sample.metadata.get("latency_s") is not None:
         cell["latency_s"] = sample.metadata["latency_s"]

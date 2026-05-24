@@ -1,28 +1,46 @@
 {
   "model": "longevity_llm_thinking",
+  "scorer_version": "v4",
+  "formula": "0.60 * gene_score + 0.40 * keyword_consistency",
   "n_scored": 29,
   "n_with_trace": 29,
-  "avg_faithfulness": 0.5828,
-  "n_consistent": 22,
-  "pct_consistent": 75.9,
+  "avg_faithfulness": 0.7163,
+  "avg_gene_score": 0.895,
+  "avg_nli_consistency": 0.4483,
+  "n_consistent": 7,
+  "pct_consistent": 24.1,
   "total_gene_candidates": 159,
-  "verified_genes": 68,
-  "pct_genes_verified": 42.8,
+  "verified_genes": 142,
+  "pct_genes_verified": 89.3,
+  "spearman_vs_correctness": {
+    "rho": 0.034,
+    "p_value": 0.8609,
+    "ci_95": [
+      -0.3107,
+      0.3903
+    ]
+  },
   "faithfulness_by_format": {
     "mcq": {
       "n": 10,
-      "avg_faithfulness": 0.3585,
-      "avg_accuracy": 0.1
+      "avg_faithfulness": 0.6504,
+      "avg_accuracy": 0.1,
+      "avg_gene_score": 0.8839,
+      "avg_nli": 0.3
     },
     "binary": {
       "n": 9,
-      "avg_faithfulness": 0.6945,
-      "avg_accuracy": 0.6667
+      "avg_faithfulness": 0.7383,
+      "avg_accuracy": 0.6667,
+      "avg_gene_score": 0.86,
+      "avg_nli": 0.5556
     },
     "pairwise": {
       "n": 10,
-      "avg_faithfulness": 0.7065,
-      "avg_accuracy": 0.5
+      "avg_faithfulness": 0.7625,
+      "avg_accuracy": 0.5,
+      "avg_gene_score": 0.9375,
+      "avg_nli": 0.5
     }
   },
   "per_sample": [
@@ -36,16 +54,15 @@
       "trace_present": true,
       "gene_candidates": 3,
       "verified_genes": [
+        "RAS",
         "PTBP1",
         "MCM7"
       ],
-      "unverified_genes": [
-        "RAS"
-      ],
-      "gene_score": 0.6667,
-      "pathway_score": 0.0,
+      "unverified_genes": [],
+      "gene_score": 1.0,
+      "nli_consistency": 1.0,
       "consistent": true,
-      "faithfulness": 0.8095
+      "faithfulness": 1.0
     },
     {
       "id": "LB-SEN-MCQ-0004_00001",
@@ -57,19 +74,18 @@
       "trace_present": true,
       "gene_candidates": 6,
       "verified_genes": [
-        "ZFP36L1",
-        "ARID1B"
-      ],
-      "unverified_genes": [
         "RAS",
+        "ZFP36L1",
+        "ARID1B",
         "SWI",
         "SNF",
         "SASP"
       ],
-      "gene_score": 0.3333,
-      "pathway_score": 0.0,
+      "unverified_genes": [],
+      "gene_score": 1.0,
+      "nli_consistency": 1.0,
       "consistent": true,
-      "faithfulness": 0.619
+      "faithfulness": 1.0
     },
     {
       "id": "LB-SEN-MCQ-0008_00002",
@@ -81,16 +97,15 @@
       "trace_present": true,
       "gene_candidates": 3,
       "verified_genes": [
+        "RAS",
         "ZFP36L1",
         "ITPKB"
       ],
-      "unverified_genes": [
-        "RAS"
-      ],
-      "gene_score": 0.6667,
-      "pathway_score": 0.0,
+      "unverified_genes": [],
+      "gene_score": 1.0,
+      "nli_consistency": 0.0,
       "consistent": false,
-      "faithfulness": 0.381
+      "faithfulness": 0.6
     },
     {
       "id": "LB-SEN-MCQ-0012_00003",
@@ -102,20 +117,20 @@
       "trace_present": true,
       "gene_candidates": 7,
       "verified_genes": [
+        "IR",
         "ITPK1",
+        "DDR",
+        "ATP",
         "ATM",
         "ATR"
       ],
       "unverified_genes": [
-        "IR",
-        "DDR",
-        "CCCP",
-        "ATP"
+        "CCCP"
       ],
-      "gene_score": 0.4286,
-      "pathway_score": 0.0,
+      "gene_score": 0.8571,
+      "nli_consistency": 0.0,
       "consistent": false,
-      "faithfulness": 0.2449
+      "faithfulness": 0.5143
     },
     {
       "id": "LB-SEN-MCQ-0017_00004",
@@ -127,21 +142,21 @@
       "trace_present": true,
       "gene_candidates": 8,
       "verified_genes": [
+        "MRC",
+        "IR",
+        "BAK",
         "BAX",
         "ATG4D"
       ],
       "unverified_genes": [
-        "MRC",
-        "IR",
         "CRISPR",
-        "BAK",
         "BCL",
         "MOMP"
       ],
-      "gene_score": 0.25,
-      "pathway_score": 0.0,
+      "gene_score": 0.625,
+      "nli_consistency": 0.0,
       "consistent": false,
-      "faithfulness": 0.1429
+      "faithfulness": 0.375
     },
     {
       "id": "LB-SEN-MCQ-0022_00005",
@@ -153,17 +168,16 @@
       "trace_present": true,
       "gene_candidates": 4,
       "verified_genes": [
-        "IGFBP3"
-      ],
-      "unverified_genes": [
         "BP1",
+        "IGFBP3",
         "IGF",
         "RAS"
       ],
-      "gene_score": 0.25,
-      "pathway_score": 0.0,
+      "unverified_genes": [],
+      "gene_score": 1.0,
+      "nli_consistency": 1.0,
       "consistent": true,
-      "faithfulness": 0.5714
+      "faithfulness": 1.0
     },
     {
       "id": "LB-SEN-MCQ-0028_00006",
@@ -175,20 +189,20 @@
       "trace_present": true,
       "gene_candidates": 7,
       "verified_genes": [
+        "RAS",
+        "BET",
         "BRD4",
         "MYC",
+        "SASP",
         "HOPX"
       ],
       "unverified_genes": [
-        "RAS",
-        "DDD86481",
-        "BET",
-        "SASP"
+        "DDD86481"
       ],
-      "gene_score": 0.4286,
-      "pathway_score": 0.0,
+      "gene_score": 0.8571,
+      "nli_consistency": 0.0,
       "consistent": false,
-      "faithfulness": 0.2449
+      "faithfulness": 0.5143
     },
     {
       "id": "LB-SEN-MCQ-0032_00007",
@@ -200,21 +214,20 @@
       "trace_present": true,
       "gene_candidates": 8,
       "verified_genes": [
-        "G6PD",
-        "SIRT1"
-      ],
-      "unverified_genes": [
         "IR",
         "TSA",
+        "G6PD",
         "NADPH",
         "ROS",
         "HDAC",
-        "FOXO"
+        "FOXO",
+        "SIRT1"
       ],
-      "gene_score": 0.25,
-      "pathway_score": 0.0,
+      "unverified_genes": [],
+      "gene_score": 1.0,
+      "nli_consistency": 0.0,
       "consistent": false,
-      "faithfulness": 0.1429
+      "faithfulness": 0.6
     },
     {
       "id": "LB-SEN-MCQ-0034_00008",
@@ -226,17 +239,16 @@
       "trace_present": true,
       "gene_candidates": 4,
       "verified_genes": [
+        "BJ",
+        "RAF",
         "YBX1",
         "CKAP2"
       ],
-      "unverified_genes": [
-        "BJ",
-        "RAF"
-      ],
-      "gene_score": 0.5,
-      "pathway_score": 0.0,
+      "unverified_genes": [],
+      "gene_score": 1.0,
+      "nli_consistency": 0.0,
       "consistent": false,
-      "faithfulness": 0.2857
+      "faithfulness": 0.6
     },
     {
       "id": "LB-SEN-MCQ-0038_00009",
@@ -248,17 +260,17 @@
       "trace_present": true,
       "gene_candidates": 4,
       "verified_genes": [
-        "PLK1"
+        "PLK1",
+        "G2"
       ],
       "unverified_genes": [
         "HDF161",
-        "H2O2",
-        "G2"
+        "H2O2"
       ],
-      "gene_score": 0.25,
-      "pathway_score": 0.0,
+      "gene_score": 0.5,
+      "nli_consistency": 0.0,
       "consistent": false,
-      "faithfulness": 0.1429
+      "faithfulness": 0.3
     },
     {
       "id": "LB-SEN-PAIR-0001_00010",
@@ -270,21 +282,21 @@
       "trace_present": true,
       "gene_candidates": 8,
       "verified_genes": [
+        "RAS",
         "COPB2",
+        "COPII",
+        "ER",
+        "SASP",
         "DIDO1",
         "DPY30"
       ],
       "unverified_genes": [
-        "RAS",
-        "COPII",
-        "ER",
-        "SASP",
         "COMPASS"
       ],
-      "gene_score": 0.375,
-      "pathway_score": 0.0,
-      "consistent": true,
-      "faithfulness": 0.6429
+      "gene_score": 0.875,
+      "nli_consistency": 0.5,
+      "consistent": false,
+      "faithfulness": 0.725
     },
     {
       "id": "LB-SEN-PAIR-0002_00011",
@@ -296,19 +308,19 @@
       "trace_present": true,
       "gene_candidates": 6,
       "verified_genes": [
+        "RAS",
         "HIF1A",
+        "SASP",
         "PMVK",
         "SERPINB2"
       ],
       "unverified_genes": [
-        "RAS",
-        "DDD86481",
-        "SASP"
+        "DDD86481"
       ],
-      "gene_score": 0.5,
-      "pathway_score": 0.0,
-      "consistent": true,
-      "faithfulness": 0.7143
+      "gene_score": 0.8333,
+      "nli_consistency": 0.5,
+      "consistent": false,
+      "faithfulness": 0.7
     },
     {
       "id": "LB-SEN-PAIR-0004_00012",
@@ -320,25 +332,25 @@
       "trace_present": true,
       "gene_candidates": 12,
       "verified_genes": [
-        "TNF",
-        "XAF1",
-        "XIAP",
-        "GDF15"
-      ],
-      "unverified_genes": [
         "WI",
         "IR",
         "BAFF",
+        "TNF",
         "NF",
-        "BH3",
-        "BCL",
+        "XAF1",
+        "XIAP",
+        "GDF15",
         "MAPK",
         "SASP"
       ],
-      "gene_score": 0.3333,
-      "pathway_score": 0.0,
-      "consistent": true,
-      "faithfulness": 0.619
+      "unverified_genes": [
+        "BH3",
+        "BCL"
+      ],
+      "gene_score": 0.8333,
+      "nli_consistency": 0.5,
+      "consistent": false,
+      "faithfulness": 0.7
     },
     {
       "id": "LB-SEN-PAIR-0009_00013",
@@ -350,19 +362,18 @@
       "trace_present": true,
       "gene_candidates": 6,
       "verified_genes": [
-        "H2AJ",
-        "CDCA2",
-        "NIPA2"
-      ],
-      "unverified_genes": [
         "WI",
+        "H2AJ",
         "H2A",
+        "CDCA2",
+        "NIPA2",
         "NIPA"
       ],
-      "gene_score": 0.5,
-      "pathway_score": 0.0,
-      "consistent": true,
-      "faithfulness": 0.7143
+      "unverified_genes": [],
+      "gene_score": 1.0,
+      "nli_consistency": 0.5,
+      "consistent": false,
+      "faithfulness": 0.8
     },
     {
       "id": "LB-SEN-PAIR-0010_00014",
@@ -374,22 +385,21 @@
       "trace_present": true,
       "gene_candidates": 9,
       "verified_genes": [
+        "RAS",
+        "WSTF",
         "INO80",
         "TP53",
         "TP73",
-        "ID1",
-        "IL6"
-      ],
-      "unverified_genes": [
-        "RAS",
-        "WSTF",
         "SASP",
+        "ID1",
+        "IL6",
         "NF"
       ],
-      "gene_score": 0.5556,
-      "pathway_score": 0.0,
-      "consistent": true,
-      "faithfulness": 0.746
+      "unverified_genes": [],
+      "gene_score": 1.0,
+      "nli_consistency": 0.5,
+      "consistent": false,
+      "faithfulness": 0.8
     },
     {
       "id": "LB-SEN-PAIR-0013_00015",
@@ -401,19 +411,18 @@
       "trace_present": true,
       "gene_candidates": 6,
       "verified_genes": [
+        "RAS",
+        "ROS",
         "MCM7",
         "MCM2",
         "MCM3AP",
         "MCM3"
       ],
-      "unverified_genes": [
-        "RAS",
-        "ROS"
-      ],
-      "gene_score": 0.6667,
-      "pathway_score": 0.0,
-      "consistent": true,
-      "faithfulness": 0.8095
+      "unverified_genes": [],
+      "gene_score": 1.0,
+      "nli_consistency": 0.5,
+      "consistent": false,
+      "faithfulness": 0.8
     },
     {
       "id": "LB-SEN-PAIR-0022_00016",
@@ -426,18 +435,18 @@
       "gene_candidates": 6,
       "verified_genes": [
         "PINK1",
-        "FLT1"
-      ],
-      "unverified_genes": [
-        "MDL72527",
+        "FLT1",
         "VEGFR3",
         "SASP",
         "VEGF"
       ],
-      "gene_score": 0.3333,
-      "pathway_score": 0.0,
-      "consistent": true,
-      "faithfulness": 0.619
+      "unverified_genes": [
+        "MDL72527"
+      ],
+      "gene_score": 0.8333,
+      "nli_consistency": 0.5,
+      "consistent": false,
+      "faithfulness": 0.7
     },
     {
       "id": "LB-SEN-PAIR-0026_00017",
@@ -449,19 +458,18 @@
       "trace_present": true,
       "gene_candidates": 6,
       "verified_genes": [
+        "RAS",
         "PTBP1",
         "ETS1",
-        "ARG2"
-      ],
-      "unverified_genes": [
-        "RAS",
+        "ARG2",
         "UTR",
         "SASP"
       ],
-      "gene_score": 0.5,
-      "pathway_score": 0.0,
-      "consistent": true,
-      "faithfulness": 0.7143
+      "unverified_genes": [],
+      "gene_score": 1.0,
+      "nli_consistency": 0.5,
+      "consistent": false,
+      "faithfulness": 0.8
     },
     {
       "id": "LB-SEN-PAIR-0037_00018",
@@ -473,18 +481,17 @@
       "trace_present": true,
       "gene_candidates": 5,
       "verified_genes": [
+        "RAS",
         "PTBP1",
         "ITPR2",
-        "WWP1"
-      ],
-      "unverified_genes": [
-        "RAS",
+        "WWP1",
         "E3"
       ],
-      "gene_score": 0.6,
-      "pathway_score": 0.0,
-      "consistent": true,
-      "faithfulness": 0.7714
+      "unverified_genes": [],
+      "gene_score": 1.0,
+      "nli_consistency": 0.5,
+      "consistent": false,
+      "faithfulness": 0.8
     },
     {
       "id": "LB-SEN-PAIR-0042_00019",
@@ -496,17 +503,16 @@
       "trace_present": true,
       "gene_candidates": 4,
       "verified_genes": [
+        "TIG",
+        "RAF",
         "NF2",
         "DGCR8"
       ],
-      "unverified_genes": [
-        "TIG",
-        "RAF"
-      ],
-      "gene_score": 0.5,
-      "pathway_score": 0.0,
-      "consistent": true,
-      "faithfulness": 0.7143
+      "unverified_genes": [],
+      "gene_score": 1.0,
+      "nli_consistency": 0.5,
+      "consistent": false,
+      "faithfulness": 0.8
     },
     {
       "id": "LB-SEN-SIG-0009_00020",
@@ -522,7 +528,7 @@
       ],
       "unverified_genes": [],
       "gene_score": 1.0,
-      "pathway_score": 0.0,
+      "nli_consistency": 1.0,
       "consistent": true,
       "faithfulness": 1.0
     },
@@ -543,9 +549,9 @@
         "H2O2"
       ],
       "gene_score": 0.3333,
-      "pathway_score": 0.0,
+      "nli_consistency": 1.0,
       "consistent": true,
-      "faithfulness": 0.619
+      "faithfulness": 0.6
     },
     {
       "id": "LB-SEN-SIG-0011_00022",
@@ -557,18 +563,17 @@
       "trace_present": true,
       "gene_candidates": 5,
       "verified_genes": [
+        "BJ",
         "ENTPD7",
+        "SASP",
+        "NF",
         "CDKN1A"
       ],
-      "unverified_genes": [
-        "BJ",
-        "SASP",
-        "NF"
-      ],
-      "gene_score": 0.4,
-      "pathway_score": 0.0,
-      "consistent": true,
-      "faithfulness": 0.6571
+      "unverified_genes": [],
+      "gene_score": 1.0,
+      "nli_consistency": 0.5,
+      "consistent": false,
+      "faithfulness": 0.8
     },
     {
       "id": "LB-SEN-SIG-0012_00023",
@@ -580,17 +585,16 @@
       "trace_present": true,
       "gene_candidates": 4,
       "verified_genes": [
-        "CALR"
-      ],
-      "unverified_genes": [
         "IR",
         "E3",
+        "CALR",
         "ER"
       ],
-      "gene_score": 0.25,
-      "pathway_score": 0.0,
-      "consistent": true,
-      "faithfulness": 0.5714
+      "unverified_genes": [],
+      "gene_score": 1.0,
+      "nli_consistency": 0.0,
+      "consistent": false,
+      "faithfulness": 0.6
     },
     {
       "id": "LB-SEN-SIG-0025_00025",
@@ -602,18 +606,17 @@
       "trace_present": true,
       "gene_candidates": 5,
       "verified_genes": [
-        "MAPK1"
-      ],
-      "unverified_genes": [
         "TIG",
         "RAF",
+        "MAPK1",
         "ERK2",
         "MAPK"
       ],
-      "gene_score": 0.2,
-      "pathway_score": 0.0,
+      "unverified_genes": [],
+      "gene_score": 1.0,
+      "nli_consistency": 1.0,
       "consistent": true,
-      "faithfulness": 0.5429
+      "faithfulness": 1.0
     },
     {
       "id": "LB-SEN-SIG-0029_00026",
@@ -627,16 +630,16 @@
       "verified_genes": [
         "HDAC1",
         "HDAC2",
-        "IL6"
-      ],
-      "unverified_genes": [
-        "MDL72527",
+        "IL6",
         "SASP"
       ],
-      "gene_score": 0.6,
-      "pathway_score": 0.0,
-      "consistent": true,
-      "faithfulness": 0.7714
+      "unverified_genes": [
+        "MDL72527"
+      ],
+      "gene_score": 0.8,
+      "nli_consistency": 0.0,
+      "consistent": false,
+      "faithfulness": 0.48
     },
     {
       "id": "LB-SEN-SIG-0045_00027",
@@ -651,17 +654,17 @@
         "MIR31HG",
         "SMAD3",
         "EZH2",
-        "SERPINB2"
+        "BJ",
+        "SERPINB2",
+        "SASP"
       ],
       "unverified_genes": [
-        "BJ",
-        "SASP",
         "TGF"
       ],
-      "gene_score": 0.5714,
-      "pathway_score": 0.0,
-      "consistent": true,
-      "faithfulness": 0.7551
+      "gene_score": 0.8571,
+      "nli_consistency": 0.0,
+      "consistent": false,
+      "faithfulness": 0.5143
     },
     {
       "id": "LB-SEN-SIG-0058_00028",
@@ -673,16 +676,15 @@
       "trace_present": true,
       "gene_candidates": 3,
       "verified_genes": [
-        "SIK1"
-      ],
-      "unverified_genes": [
         "BJ",
+        "SIK1",
         "MAPK"
       ],
-      "gene_score": 0.3333,
-      "pathway_score": 0.0,
-      "consistent": true,
-      "faithfulness": 0.619
+      "unverified_genes": [],
+      "gene_score": 1.0,
+      "nli_consistency": 0.5,
+      "consistent": false,
+      "faithfulness": 0.8
     },
     {
       "id": "LB-SEN-SIG-0061_00029",
@@ -695,16 +697,16 @@
       "gene_candidates": 4,
       "verified_genes": [
         "SIN3B",
-        "SIN3A"
-      ],
-      "unverified_genes": [
-        "CCCP",
+        "SIN3A",
         "ROS"
       ],
-      "gene_score": 0.5,
-      "pathway_score": 0.0,
+      "unverified_genes": [
+        "CCCP"
+      ],
+      "gene_score": 0.75,
+      "nli_consistency": 1.0,
       "consistent": true,
-      "faithfulness": 0.7143
+      "faithfulness": 0.85
     }
   ]
 }

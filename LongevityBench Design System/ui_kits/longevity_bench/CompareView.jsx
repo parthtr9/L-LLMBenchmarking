@@ -1,64 +1,178 @@
-// CompareView — model comparison driven by real run data.
-// Receives `runs` prop from App (populated from public/data.json).
+// CompareView — model comparison with grouped bar chart and per-model cards.
+// Receives runs + records props from App.
 
-const HorizontalBars = ({ task, models }) => {
-  const max = Math.max(...models.map(m => task.scores[m.id] ?? 0), 0.01);
-  const llm = task.scores['longevity_llm'];
-  const baseline = task.scores['majority_baseline'];
-  const delta = llm != null && baseline != null ? llm - baseline : null;
+const BASELINE_IDS = ['majority_baseline', 'random_baseline'];
+const FORMAT_ORDER = ['mcq', 'binary', 'pairwise', 'regression'];
+const FORMAT_LABELS = { mcq: 'MCQ', binary: 'Binary', pairwise: 'Pairwise', regression: 'Regression' };
+
+// ── Grouped bar chart (SVG) ───────────────────────────────────────────────────
+
+const GroupedBarChart = ({ matrix, models, formats }) => {
+  const W = 680, H = 280;
+  const ML = 44, MR = 16, MT = 20, MB = 60;
+  const chartW = W - ML - MR;
+  const chartH = H - MT - MB;
+
+  const GROUP_GAP = 32;
+  const barAreaW = (chartW - GROUP_GAP * (formats.length - 1)) / formats.length;
+  const barW = Math.min(22, (barAreaW - 12) / models.length);
+  const barSpacing = 3;
+  const groupBarTotalW = barW * models.length + barSpacing * (models.length - 1);
+  const barPad = (barAreaW - groupBarTotalW) / 2;
+
+  const yTicks = [0, 0.25, 0.5, 0.75, 1.0];
+
+  const groupX = (fi) => ML + fi * (barAreaW + GROUP_GAP);
 
   return (
-    <div style={{ padding: '14px 18px 18px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
-        <div>
-          <Pill brand>{task.id}</Pill>
-          <span style={{ marginLeft: 8, font: '500 14px var(--lb-font-sans)', color: 'var(--lb-fg-1)' }}>
-            {task.name.replace(/_/g, ' ')}
-          </span>
-        </div>
-        {delta != null && (
-          <span className="lb-meta" style={{ fontFamily: 'var(--lb-font-mono)' }}>
-            L-LLM vs majority:{' '}
-            <span style={{ color: delta >= 0 ? 'var(--lb-green-700)' : 'var(--lb-error)', fontWeight: 500 }}>
-              {delta >= 0 ? '+' : '−'}{Math.abs(delta).toFixed(3)}
-            </span>
-          </span>
-        )}
-      </div>
-      {models.map(m => {
-        const v = task.scores[m.id];
-        if (v == null) return null;
-        const ci = task.ci[m.id];
-        const pct = (v / max) * 100;
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', maxWidth: W, display: 'block' }}>
+      {/* Y grid + labels */}
+      {yTicks.map(t => {
+        const y = MT + chartH - t * chartH;
         return (
-          <div key={m.id} style={{ display: 'grid', gridTemplateColumns: '110px 1fr 52px', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-            <span style={{ font: '500 12px var(--lb-font-sans)', color: 'var(--lb-fg-2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.name}</span>
-            <div style={{ position: 'relative', height: 8, background: 'var(--lb-ink-100)', borderRadius: 4 }}>
-              <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${pct}%`, background: m.color, borderRadius: 4 }} />
-              {ci && (
-                <div style={{
-                  position: 'absolute', top: -2,
-                  left: `${(ci[0] / max) * 100}%`,
-                  width: `${((ci[1] - ci[0]) / max) * 100}%`,
-                  height: 12,
-                  borderLeft: '1.5px solid ' + m.color,
-                  borderRight: '1.5px solid ' + m.color,
-                  opacity: 0.7,
-                }} />
-              )}
-            </div>
-            <span style={{ font: '500 12px var(--lb-font-mono)', fontVariantNumeric: 'tabular-nums', color: 'var(--lb-fg-1)', textAlign: 'right' }}>
-              {v.toFixed(3)}
-            </span>
-          </div>
+          <g key={t}>
+            <line x1={ML} x2={ML + chartW} y1={y} y2={y}
+              stroke="var(--lb-border)" strokeWidth={t === 0 ? 1.5 : 1} strokeDasharray={t > 0 ? '3 3' : ''} />
+            <text x={ML - 6} y={y + 4} textAnchor="end"
+              style={{ font: '10px var(--lb-font-mono)', fill: 'var(--lb-fg-4)' }}>
+              {t.toFixed(2)}
+            </text>
+          </g>
         );
       })}
+
+      {/* Bars + format labels */}
+      {formats.map((fmt, fi) => {
+        const gx = groupX(fi);
+        const labelY = MT + chartH + 14;
+        return (
+          <g key={fmt}>
+            {/* Format label */}
+            <text x={gx + barAreaW / 2} y={labelY + 10}
+              textAnchor="middle"
+              style={{ font: '500 11px var(--lb-font-sans)', fill: 'var(--lb-fg-2)' }}>
+              {FORMAT_LABELS[fmt] || fmt}
+            </text>
+            {/* Bars per model */}
+            {models.map((m, mi) => {
+              const v = matrix[fmt]?.[m.id];
+              if (v == null) return null;
+              const barH = v * chartH;
+              const x = gx + barPad + mi * (barW + barSpacing);
+              const y = MT + chartH - barH;
+              const isBaseline = BASELINE_IDS.includes(m.id);
+              return (
+                <g key={m.id}>
+                  <rect
+                    x={x} y={y} width={barW} height={Math.max(barH, 1)}
+                    fill={m.color}
+                    opacity={isBaseline ? 0.4 : 0.88}
+                    rx={2}
+                  />
+                  <title>{m.name}: {v.toFixed(3)}</title>
+                  {barH >= 16 && (
+                    <text x={x + barW / 2} y={y - 3} textAnchor="middle"
+                      style={{ font: '9px var(--lb-font-mono)', fill: m.color, fontWeight: 600 }}>
+                      {v.toFixed(2)}
+                    </text>
+                  )}
+                </g>
+              );
+            })}
+          </g>
+        );
+      })}
+
+      {/* Legend */}
+      {models.map((m, i) => (
+        <g key={m.id} transform={`translate(${ML + i * 122}, ${H - 12})`}>
+          <rect x={0} y={-7} width={10} height={10} fill={m.color}
+            opacity={BASELINE_IDS.includes(m.id) ? 0.45 : 0.9} rx={2} />
+          <text x={14} y={2} style={{ font: '11px var(--lb-font-sans)', fill: 'var(--lb-fg-2)' }}>
+            {m.name}
+          </text>
+        </g>
+      ))}
+    </svg>
+  );
+};
+
+// ── Radial score ring (per-model card) ───────────────────────────────────────
+
+const ScoreRing = ({ value, color, size = 52 }) => {
+  const r = (size - 8) / 2;
+  const circ = 2 * Math.PI * r;
+  const dash = value * circ;
+  return (
+    <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none"
+        stroke="var(--lb-ink-100)" strokeWidth={6} />
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none"
+        stroke={color} strokeWidth={6}
+        strokeDasharray={`${dash} ${circ - dash}`}
+        strokeLinecap="round"
+        style={{ transition: 'stroke-dasharray 0.4s ease' }}
+      />
+    </svg>
+  );
+};
+
+const ModelCard = ({ model, formatScores, formats, avgScore, nCorrect, nTotal }) => {
+  const isBaseline = BASELINE_IDS.includes(model.id);
+  return (
+    <div className="card" style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 14 }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ position: 'relative', width: 52, height: 52, flexShrink: 0 }}>
+          <ScoreRing value={avgScore ?? 0} color={model.color} />
+          <div style={{
+            position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
+            justifyContent: 'center', font: '600 11px var(--lb-font-mono)',
+            color: model.color, transform: 'none',
+          }}>
+            {avgScore != null ? (avgScore * 100).toFixed(0) + '%' : '—'}
+          </div>
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ font: '500 14px var(--lb-font-sans)', color: 'var(--lb-fg-1)', marginBottom: 2 }}>
+            {model.name}
+            {isBaseline && <span style={{ marginLeft: 6, font: '400 11px var(--lb-font-sans)', color: 'var(--lb-fg-4)' }}>baseline</span>}
+          </div>
+          <div className="lb-meta">{nCorrect}/{nTotal} correct</div>
+        </div>
+      </div>
+
+      {/* Per-format mini bars */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+        {formats.map(fmt => {
+          const v = formatScores[fmt];
+          if (v == null) return null;
+          const color = v >= 0.6 ? 'var(--lb-green-500)' : v >= 0.4 ? '#c98b1c' : 'var(--lb-error)';
+          return (
+            <div key={fmt}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+                <span style={{ font: '400 11px var(--lb-font-sans)', color: 'var(--lb-fg-3)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  {FORMAT_LABELS[fmt] || fmt}
+                </span>
+                <span style={{ font: '500 11px var(--lb-font-mono)', color }}>
+                  {v.toFixed(3)}
+                </span>
+              </div>
+              <div style={{ height: 4, background: 'var(--lb-ink-100)', borderRadius: 3 }}>
+                <div style={{ width: `${v * 100}%`, height: '100%', background: color, borderRadius: 3, transition: 'width 0.3s ease' }} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
 
-const CompareView = ({ runs = [] }) => {
-  // ── Derive models from completed runs ──────────────────────────────────────
+// ── Main CompareView ──────────────────────────────────────────────────────────
+
+const CompareView = ({ runs = [], records = [] }) => {
+  // Derive model list from completed runs
   const modelMap = {};
   runs.filter(r => r.status === 'complete').forEach(r => {
     if (!modelMap[r.modelId]) {
@@ -66,16 +180,15 @@ const CompareView = ({ runs = [] }) => {
         id: r.modelId,
         name: r.model,
         color: (MODEL_COLORS || {})[r.modelId] || '#8c948c',
-        sub: r.modelId.replace(/_/g, ' '),
       };
     }
   });
 
-  // Order: L-LLM first, then non-baselines, then baselines
-  const BASELINE_IDS = ['majority_baseline', 'random_baseline'];
   const models = Object.values(modelMap).sort((a, b) => {
     if (a.id === 'longevity_llm') return -1;
     if (b.id === 'longevity_llm') return 1;
+    if (a.id === 'claude_sonnet') return -1;
+    if (b.id === 'claude_sonnet') return 1;
     const aBase = BASELINE_IDS.includes(a.id);
     const bBase = BASELINE_IDS.includes(b.id);
     if (aBase && !bBase) return 1;
@@ -83,23 +196,43 @@ const CompareView = ({ runs = [] }) => {
     return a.name.localeCompare(b.name);
   });
 
-  // ── Derive tasks — best score per model per lbId ──────────────────────────
-  const taskMap = {};
-  runs.filter(r => r.status === 'complete').forEach(r => {
-    if (!taskMap[r.lbId]) {
-      taskMap[r.lbId] = { id: r.lbId, name: r.taskName || r.lbId, scores: {}, ci: {} };
-    }
-    const score = r.spark?.[7] ?? r.f1 ?? r.mae ?? 0;
-    const existing = taskMap[r.lbId].scores[r.modelId];
-    if (existing == null || score > existing) {
-      taskMap[r.lbId].scores[r.modelId] = score;
-    }
-    if (r.ci) taskMap[r.lbId].ci[r.modelId] = r.ci;
-  });
-  const tasks = Object.values(taskMap);
+  // Derive formats present in records
+  const formats = FORMAT_ORDER.filter(f =>
+    records.some(r => r.format === f)
+  );
 
-  // ── Empty state ────────────────────────────────────────────────────────────
-  if (models.length === 0 || tasks.length === 0) {
+  // Compute accuracy matrix: matrix[format][modelId] = accuracy
+  const matrix = {};
+  formats.forEach(fmt => {
+    matrix[fmt] = {};
+    models.forEach(m => {
+      const fmtRecords = records.filter(r => r.format === fmt);
+      if (fmtRecords.length === 0) return;
+      const modelCells = fmtRecords.map(r => r.cells?.[m.id]);
+      const scored = modelCells.filter(c => c && c.score != null);
+      if (scored.length === 0) return;
+      matrix[fmt][m.id] = scored.reduce((s, c) => s + c.score, 0) / scored.length;
+    });
+  });
+
+  // Per-model stats
+  const modelStats = models.map(m => {
+    const formatScores = {};
+    formats.forEach(f => { formatScores[f] = matrix[f]?.[m.id]; });
+    const vals = Object.values(formatScores).filter(v => v != null);
+    const avgScore = vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+    const modelCells = records.map(r => r.cells?.[m.id]).filter(c => c && c.score != null);
+    const nCorrect = modelCells.filter(c => c.pass).length;
+    return { ...m, formatScores, avgScore, nCorrect, nTotal: modelCells.length };
+  });
+
+  // Best / second for key finding
+  const nonBaselines = modelStats.filter(m => !BASELINE_IDS.includes(m.id) && m.avgScore != null);
+  const best = nonBaselines.sort((a, b) => (b.avgScore ?? 0) - (a.avgScore ?? 0))[0];
+  const second = nonBaselines.filter(m => m.id !== best?.id)[0];
+  const majorityAvg = modelStats.find(m => m.id === 'majority_baseline')?.avgScore;
+
+  if (models.length === 0 || records.length === 0) {
     return (
       <>
         <div className="page-head">
@@ -107,30 +240,11 @@ const CompareView = ({ runs = [] }) => {
         </div>
         <div className="card" style={{ padding: 40, textAlign: 'center' }}>
           <div className="lb-eyebrow" style={{ marginBottom: 8 }}>No data</div>
-          <p className="lb-p" style={{ color: 'var(--lb-fg-3)' }}>
-            Run <code>pipeline.py</code> or <code>src.eval.run_inspect</code> then export logs.
-          </p>
+          <p className="lb-p" style={{ color: 'var(--lb-fg-3)' }}>Run <code>pipeline.py</code> then export logs.</p>
         </div>
       </>
     );
   }
-
-  // ── Aggregate scores ───────────────────────────────────────────────────────
-  const agg = models.map(m => {
-    const taskScores = tasks.map(t => t.scores[m.id]).filter(v => v != null);
-    const avg = taskScores.length > 0 ? taskScores.reduce((s, v) => s + v, 0) / taskScores.length : null;
-    const wins = tasks.filter(t => {
-      if (t.scores[m.id] == null) return false;
-      const best = Math.max(...Object.values(t.scores).filter(v => v != null));
-      return t.scores[m.id] >= best;
-    }).length;
-    return { ...m, avg, wins, nTasks: taskScores.length };
-  });
-
-  // ── Best non-baseline for key-findings callout ─────────────────────────────
-  const nonBaselines = agg.filter(m => !BASELINE_IDS.includes(m.id) && m.avg != null);
-  const best = nonBaselines.reduce((a, b) => (a.avg ?? 0) >= (b.avg ?? 0) ? a : b, nonBaselines[0]);
-  const second = nonBaselines.filter(m => m.id !== best?.id)[0];
 
   return (
     <>
@@ -139,68 +253,74 @@ const CompareView = ({ runs = [] }) => {
           <div className="lb-eyebrow" style={{ marginBottom: 6 }}>Live results · built from outputs/inspect/</div>
           <h1>Model comparison</h1>
           <div className="sub">
-            {models.length} models · {tasks.length} task{tasks.length !== 1 ? 's' : ''} · score = normalised mean (higher is better)
+            {models.length} models · {formats.length} format{formats.length !== 1 ? 's' : ''} · {records.length} samples
           </div>
         </div>
       </div>
 
-      {/* Aggregate metric cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(models.length, 4)}, 1fr)`, gap: 14, marginBottom: 22 }}>
-        {agg.map(m => (
-          <div key={m.id} className="metric">
-            <div className="lbl" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ width: 10, height: 10, background: m.color, borderRadius: 2, display: 'inline-block' }} />
-              {m.name}
+      {/* Key findings strip */}
+      {best && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 20 }}>
+          <div className="card" style={{ padding: '14px 18px' }}>
+            <div className="lb-eyebrow" style={{ color: 'var(--lb-green-700)', marginBottom: 6 }}>Best model</div>
+            <div style={{ font: '600 22px var(--lb-font-mono)', color: best.color, marginBottom: 4 }}>
+              {(best.avgScore * 100).toFixed(1)}%
             </div>
-            <div className="val">{m.avg != null ? m.avg.toFixed(3) : '—'}</div>
-            <div className="sub">{m.sub} · {m.wins}/{tasks.length} task wins</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Key findings */}
-      {best && second && (
-        <div className="card" style={{ marginBottom: 16 }}>
-          <div className="head"><h3>Key findings</h3></div>
-          <div style={{ padding: '14px 20px 18px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-            <div style={{ padding: 14, background: 'var(--lb-success-bg)', borderRadius: 6, border: '1px solid #c1e0b9' }}>
-              <div className="lb-eyebrow" style={{ color: 'var(--lb-green-700)', marginBottom: 6 }}>Best model</div>
-              <p style={{ margin: 0, font: '400 13px var(--lb-font-sans)', color: 'var(--lb-fg-1)', lineHeight: 1.55 }}>
-                <strong>{best.name}</strong> leads with avg score <strong>{best.avg.toFixed(3)}</strong> across {best.nTasks} task{best.nTasks !== 1 ? 's' : ''}.
-              </p>
-            </div>
-            <div style={{ padding: 14, background: 'var(--lb-info-bg)', borderRadius: 6, border: '1px solid #b8cef0' }}>
-              <div className="lb-eyebrow" style={{ color: '#1b4a8c', marginBottom: 6 }}>Gap to next</div>
-              <p style={{ margin: 0, font: '400 13px var(--lb-font-sans)', color: 'var(--lb-fg-1)', lineHeight: 1.55 }}>
-                <strong>{best.name}</strong> vs <strong>{second.name}</strong>:{' '}
-                <strong>{(best.avg - second.avg >= 0 ? '+' : '')}{(best.avg - second.avg).toFixed(3)}</strong> avg score difference.
-              </p>
+            <div style={{ font: '400 13px var(--lb-font-sans)', color: 'var(--lb-fg-1)' }}>
+              {best.name} avg across {formats.length} format{formats.length !== 1 ? 's' : ''}
             </div>
           </div>
+          {second && (
+            <div className="card" style={{ padding: '14px 18px' }}>
+              <div className="lb-eyebrow" style={{ color: '#1b4a8c', marginBottom: 6 }}>Gap to 2nd</div>
+              <div style={{ font: '600 22px var(--lb-font-mono)', color: best.avgScore >= second.avgScore ? 'var(--lb-green-700)' : 'var(--lb-error)', marginBottom: 4 }}>
+                {best.avgScore >= second.avgScore ? '+' : ''}{((best.avgScore - second.avgScore) * 100).toFixed(1)}%
+              </div>
+              <div style={{ font: '400 13px var(--lb-font-sans)', color: 'var(--lb-fg-1)' }}>
+                {best.name} vs {second.name}
+              </div>
+            </div>
+          )}
+          {majorityAvg != null && best && (
+            <div className="card" style={{ padding: '14px 18px' }}>
+              <div className="lb-eyebrow" style={{ color: '#8a5d12', marginBottom: 6 }}>vs Majority baseline</div>
+              <div style={{ font: '600 22px var(--lb-font-mono)', color: best.avgScore > majorityAvg ? 'var(--lb-green-700)' : 'var(--lb-error)', marginBottom: 4 }}>
+                {best.avgScore > majorityAvg ? '+' : ''}{((best.avgScore - majorityAvg) * 100).toFixed(1)}%
+              </div>
+              <div style={{ font: '400 13px var(--lb-font-sans)', color: 'var(--lb-fg-1)' }}>
+                {best.name} above majority class
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Per-task bar charts */}
-      <div className="card" style={{ overflow: 'hidden' }}>
-        <div className="head">
-          <h3>Per-task scores</h3>
-          <p className="sub">95% CI shown where available · score normalised to [0,1]</p>
+      {/* Grouped bar chart */}
+      <div className="card" style={{ marginBottom: 20, padding: '18px 24px 22px' }}>
+        <div className="head" style={{ marginBottom: 16 }}>
+          <h3>Accuracy by format</h3>
+          <p className="sub">all models · score per question format · higher is better</p>
         </div>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: tasks.length === 1 ? '1fr' : '1fr 1fr',
-          gap: 0,
-          borderTop: '1px solid var(--lb-border)',
-        }}>
-          {tasks.map((t, i) => (
-            <div key={t.id} style={{
-              borderRight: tasks.length > 1 && i % 2 === 0 ? '1px solid var(--lb-border)' : 'none',
-              borderBottom: i < tasks.length - (tasks.length % 2 === 0 ? 2 : 1) ? '1px solid var(--lb-border)' : 'none',
-            }}>
-              <HorizontalBars task={t} models={models} />
-            </div>
-          ))}
-        </div>
+        <GroupedBarChart matrix={matrix} models={models} formats={formats} />
+      </div>
+
+      {/* Per-model cards */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: `repeat(${Math.min(models.length, 4)}, 1fr)`,
+        gap: 14,
+      }}>
+        {modelStats.map(m => (
+          <ModelCard
+            key={m.id}
+            model={m}
+            formatScores={m.formatScores}
+            formats={formats}
+            avgScore={m.avgScore}
+            nCorrect={m.nCorrect}
+            nTotal={m.nTotal}
+          />
+        ))}
       </div>
     </>
   );

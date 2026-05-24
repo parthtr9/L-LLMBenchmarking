@@ -62,6 +62,7 @@ _FORMAT_INSTRUCTIONS: dict[str, str] = {
     "binary":     "\n\nAnswer with only A or B. No explanation.",
     "pairwise":   "\n\nAnswer with only A or B. No explanation.",
     "ternary":    "\n\nAnswer with only the label (e.g. synergistic, antagonistic, additive). No explanation.",
+    "regression": "\n\nAnswer with only a single integer. No units, no explanation.",
 }
 
 
@@ -88,6 +89,7 @@ def _row_to_sample(row: dict[str, Any], index: int) -> Sample:
         metadata={
             "lb_id": row.get("lb_id"),
             "display_name": row.get("display_name"),
+            "display_group": row.get("display_group"),
             "format": row.get("format"),
             "metric": row.get("metric"),
             "domain": row.get("domain"),

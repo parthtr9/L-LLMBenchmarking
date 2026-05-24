@@ -1,30 +1,40 @@
-// RunDetail — metric cards + model comparison bar chart + records table.
+// RunDetail — dynamic view for a single completed run.
+// Shows actual scores, format breakdown, and per-sample log for this model only.
 
-const ModelBar = () => {
-  const rows = [
-    { lbl: 'L-LLM (Qwen3.5-9B)',    val: 0.62, color: 'var(--lb-green-500)' },
-    { lbl: 'GPT-4o',                val: 0.58, color: '#2a6dc8' },
-    { lbl: 'Majority baseline',     val: 0.42, color: '#c98b1c' },
-    { lbl: 'Random uniform',        val: 0.33, color: '#8c948c' },
-  ];
-  const max = 1.0;
+const RunScoreBar = ({ run, records }) => {
+  // Per-format accuracy for this specific model from actual records
+  const formats = ['mcq', 'binary', 'pairwise', 'regression'];
+  const fmtStats = [];
+  formats.forEach(fmt => {
+    const fmtRecs = records.filter(r => r.format === fmt && r.cells?.[run.modelId]);
+    if (fmtRecs.length === 0) return;
+    const cells = fmtRecs.map(r => r.cells[run.modelId]);
+    const scored = cells.filter(c => c.score != null);
+    if (scored.length === 0) return;
+    const avg = scored.reduce((s, c) => s + c.score, 0) / scored.length;
+    const nPass = cells.filter(c => c.pass).length;
+    fmtStats.push({ fmt, avg, n: fmtRecs.length, nPass });
+  });
+
+  if (fmtStats.length === 0) return null;
+
+  const labels = { mcq: 'MCQ', binary: 'Binary', pairwise: 'Pairwise', regression: 'Regression' };
+  const modelColor = (MODEL_COLORS || {})[run.modelId] || '#8c948c';
+
   return (
-    <div className="card">
+    <div className="card" style={{ marginBottom: 22 }}>
       <div className="head">
-        <h3>Macro F1 — LB-0038 · epistasis ternary</h3>
-        <p className="sub">test split · n=200 · 95% CI from 1,000 bootstrap resamples</p>
-        <div className="right">
-          <Button variant="ghost" size="small" icon="download">Export</Button>
-        </div>
+        <h3>Score by format</h3>
+        <p className="sub">{run.model} · actual results from exported logs</p>
       </div>
       <div className="barchart">
-        {rows.map(r => (
-          <div className="row" key={r.lbl}>
-            <span className="lbl">{r.lbl}</span>
+        {fmtStats.map(({ fmt, avg, n, nPass }) => (
+          <div className="row" key={fmt}>
+            <span className="lbl">{labels[fmt] || fmt} <span style={{ color: 'var(--lb-fg-4)', fontWeight: 400 }}>n={n}</span></span>
             <div className="track">
-              <div className="fill" style={{ width: `${(r.val / max) * 100}%`, background: r.color }} />
+              <div className="fill" style={{ width: `${avg * 100}%`, background: modelColor }} />
             </div>
-            <span className="val">{r.val.toFixed(2)}</span>
+            <span className="val">{avg.toFixed(3)}</span>
           </div>
         ))}
       </div>
@@ -32,90 +42,136 @@ const ModelBar = () => {
   );
 };
 
-const RunDetail = ({ run, records, onOpenRecord }) => (
-  <>
-    <div className="page-head">
-      <div>
-        <div style={{ marginBottom: 6 }}>
-          <Pill brand>{run.lbId}</Pill>
-          <span style={{ marginLeft: 8 }}><Pill>{run.taskName.replace(/_/g, ' ')}</Pill></span>
+const RunDetail = ({ run, records, onOpenRecord }) => {
+  // Records for THIS run's model only
+  const modelRecords = records.filter(r => r.cells?.[run.modelId]);
+
+  // Format-level summary
+  const fmtCounts = {};
+  modelRecords.forEach(r => {
+    fmtCounts[r.format] = (fmtCounts[r.format] || 0) + 1;
+  });
+  const fmtSummary = Object.entries(fmtCounts)
+    .map(([f, n]) => `${f} (${n})`)
+    .join(' · ');
+
+  // Overall pass rate
+  const allCells = modelRecords.map(r => r.cells[run.modelId]).filter(Boolean);
+  const nPass = allCells.filter(c => c.pass).length;
+  const avgLatency = allCells.filter(c => c.latency_s != null).length > 0
+    ? allCells.filter(c => c.latency_s != null).reduce((s, c) => s + c.latency_s, 0) /
+      allCells.filter(c => c.latency_s != null).length
+    : null;
+
+  const primaryScore = run.f1 ?? run.bal_acc ?? run.mae;
+  const primaryLabel = run.f1 != null ? 'Macro F1'
+    : run.bal_acc != null ? 'Bal. acc'
+    : run.mae != null ? 'MAE' : 'Score';
+  const primaryVal = run.f1 != null ? run.f1.toFixed(3)
+    : run.bal_acc != null ? run.bal_acc.toFixed(3)
+    : run.mae != null ? run.mae.toFixed(3) : '—';
+
+  return (
+    <>
+      <div className="page-head">
+        <div>
+          <div style={{ marginBottom: 6 }}>
+            <Pill brand>{run.lbId || 'unknown'}</Pill>
+            <span style={{ marginLeft: 8 }}><Pill>{(run.taskName || '').replace(/_/g, ' ')}</Pill></span>
+          </div>
+          <h1>{run.id}</h1>
+          <div className="sub">
+            {run.model} · {modelRecords.length} records · {fmtSummary} ·
+            {' '}started {run.started ? new Date(run.started).toLocaleTimeString() : '—'} ·
+            {' '}{run.durationS > 0 ? `${Math.round(run.durationS)}s` : '—'}
+          </div>
         </div>
-        <h1>{run.id}</h1>
-        <div className="sub">
-          Model <code style={{ background: 'transparent', border: 0, padding: 0, fontSize: 13 }}>{run.model}</code> ·
-          {' '}{run.n} rows · seed 42 · {run.think ? 'think mode' : 'no think'} ·
-          {' '}duration {Math.round(run.durationS / 60)}m {run.durationS % 60}s
+        <div className="actions">
+          <Button variant="ghost" icon="download" size="small">summary.json</Button>
         </div>
       </div>
-      <div className="actions">
-        <Button variant="ghost" icon="download" size="small">records.jsonl</Button>
-        <Button variant="ghost" icon="download" size="small">summary.json</Button>
-        <Button variant="secondary" icon="refresh" size="small">Re-score</Button>
-        <Button variant="primary" icon="play">Re-run</Button>
+
+      <div className="metric-grid">
+        <MetricCard
+          label={primaryLabel}
+          value={primaryVal}
+          sub={run.ci ? `CI [${run.ci[0]?.toFixed(3)}, ${run.ci[1]?.toFixed(3)}]` : `n=${modelRecords.length}`}
+        />
+        <MetricCard
+          label="Correct"
+          value={modelRecords.length > 0 ? `${nPass}/${modelRecords.length}` : '—'}
+          sub={modelRecords.length > 0 ? `${(nPass / modelRecords.length * 100).toFixed(1)}% pass rate` : '—'}
+        />
+        <MetricCard
+          label="Avg latency"
+          value={avgLatency != null ? avgLatency.toFixed(2) + 's' : '—'}
+          sub="per sample"
+        />
+        <MetricCard
+          label="Errors"
+          value={run.errors != null ? String(run.errors) : '0'}
+          sub={run.status === 'complete' ? 'run complete' : run.status || '—'}
+        />
       </div>
-    </div>
 
-    <div className="metric-grid">
-      <MetricCard label="Macro F1" value={run.f1 != null ? run.f1.toFixed(2) : '—'} sub={run.ci ? `CI ${run.ci[0]} — ${run.ci[1]} · n=${run.n}` : `n=${run.n}`} delta={0.04} />
-      <MetricCard label="Balanced acc." value={run.bal_acc != null ? run.bal_acc.toFixed(2) : '—'} sub="vs GPT-4o 0.55" />
-      <MetricCard label="Latency p50" value="5.6s" sub="p95 9.4s · 200 calls" />
-      <MetricCard label="Trace faithfulness" value={run.faithfulness != null ? run.faithfulness.toFixed(2) : '—'} sub={run.faithfulness ? `${Math.round(run.faithfulness * 190)} / 190 verified` : '—'} />
-    </div>
+      <RunScoreBar run={run} records={records} />
 
-    <div style={{ marginBottom: 22 }}>
-      <ModelBar />
-    </div>
-
-    <div className="card" style={{ overflow: 'hidden' }}>
-      <div className="head">
-        <h3>Records</h3>
-        <p className="sub">{records.length} of {run.n} shown</p>
-        <div className="right">
-          <Button variant="ghost" size="small">All</Button>
-          <Button variant="ghost" size="small">Errors</Button>
-          <Button variant="ghost" size="small">Inconsistent traces</Button>
+      <div className="card" style={{ overflow: 'hidden' }}>
+        <div className="head">
+          <h3>Sample log</h3>
+          <p className="sub">{modelRecords.length} records · click row to inspect</p>
         </div>
-      </div>
-      <div style={{ maxHeight: 420, overflow: 'auto' }}>
-        <table className="lb">
-          <thead>
-            <tr>
-              <th>Row</th>
-              <th>Format</th>
-              <th>Organism</th>
-              <th>Genes</th>
-              <th>Gold</th>
-              <th>Pred</th>
-              <th style={{ textAlign: 'right' }}>Latency</th>
-              <th>Trace</th>
-            </tr>
-          </thead>
-          <tbody>
-            {records.map(r => (
-              <tr key={r.row} onClick={() => onOpenRecord(r)}>
-                <td className="id">{String(r.row).padStart(3, '0')}</td>
-                <td>{r.format.replace(/_/g, ' ')}</td>
-                <td>{r.organism}</td>
-                <td className="mono gene">{r.gene1} · {r.gene2}</td>
-                <td className="mono">{r.gold}</td>
-                <td>
-                  {r.match
-                    ? <Badge kind="pass">{r.pred}</Badge>
-                    : <Badge kind="err">{r.pred}</Badge>}
-                </td>
-                <td className="num">{r.latencyS.toFixed(2)}s</td>
-                <td>
-                  {r.consistent
-                    ? <Badge kind="pass">consistent</Badge>
-                    : <Badge kind="err">inconsistent</Badge>}
-                </td>
+        <div style={{ maxHeight: 460, overflow: 'auto' }}>
+          <table className="lb">
+            <thead>
+              <tr>
+                <th style={{ width: 36 }}>#</th>
+                <th>LB-ID</th>
+                <th>Fmt</th>
+                <th>Gold</th>
+                <th>Pred</th>
+                <th style={{ textAlign: 'right' }}>Score</th>
+                <th style={{ textAlign: 'right' }}>Latency</th>
+                <th style={{ textAlign: 'right' }}>Tokens</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {modelRecords.map(r => {
+                const cell = r.cells[run.modelId] || {};
+                const pred = cell.pred || '—';
+                const predShort = pred.length <= 14 ? pred : pred.slice(0, 14) + '…';
+                const passColor = cell.pass === true ? 'var(--lb-green-700)'
+                  : cell.pass === false ? 'var(--lb-error)'
+                  : 'var(--lb-fg-4)';
+                return (
+                  <tr key={r.row} onClick={() => onOpenRecord(r)} style={{ cursor: 'pointer' }}>
+                    <td className="id">{String(r.row).padStart(3, '0')}</td>
+                    <td style={{ fontFamily: 'var(--lb-font-mono)', fontSize: 11 }}>{r.lbId || '—'}</td>
+                    <td><span className="badge neutral">{r.format}</span></td>
+                    <td className="mono" style={{ fontWeight: 600, color: 'var(--lb-green-700)' }}>{r.gold}</td>
+                    <td>
+                      <span className="mono" style={{ color: passColor, fontWeight: 500 }} title={pred}>
+                        {cell.pass === true ? '✓ ' : cell.pass === false ? '✗ ' : ''}{predShort}
+                      </span>
+                    </td>
+                    <td className="mono" style={{ textAlign: 'right' }}>
+                      {cell.score != null ? cell.score.toFixed(3) : '—'}
+                    </td>
+                    <td className="mono" style={{ textAlign: 'right' }}>
+                      {cell.latency_s != null ? cell.latency_s.toFixed(2) + 's' : '—'}
+                    </td>
+                    <td className="mono" style={{ textAlign: 'right', color: 'var(--lb-fg-4)' }}>
+                      {cell.tokens != null ? cell.tokens : '—'}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
-  </>
-);
+    </>
+  );
+};
 
-Object.assign(window, { RunDetail, ModelBar });
+Object.assign(window, { RunDetail });

@@ -28,19 +28,20 @@ const Sidebar = ({ view, setView, runsCount, liveCount }) => {
 
       <div className="nav-section">
         <p className="heading">Evaluate</p>
-        {item('trust',   'target', 'Trust & reasoning')}
         {item('matrix',  'table',  'Eval matrix')}
         {item('compare', 'chart',  'Compare models')}
         {item('answers', 'table',  'Answers')}
+        {item('gap',     'chart',  'Gap analysis')}
         {item('runs',    'play',   'Live runs', liveCount, true)}
+        {item('trust',   'target', 'Trust & reasoning')}
       </div>
 
       <div className="nav-section">
         <p className="heading">Library</p>
         {item('tasks',   'flask',  'Tasks', 6)}
         {item('models',  'layers', 'Models', 4)}
-        {item('synergyage', 'box', 'SynergyAge', '200')}
-        {item('mgi',     'box',    'MGI', '150')}
+        {item('senescence', 'flask', 'Senescence', '298')}
+        {item('lipidomics', 'flask', 'Lipidomics', '285')}
       </div>
 
       <div className="nav-section">

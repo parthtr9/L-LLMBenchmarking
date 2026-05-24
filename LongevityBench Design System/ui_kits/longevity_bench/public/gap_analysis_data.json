@@ -1,0 +1,632 @@
+{
+  "generated_at": "2026-05-24T09:47:29.521284+00:00",
+  "dataset": {
+    "train": {
+      "n": 239,
+      "formats": {
+        "binary": 83,
+        "pairwise": 81,
+        "mcq": 75
+      },
+      "accessions": 15,
+      "label_dist": {
+        "mcq": {
+          "A": 27,
+          "B": 26,
+          "C": 22
+        },
+        "pairwise": {
+          "B": 43,
+          "A": 38
+        },
+        "binary": {
+          "A": 44,
+          "B": 39
+        }
+      }
+    },
+    "test": {
+      "n": 59,
+      "formats": {
+        "mcq": 24,
+        "pairwise": 18,
+        "binary": 17
+      },
+      "accessions": 28,
+      "label_dist": {
+        "mcq": {
+          "C": 11,
+          "B": 7,
+          "A": 6
+        },
+        "pairwise": {
+          "A": 9,
+          "B": 9
+        },
+        "binary": {
+          "B": 11,
+          "A": 6
+        }
+      }
+    }
+  },
+  "model_display": {
+    "longevity_llm": "L-LLM",
+    "longevity_llm_thinking": "L-LLM (think)",
+    "claude_sonnet": "Claude Sonnet",
+    "majority_baseline": "Majority",
+    "random_baseline": "Random"
+  },
+  "model_order": [
+    "longevity_llm",
+    "longevity_llm_thinking",
+    "claude_sonnet",
+    "majority_baseline",
+    "random_baseline"
+  ],
+  "metrics": {
+    "random_baseline": {
+      "binary": {
+        "n": 27,
+        "accuracy": 0.3704,
+        "balanced_accuracy": 0.3889,
+        "ci_accuracy": [
+          0.1852,
+          0.5556
+        ],
+        "class_accuracy": {
+          "A": 0.4444,
+          "B": 0.3333
+        },
+        "gold_distribution": {
+          "A": 9,
+          "B": 18
+        },
+        "prediction_distribution": {
+          "A": 16,
+          "B": 11
+        },
+        "prediction_fraction": {
+          "A": 0.5926,
+          "B": 0.4074
+        },
+        "a_bias": 0.2593
+      },
+      "mcq": {
+        "n": 32,
+        "labels": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "accuracy": 0.3438,
+        "macro_f1": 0.212,
+        "balanced_accuracy": 0.2583,
+        "ci_accuracy": [
+          0.1875,
+          0.5
+        ],
+        "ci_macro_f1": [
+          0.1212,
+          0.2965
+        ],
+        "confusion_matrix": {
+          "labels": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
+          "matrix": [
+            [
+              7,
+              1,
+              2,
+              0
+            ],
+            [
+              5,
+              0,
+              4,
+              0
+            ],
+            [
+              6,
+              2,
+              4,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              0
+            ]
+          ]
+        }
+      },
+      "regression": {
+        "n": 0,
+        "mae": null
+      },
+      "pairwise": {
+        "n": 18,
+        "accuracy": 0.6667,
+        "balanced_accuracy": 0.6667,
+        "ci_accuracy": [
+          0.4444,
+          0.8889
+        ],
+        "class_accuracy": {
+          "A": 0.6667,
+          "B": 0.6667
+        },
+        "gold_distribution": {
+          "A": 9,
+          "B": 9
+        },
+        "prediction_distribution": {
+          "A": 9,
+          "B": 9
+        },
+        "prediction_fraction": {
+          "A": 0.5,
+          "B": 0.5
+        },
+        "a_bias": 0.0
+      }
+    },
+    "majority_baseline": {
+      "binary": {
+        "n": 27,
+        "accuracy": 0.3333,
+        "balanced_accuracy": 0.5,
+        "ci_accuracy": [
+          0.1481,
+          0.5185
+        ],
+        "class_accuracy": {
+          "A": 1.0,
+          "B": 0.0
+        },
+        "gold_distribution": {
+          "A": 9,
+          "B": 18
+        },
+        "prediction_distribution": {
+          "A": 27,
+          "B": 0
+        },
+        "prediction_fraction": {
+          "A": 1.0,
+          "B": 0.0
+        },
+        "a_bias": 0.6667
+      },
+      "mcq": {
+        "n": 32,
+        "labels": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "accuracy": 0.2188,
+        "macro_f1": 0.1132,
+        "balanced_accuracy": 0.1708,
+        "ci_accuracy": [
+          0.0625,
+          0.375
+        ],
+        "ci_macro_f1": [
+          0.0427,
+          0.1878
+        ],
+        "confusion_matrix": {
+          "labels": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
+          "matrix": [
+            [
+              6,
+              0,
+              4,
+              0
+            ],
+            [
+              7,
+              0,
+              2,
+              0
+            ],
+            [
+              11,
+              0,
+              1,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              0
+            ]
+          ]
+        }
+      },
+      "regression": {
+        "n": 0,
+        "mae": null
+      },
+      "pairwise": {
+        "n": 18,
+        "accuracy": 0.5,
+        "balanced_accuracy": 0.5,
+        "ci_accuracy": [
+          0.2778,
+          0.7222
+        ],
+        "class_accuracy": {
+          "A": 0.0,
+          "B": 1.0
+        },
+        "gold_distribution": {
+          "A": 9,
+          "B": 9
+        },
+        "prediction_distribution": {
+          "A": 0,
+          "B": 18
+        },
+        "prediction_fraction": {
+          "A": 0.0,
+          "B": 1.0
+        },
+        "a_bias": -0.5
+      }
+    },
+    "claude_sonnet": {
+      "binary": {
+        "n": 27,
+        "accuracy": 0.5926,
+        "balanced_accuracy": 0.5,
+        "ci_accuracy": [
+          0.4074,
+          0.7778
+        ],
+        "class_accuracy": {
+          "A": 0.2222,
+          "B": 0.7778
+        },
+        "gold_distribution": {
+          "A": 9,
+          "B": 18
+        },
+        "prediction_distribution": {
+          "A": 6,
+          "B": 21
+        },
+        "prediction_fraction": {
+          "A": 0.2222,
+          "B": 0.7778
+        },
+        "a_bias": -0.1111
+      },
+      "mcq": {
+        "n": 32,
+        "labels": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "accuracy": 0.3125,
+        "macro_f1": 0.2222,
+        "balanced_accuracy": 0.2583,
+        "ci_accuracy": [
+          0.1562,
+          0.4688
+        ],
+        "ci_macro_f1": [
+          0.1121,
+          0.3314
+        ],
+        "confusion_matrix": {
+          "labels": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
+          "matrix": [
+            [
+              2,
+              5,
+              3,
+              0
+            ],
+            [
+              3,
+              6,
+              0,
+              0
+            ],
+            [
+              3,
+              7,
+              2,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              0
+            ]
+          ]
+        }
+      },
+      "regression": {
+        "n": 7,
+        "mae": 25.7871,
+        "median_ae": 16.0,
+        "spearman_r": 0.2477,
+        "spearman_p": 0.5922,
+        "sign_accuracy": 1.0,
+        "ci_mae": [
+          10.7782,
+          42.8635
+        ],
+        "parse_failures": 0
+      },
+      "pairwise": {
+        "n": 18,
+        "accuracy": 0.7778,
+        "balanced_accuracy": 0.7778,
+        "ci_accuracy": [
+          0.5556,
+          0.9444
+        ],
+        "class_accuracy": {
+          "A": 0.8889,
+          "B": 0.6667
+        },
+        "gold_distribution": {
+          "A": 9,
+          "B": 9
+        },
+        "prediction_distribution": {
+          "A": 11,
+          "B": 7
+        },
+        "prediction_fraction": {
+          "A": 0.6111,
+          "B": 0.3889
+        },
+        "a_bias": 0.1111
+      }
+    },
+    "longevity_llm": {
+      "binary": {
+        "n": 27,
+        "accuracy": 0.5556,
+        "balanced_accuracy": 0.5,
+        "ci_accuracy": [
+          0.3704,
+          0.7407
+        ],
+        "class_accuracy": {
+          "A": 0.3333,
+          "B": 0.6667
+        },
+        "gold_distribution": {
+          "A": 9,
+          "B": 18
+        },
+        "prediction_distribution": {
+          "A": 9,
+          "B": 18
+        },
+        "prediction_fraction": {
+          "A": 0.3333,
+          "B": 0.6667
+        },
+        "a_bias": 0.0
+      },
+      "mcq": {
+        "n": 32,
+        "labels": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "accuracy": 0.5,
+        "macro_f1": 0.3515,
+        "balanced_accuracy": 0.3667,
+        "ci_accuracy": [
+          0.3125,
+          0.6562
+        ],
+        "ci_macro_f1": [
+          0.2035,
+          0.4795
+        ],
+        "confusion_matrix": {
+          "labels": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
+          "matrix": [
+            [
+              3,
+              2,
+              5,
+              0
+            ],
+            [
+              1,
+              3,
+              5,
+              0
+            ],
+            [
+              1,
+              1,
+              10,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              0
+            ]
+          ]
+        }
+      },
+      "regression": {
+        "n": 7,
+        "mae": 10.5714,
+        "median_ae": 10.0,
+        "spearman_r": 0.3191,
+        "spearman_p": 0.4854,
+        "sign_accuracy": 1.0,
+        "ci_mae": [
+          7.7143,
+          13.15
+        ],
+        "parse_failures": 0
+      },
+      "pairwise": {
+        "n": 18,
+        "accuracy": 0.5556,
+        "balanced_accuracy": 0.5556,
+        "ci_accuracy": [
+          0.3333,
+          0.7778
+        ],
+        "class_accuracy": {
+          "A": 0.6667,
+          "B": 0.4444
+        },
+        "gold_distribution": {
+          "A": 9,
+          "B": 9
+        },
+        "prediction_distribution": {
+          "A": 11,
+          "B": 7
+        },
+        "prediction_fraction": {
+          "A": 0.6111,
+          "B": 0.3889
+        },
+        "a_bias": 0.1111
+      }
+    },
+    "longevity_llm_thinking": {
+      "mcq": {
+        "n": 10,
+        "labels": [
+          "A",
+          "B",
+          "C"
+        ],
+        "accuracy": 0.1,
+        "macro_f1": 0.0667,
+        "balanced_accuracy": 0.1111,
+        "ci_accuracy": [
+          0.0,
+          0.3
+        ],
+        "ci_macro_f1": [
+          0.0,
+          0.1818
+        ],
+        "confusion_matrix": {
+          "labels": [
+            "A",
+            "B",
+            "C"
+          ],
+          "matrix": [
+            [
+              0,
+              1,
+              3
+            ],
+            [
+              0,
+              0,
+              3
+            ],
+            [
+              1,
+              1,
+              1
+            ]
+          ]
+        }
+      },
+      "pairwise": {
+        "n": 10,
+        "accuracy": 0.5,
+        "balanced_accuracy": 0.5,
+        "ci_accuracy": [
+          0.2,
+          0.8
+        ],
+        "class_accuracy": {
+          "A": 0.5,
+          "B": 0.5
+        },
+        "gold_distribution": {
+          "A": 6,
+          "B": 4
+        },
+        "prediction_distribution": {
+          "A": 5,
+          "B": 5
+        },
+        "prediction_fraction": {
+          "A": 0.5,
+          "B": 0.5
+        },
+        "a_bias": -0.1
+      },
+      "binary": {
+        "n": 10,
+        "accuracy": 0.7,
+        "balanced_accuracy": 0.4375,
+        "ci_accuracy": [
+          0.4,
+          1.0
+        ],
+        "class_accuracy": {
+          "A": 0.0,
+          "B": 0.875
+        },
+        "gold_distribution": {
+          "A": 2,
+          "B": 8
+        },
+        "prediction_distribution": {
+          "A": 1,
+          "B": 9
+        },
+        "prediction_fraction": {
+          "A": 0.1,
+          "B": 0.9
+        },
+        "a_bias": -0.1
+      }
+    }
+  }
+}

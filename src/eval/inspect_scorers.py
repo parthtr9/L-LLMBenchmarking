@@ -8,11 +8,17 @@ from inspect_ai.scorer import Score, Target, mean, scorer
 from inspect_ai.solver import TaskState
 
 _ANSWER_LETTER_RE = re.compile(r"(?<![A-Za-z])([A-F])(?![A-Za-z])")
+_NUMBER_RE = re.compile(r"-?\d+(?:\.\d+)?")
 
 
 def _extract_mcq_letter(text: str) -> str | None:
     letters = _ANSWER_LETTER_RE.findall(text)
     return letters[-1] if letters else None
+
+
+def _extract_number(text: str) -> float | None:
+    m = _NUMBER_RE.search(text.strip())
+    return float(m.group()) if m else None
 
 
 def _normalize(value: str) -> str:
@@ -21,9 +27,11 @@ def _normalize(value: str) -> str:
 
 @scorer(metrics=[mean()])
 def longebench_scorer() -> ...:
-    """Format-aware scorer for LongevityBench tasks (mcq, binary, pairwise).
+    """Format-aware scorer for LongevityBench tasks (mcq, binary, pairwise, regression).
 
-    Score.value: 0.0 or 1.0 exact match for all supported formats.
+    Score.value:
+      regression — 1 / (1 + MAE) so higher = better; raw MAE stored in metadata.
+      all others — 0.0 or 1.0 exact match.
     """
 
     async def score(state: TaskState, target: Target) -> Score:
@@ -34,6 +42,25 @@ def longebench_scorer() -> ...:
         gold = target.text
         meta = state.metadata or {}
         fmt = str(meta.get("format", "")).lower()
+
+        # --- Regression (MAE) ---
+        if fmt == "regression":
+            gold_val = _extract_number(gold)
+            pred_val = _extract_number(completion)
+            if gold_val is None or pred_val is None:
+                mae = None
+                value = 0.0
+                explanation = f"parse_fail pred={completion!r} gold={gold!r}"
+            else:
+                mae = abs(pred_val - gold_val)
+                value = round(1.0 / (1.0 + mae), 4)
+                explanation = f"pred={pred_val} gold={gold_val} mae={mae:.2f}"
+            return Score(
+                value=value,
+                answer=str(pred_val),
+                explanation=explanation,
+                metadata={"mae": mae, "pred": pred_val, "gold": gold_val},
+            )
 
         # --- MCQ ---
         if "mcq" in fmt or "multiple" in fmt:

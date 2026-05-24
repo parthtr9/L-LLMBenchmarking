@@ -4,6 +4,20 @@ const SEED_RUNS = [];
 
 const SEED_RECORDS = [];
 
+function _taskGroupFromLbId(lbId) {
+  if (!lbId) return 'Other';
+  if (lbId.startsWith('LB-SEN')) return 'Senescence Perturbation';
+  if (lbId.startsWith('LB-LIP')) return 'Lipidomics';
+  if (lbId.startsWith('LB-MET')) return 'Metabolite Prediction';
+  return 'Other';
+}
+
+function _normalizeTaskGroup(group) {
+  if (!group) return null;
+  if (group.startsWith('Lipidomics')) return 'Lipidomics';
+  return group;
+}
+
 const MODEL_NAMES = {
   longevity_llm:          'L-LLM',
   longevity_llm_thinking: 'L-LLM (think)',
@@ -55,6 +69,7 @@ async function loadDashboardData() {
       return {
         row: i,
         lbId: s.lb_id,
+        taskGroup: _normalizeTaskGroup(s.metadata?.display_group) || _taskGroupFromLbId(s.lb_id),
         format: s.format || 'regression',
         metric: s.metadata?.metric || 'mae',
         organism: s.metadata?.domain || s.metadata?.organism || '—',
@@ -91,4 +106,4 @@ const ENTITY_HIGHLIGHTS = (text) =>
     .replace(/\[V\](.+?)\[\/V\]/g, '<span class="verify">$1</span>')
     .replace(/\[F\](.+?)\[\/F\]/g, '<span class="fail">$1</span>');
 
-Object.assign(window, { SEED_RUNS, SEED_RECORDS, ENTITY_HIGHLIGHTS, loadDashboardData, MODEL_NAMES, MODEL_COLORS });
+Object.assign(window, { SEED_RUNS, SEED_RECORDS, ENTITY_HIGHLIGHTS, loadDashboardData, MODEL_NAMES, MODEL_COLORS, _taskGroupFromLbId });
