@@ -46,7 +46,7 @@ Train/test split (per-task 80/20, grouped by individual_id):
 Summary → task_b_lipidomics_summary.json
 
 --- Example MCQ ---
-lb_id: LB-LIP-MCQ-0001  format: mcq  metric: accuracy
+lb_id: LB-LIP-MCQ-0001  format: mcq  metric: off-by-one accuracy
 [user]
 <question>
 You are presented with a plasma lipidomics profile from a human donor. Given the following lipid species abundances, predict which age bracket the donor belongs to.
