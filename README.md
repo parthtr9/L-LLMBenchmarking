@@ -132,6 +132,20 @@ Train/test split by GEO accession — no random split (comparisons within a stud
 
 ### Regenerate prompts
 
+Download `Total_Data.csv` from https://research.ncl.ac.uk/cellularsenescence/downloadingdata/ to `data/task_a_senescence/raw/`. 
+
+```bash
+python senescence_benchmark_pipeline.py \
+    --dataset raw/Total_Data.csv \
+    --cellage raw/cellage3.tsv \
+  --output-dir processed > processed/task_a_senescence_stdout.txt
+```
+
+### Usage
+
+Prompts are stored in parquet file and have the same tabular format as LongevityBench tasks (see https://huggingface.co/datasets/insilicomedicine/longebench).
+
+Prompts are split into 80-20 train-test split. 
 ```bash
 cd data/task_a_senescence
 python senescence_benchmark_pipeline.py \
@@ -139,6 +153,57 @@ python senescence_benchmark_pipeline.py \
   --cellage raw/cellage3.tsv \
   --output-dir processed
 ```
+
+---
+
+## Task B — Lipidomics
+
+126 prompts across three formats derived from MTBLS4461 plasma lipidomics (1,864 donors × 497 lipid features after gender balancing).
+
+| Format | Task | Metric |
+|--------|------|--------|
+| MCQ | Predict age bracket from lipid profile (A=20–39 / B=40–59 / C=60–79 / D=80+) | Accuracy |
+| Regression | Predict numeric age in years from lipid profile + diabetes status | MAE |
+| Binary | Predict diabetes status (A=Yes / B=No) from lipid profile + age | Accuracy |
+
+Train/test split is stratified by task format and grouped by `individual_id` — each donor's samples go entirely into train or test, and every format hits the test fraction (~20%) independently.
+
+MCQ class count (40 prompts) is capped by the 80+ bracket, which only has 10 donors in the source data.
+
+### Prompt generation
+
+Source: download MTBLS4461 MAF (`m_MTBLS4461_DI-MS_alternating__metabolite_profiling_v2_maf.tsv`) and sample sheet (`s_MTBLS4461.txt`) from [EBI MetaboLights](https://www.ebi.ac.uk/metabolights/editor/MTBLS4461/samples) into `data/task_b_lipidomics/raw/`.
+
+Three sequential steps:
+
+```bash
+cd data/task_b_lipidomics
+
+# 1. Join MAF abundance × sample metadata → one row per sample, one column per lipid
+python combine_lipidomics.py \
+  --maf    raw/m_MTBLS4461_DI-MS_alternating__metabolite_profiling_v2_maf.tsv \
+  --sample raw/s_MTBLS4461.txt \
+  --out    combined_lipidomics.tsv
+
+# 2. Drop NaN-diabetes rows, undersample Males to Female count stratified on diabetes
+python balance_gender.py
+
+# 3. Generate prompts + train/test split
+python lipidomics_pipeline.py \
+  --input balanced_lipidomics.tsv \
+  --output-dir . \
+  --target-per-task 50
+```
+
+### Usage
+
+Outputs match the LongevityBench tabular schema:
+
+- `task_b_lipidomics_train.{parquet,json}` — 101 prompts
+- `task_b_lipidomics_test.{parquet,json}` — 25 prompts
+- `task_b_lipidomics_summary.json` — per-format counts, label distribution, split report
+
+`lb_id` prefixes: `LB-LIP-MCQ`, `LB-LIP-REG`, `LB-LIP-DIAB`.
 
 ---
 

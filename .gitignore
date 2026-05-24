@@ -4,7 +4,7 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
-data/raw/
+data/task_a_senescence/raw/Total_Data.csv
 data/cache/
 outputs/*.jsonl
 outputs/*.json
