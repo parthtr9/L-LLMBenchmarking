@@ -29,3 +29,11 @@ models:
   majority_baseline:
     type: baseline
     strategy: majority
+
+  population_prior_baseline:
+    type: baseline
+    strategy: population_prior
+    csv_path: "data/task_b_lipidomics/nc-est2025-agesex-res.csv"
+    year_col: "POPESTIMATE2025"
+    age_min: 20
+    age_max: 90

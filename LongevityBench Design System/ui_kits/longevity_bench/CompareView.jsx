@@ -1,17 +1,23 @@
 // CompareView — model comparison with grouped bar chart and per-model cards.
 // Receives runs + records props from App.
 
-const BASELINE_IDS = ['majority_baseline', 'random_baseline'];
+const BASELINE_IDS = ['majority_baseline', 'random_baseline', 'population_prior_baseline'];
 const FORMAT_ORDER = ['mcq', 'binary', 'pairwise', 'regression'];
 const FORMAT_LABELS = { mcq: 'MCQ', binary: 'Binary', pairwise: 'Pairwise', regression: 'Regression' };
 
 // ── Grouped bar chart (SVG) ───────────────────────────────────────────────────
 
 const GroupedBarChart = ({ matrix, models, formats }) => {
-  const W = 680, H = 280;
-  const ML = 44, MR = 16, MT = 20, MB = 60;
+  const W = 680;
+  const LEGEND_COLS = Math.min(models.length, 3);
+  const LEGEND_ROW_H = 16;
+  const legendRows = Math.max(1, Math.ceil(models.length / LEGEND_COLS));
+  const ML = 44, MR = 16, MT = 20;
+  const MB = 44 + legendRows * LEGEND_ROW_H;
+  const H = 240 + legendRows * LEGEND_ROW_H;
   const chartW = W - ML - MR;
   const chartH = H - MT - MB;
+  const legendSpacing = chartW / LEGEND_COLS;
 
   const GROUP_GAP = 32;
   const barAreaW = (chartW - GROUP_GAP * (formats.length - 1)) / formats.length;
@@ -83,16 +89,22 @@ const GroupedBarChart = ({ matrix, models, formats }) => {
         );
       })}
 
-      {/* Legend */}
-      {models.map((m, i) => (
-        <g key={m.id} transform={`translate(${ML + i * 122}, ${H - 12})`}>
-          <rect x={0} y={-7} width={10} height={10} fill={m.color}
-            opacity={BASELINE_IDS.includes(m.id) ? 0.45 : 0.9} rx={2} />
-          <text x={14} y={2} style={{ font: '11px var(--lb-font-sans)', fill: 'var(--lb-fg-2)' }}>
-            {m.name}
-          </text>
-        </g>
-      ))}
+      {/* Legend (wraps to multiple rows when crowded) */}
+      {models.map((m, i) => {
+        const row = Math.floor(i / LEGEND_COLS);
+        const col = i % LEGEND_COLS;
+        const lx = ML + col * legendSpacing;
+        const ly = H - 12 - (legendRows - 1 - row) * LEGEND_ROW_H;
+        return (
+          <g key={m.id} transform={`translate(${lx}, ${ly})`}>
+            <rect x={0} y={-7} width={10} height={10} fill={m.color}
+              opacity={BASELINE_IDS.includes(m.id) ? 0.45 : 0.9} rx={2} />
+            <text x={14} y={2} style={{ font: '11px var(--lb-font-sans)', fill: 'var(--lb-fg-2)' }}>
+              {m.name}
+            </text>
+          </g>
+        );
+      })}
     </svg>
   );
 };
@@ -172,6 +184,8 @@ const ModelCard = ({ model, formatScores, formats, avgScore, nCorrect, nTotal })
 // ── Main CompareView ──────────────────────────────────────────────────────────
 
 const CompareView = ({ runs = [], records = [] }) => {
+  const [showBaselines, setShowBaselines] = React.useState(true);
+
   // Derive model list from completed runs
   const modelMap = {};
   runs.filter(r => r.status === 'complete').forEach(r => {
@@ -296,21 +310,53 @@ const CompareView = ({ runs = [], records = [] }) => {
       )}
 
       {/* Grouped bar chart */}
+      {(() => {
+        const visibleModels = showBaselines
+          ? models
+          : models.filter(m => !BASELINE_IDS.includes(m.id));
+        const visibleStats = showBaselines
+          ? modelStats
+          : modelStats.filter(m => !BASELINE_IDS.includes(m.id));
+        return (
+      <>
       <div className="card" style={{ marginBottom: 20, padding: '18px 24px 22px' }}>
-        <div className="head" style={{ marginBottom: 16 }}>
-          <h3>Accuracy by format</h3>
-          <p className="sub">all models · score per question format · higher is better</p>
+        <div className="head" style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+          <div>
+            <h3>Accuracy by format</h3>
+            <p className="sub">
+              {showBaselines ? 'all models' : 'models only'} · score per question format · higher is better
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowBaselines(v => !v)}
+            style={{
+              font: '500 11px var(--lb-font-sans)',
+              padding: '6px 12px',
+              border: '1px solid var(--lb-border)',
+              borderRadius: 4,
+              background: showBaselines ? 'var(--lb-bg-2, #f5f5f5)' : 'var(--lb-green-500)',
+              color: showBaselines ? 'var(--lb-fg-1)' : '#fff',
+              cursor: 'pointer',
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+              flexShrink: 0,
+            }}
+            title="Toggle baseline visibility"
+          >
+            {showBaselines ? 'Hide baselines' : 'Show baselines'}
+          </button>
         </div>
-        <GroupedBarChart matrix={matrix} models={models} formats={formats} />
+        <GroupedBarChart matrix={matrix} models={visibleModels} formats={formats} />
       </div>
 
       {/* Per-model cards */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: `repeat(${Math.min(models.length, 4)}, 1fr)`,
+        gridTemplateColumns: `repeat(${Math.min(visibleStats.length, 4)}, 1fr)`,
         gap: 14,
       }}>
-        {modelStats.map(m => (
+        {visibleStats.map(m => (
           <ModelCard
             key={m.id}
             model={m}
@@ -322,6 +368,9 @@ const CompareView = ({ runs = [], records = [] }) => {
           />
         ))}
       </div>
+      </>
+        );
+      })()}
     </>
   );
 };

@@ -34,11 +34,12 @@ _NUMBER_RE = re.compile(r"-?\d+(?:\.\d+)?")
 _LETTER_RE  = re.compile(r"(?<![A-Za-z])([A-F])(?![A-Za-z])")
 
 MODEL_DISPLAY = {
-    "longevity_llm":          "L-LLM",
-    "longevity_llm_thinking": "L-LLM (think)",
-    "claude_sonnet":          "Claude Sonnet",
-    "majority_baseline":      "Majority",
-    "random_baseline":        "Random",
+    "longevity_llm":              "L-LLM",
+    "longevity_llm_thinking":     "L-LLM (think)",
+    "claude_sonnet":              "Claude Sonnet",
+    "majority_baseline":          "Majority",
+    "random_baseline":            "Random",
+    "population_prior_baseline":  "Population Prior Prediction",
 }
 
 MODEL_ORDER = [
@@ -47,6 +48,7 @@ MODEL_ORDER = [
     "claude_sonnet",
     "majority_baseline",
     "random_baseline",
+    "population_prior_baseline",
 ]
 
 
@@ -480,7 +482,9 @@ def render_report(
     }
     a("| Baseline | " + " | ".join(header_names[fmt] for fmt in baseline_formats) + " |")
     a("|---|" + "---|" * len(baseline_formats))
-    for mid in ["majority_baseline", "random_baseline"]:
+    for mid in ["majority_baseline", "random_baseline", "population_prior_baseline"]:
+        if mid not in metrics:
+            continue
         name = MODEL_DISPLAY.get(mid, mid)
         vals = []
         for fmt in baseline_formats:
@@ -489,7 +493,8 @@ def render_report(
         a("| " + " | ".join([name] + vals) + " |")
     a("")
     a("_Majority baseline uses per-format most-frequent label from training split._  ")
-    a("_Random baseline draws uniformly from valid label set per format (A/B/C for MCQ, A/B for binary/pairwise)._\n")
+    a("_Random baseline draws uniformly from valid label set per format (A/B/C for MCQ, A/B for binary/pairwise)._  ")
+    a("_Population Prior Prediction baseline samples regression age from US Census 2025 population estimates conditioned on donor sex (no train labels used)._\n")
 
     return "\n".join(lines)
 

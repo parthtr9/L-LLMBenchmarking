@@ -19,19 +19,21 @@ function _normalizeTaskGroup(group) {
 }
 
 const MODEL_NAMES = {
-  longevity_llm:          'L-LLM',
-  longevity_llm_thinking: 'L-LLM (think)',
-  claude_sonnet:          'Claude S4.5',
-  majority_baseline:      'Majority',
-  random_baseline:        'Random',
+  longevity_llm:              'L-LLM',
+  longevity_llm_thinking:     'L-LLM (think)',
+  claude_sonnet:              'Claude S4.5',
+  majority_baseline:          'Majority',
+  random_baseline:            'Random',
+  population_prior_baseline:  'Population Prior Prediction',
 };
 
 const MODEL_COLORS = {
-  longevity_llm:          'var(--lb-green-500)',
-  longevity_llm_thinking: 'var(--lb-green-700)',
-  claude_sonnet:          '#c98b1c',
-  majority_baseline:      '#8c948c',
-  random_baseline:        '#b3b8b3',
+  longevity_llm:              'var(--lb-green-500)',
+  longevity_llm_thinking:     'var(--lb-green-700)',
+  claude_sonnet:              '#c98b1c',
+  majority_baseline:          '#8c948c',
+  random_baseline:            '#b3b8b3',
+  population_prior_baseline:  '#6b7280',
 };
 
 async function loadDashboardData() {

@@ -1,6 +1,6 @@
 # LongevityBench-X · Task A Senescence · Gap Analysis Report
 
-_Generated: 2026-05-24T09:47:29.521284+00:00_
+_Generated: 2026-05-24T11:39:48.290297+00:00_
 
 ## 1. Dataset Summary
 
@@ -29,11 +29,12 @@ Prevents label leakage from shared batch effects and analysis pipelines.
 
 | Model | binary/significance | mcq | pairwise | regression |
 |---|---|---|---|---|
-| L-LLM | 27 | 32 | 18 | 7 |
+| L-LLM | 47 | 49 | 18 | 27 |
 | L-LLM (think) | 10 | 10 | 10 | — |
-| Claude Sonnet | 27 | 32 | 18 | 7 |
-| Majority | 27 | 32 | 18 | 0 |
-| Random | 27 | 32 | 18 | 0 |
+| Claude Sonnet | 47 | 49 | 18 | 27 |
+| Majority | 47 | 49 | 18 | 0 |
+| Random | 47 | 49 | 18 | 0 |
+| Population Prior Prediction | 20 | 17 | — | 20 |
 
 ## 3. Main Results
 
@@ -41,21 +42,23 @@ Prevents label leakage from shared batch effects and analysis pipelines.
 
 | Model | N | Accuracy | Balanced Acc | Acc(A) | Acc(B) | CI (Acc) |
 |---|---|---|---|---|---|---|
-| L-LLM | 27 | 0.556 | 0.500 | 0.3333 | 0.6667 | [0.370, 0.741] |
+| L-LLM | 47 | 0.553 | 0.564 | 0.6667 | 0.4615 | [0.404, 0.702] |
 | L-LLM (think) | 10 | 0.700 | 0.438 | 0.0 | 0.875 | [0.400, 1.000] |
-| Claude Sonnet | 27 | 0.593 | 0.500 | 0.2222 | 0.7778 | [0.407, 0.778] |
-| Majority | 27 | 0.333 | 0.500 | 1.0 | 0.0 | [0.148, 0.518] |
-| Random | 27 | 0.370 | 0.389 | 0.4444 | 0.3333 | [0.185, 0.556] |
+| Claude Sonnet | 47 | 0.575 | 0.551 | 0.3333 | 0.7692 | [0.425, 0.723] |
+| Majority | 47 | 0.362 | 0.368 | 0.4286 | 0.3077 | [0.213, 0.511] |
+| Random | 47 | 0.447 | 0.454 | 0.5238 | 0.3846 | [0.298, 0.596] |
+| Population Prior Prediction | 20 | 0.500 | 0.500 | 0.5 | 0.5 | [0.299, 0.700] |
 
 ### Format: `mcq`
 
 | Model | N | Accuracy | Macro F1 | Balanced Acc | CI (F1) |
 |---|---|---|---|---|---|
-| L-LLM | 32 | 0.500 | 0.351 | 0.367 | [0.203, 0.479] |
+| L-LLM | 49 | 0.388 | 0.273 | 0.280 | [0.169, 0.374] |
 | L-LLM (think) | 10 | 0.100 | 0.067 | 0.111 | [0.000, 0.182] |
-| Claude Sonnet | 32 | 0.312 | 0.222 | 0.258 | [0.112, 0.331] |
-| Majority | 32 | 0.219 | 0.113 | 0.171 | [0.043, 0.188] |
-| Random | 32 | 0.344 | 0.212 | 0.258 | [0.121, 0.296] |
+| Claude Sonnet | 49 | 0.327 | 0.234 | 0.274 | [0.140, 0.324] |
+| Majority | 49 | 0.204 | 0.148 | 0.181 | [0.070, 0.228] |
+| Random | 49 | 0.367 | 0.228 | 0.268 | [0.152, 0.296] |
+| Population Prior Prediction | 17 | 0.412 | 0.240 | 0.264 | [0.108, 0.355] |
 
 **Confusion matrices:**
 
@@ -63,10 +66,10 @@ _L-LLM_
 
 | pred→ | A | B | C | D |
 |---|---|---|---|---|
-| gold=A | 3 | 2 | 5 | 0 |
-| gold=B | 1 | 3 | 5 | 0 |
-| gold=C | 1 | 1 | 10 | 0 |
-| gold=D | 0 | 0 | 1 | 0 |
+| gold=A | 3 | 3 | 8 | 0 |
+| gold=B | 1 | 4 | 7 | 0 |
+| gold=C | 1 | 8 | 12 | 0 |
+| gold=D | 0 | 1 | 1 | 0 |
 
 _L-LLM (think)_
 
@@ -80,28 +83,37 @@ _Claude Sonnet_
 
 | pred→ | A | B | C | D |
 |---|---|---|---|---|
-| gold=A | 2 | 5 | 3 | 0 |
-| gold=B | 3 | 6 | 0 | 0 |
-| gold=C | 3 | 7 | 2 | 0 |
-| gold=D | 0 | 0 | 1 | 0 |
+| gold=A | 2 | 6 | 6 | 0 |
+| gold=B | 3 | 8 | 1 | 0 |
+| gold=C | 3 | 12 | 6 | 0 |
+| gold=D | 0 | 0 | 2 | 0 |
 
 _Majority_
 
 | pred→ | A | B | C | D |
 |---|---|---|---|---|
-| gold=A | 6 | 0 | 4 | 0 |
-| gold=B | 7 | 0 | 2 | 0 |
-| gold=C | 11 | 0 | 1 | 0 |
-| gold=D | 0 | 0 | 1 | 0 |
+| gold=A | 6 | 4 | 4 | 0 |
+| gold=B | 7 | 3 | 2 | 0 |
+| gold=C | 11 | 9 | 1 | 0 |
+| gold=D | 0 | 1 | 1 | 0 |
 
 _Random_
 
 | pred→ | A | B | C | D |
 |---|---|---|---|---|
-| gold=A | 7 | 1 | 2 | 0 |
-| gold=B | 5 | 0 | 4 | 0 |
-| gold=C | 6 | 2 | 4 | 0 |
-| gold=D | 0 | 0 | 1 | 0 |
+| gold=A | 9 | 1 | 4 | 0 |
+| gold=B | 8 | 0 | 4 | 0 |
+| gold=C | 9 | 3 | 9 | 0 |
+| gold=D | 0 | 1 | 1 | 0 |
+
+_Population Prior Prediction_
+
+| pred→ | A | B | C | D |
+|---|---|---|---|---|
+| gold=A | 2 | 0 | 2 | 0 |
+| gold=B | 3 | 0 | 0 | 0 |
+| gold=C | 3 | 1 | 5 | 0 |
+| gold=D | 0 | 1 | 0 | 0 |
 
 ### Format: `pairwise`
 
@@ -117,19 +129,20 @@ _Random_
 
 | Model | N | MAE | Median AE | Spearman r | Sign Acc | CI (MAE) |
 |---|---|---|---|---|---|---|
-| L-LLM | 7 | 10.571 | 10.000 | 0.319 | 1.000 | [7.714, 13.150] |
-| Claude Sonnet | 7 | 25.787 | 16.000 | 0.248 | 1.000 | [10.778, 42.864] |
+| L-LLM | 27 | 12.074 | 12.000 | 0.075 | 1.000 | [9.740, 14.520] |
+| Claude Sonnet | 27 | 22.182 | 19.000 | -0.145 | 1.000 | [15.893, 29.293] |
 | Majority | 0 | — | — | — | — | — |
 | Random | 0 | — | — | — | — | — |
+| Population Prior Prediction | 20 | 25.450 | 28.500 | -0.378 | 1.000 | [19.450, 31.351] |
 
 ## 4. Failure Analysis
 
 ### MCQ — class-level errors
 
 **L-LLM:** most-confused pairs:
-- gold=B predicted as C: 5×
-- gold=A predicted as C: 5×
-- gold=A predicted as B: 2×
+- gold=C predicted as B: 8×
+- gold=A predicted as C: 8×
+- gold=B predicted as C: 7×
 
 **L-LLM (think):** most-confused pairs:
 - gold=B predicted as C: 3×
@@ -137,26 +150,32 @@ _Random_
 - gold=C predicted as B: 1×
 
 **Claude Sonnet:** most-confused pairs:
-- gold=C predicted as B: 7×
-- gold=A predicted as B: 5×
-- gold=C predicted as A: 3×
+- gold=C predicted as B: 12×
+- gold=A predicted as C: 6×
+- gold=A predicted as B: 6×
 
 **Majority:** most-confused pairs:
 - gold=C predicted as A: 11×
+- gold=C predicted as B: 9×
 - gold=B predicted as A: 7×
-- gold=A predicted as C: 4×
 
 **Random:** most-confused pairs:
-- gold=C predicted as A: 6×
-- gold=B predicted as A: 5×
+- gold=C predicted as A: 9×
+- gold=B predicted as A: 8×
 - gold=B predicted as C: 4×
 
+**Population Prior Prediction:** most-confused pairs:
+- gold=C predicted as A: 3×
+- gold=B predicted as A: 3×
+- gold=A predicted as C: 2×
+
 ### Binary/significance — class-wise accuracy
-- **L-LLM**: class A acc=0.3333, class B acc=0.6667
+- **L-LLM**: class A acc=0.6667, class B acc=0.4615
 - **L-LLM (think)**: class A acc=0.0, class B acc=0.875
-- **Claude Sonnet**: class A acc=0.2222, class B acc=0.7778
-- **Majority**: class A acc=1.0, class B acc=0.0
-- **Random**: class A acc=0.4444, class B acc=0.3333
+- **Claude Sonnet**: class A acc=0.3333, class B acc=0.7692
+- **Majority**: class A acc=0.4286, class B acc=0.3077
+- **Random**: class A acc=0.5238, class B acc=0.3846
+- **Population Prior Prediction**: class A acc=0.5, class B acc=0.5
 
 ### Pairwise — A/B prediction bias
 - **L-LLM**: predicted A=61.1%, predicted B=38.9%, A-bias=0.1111
@@ -172,8 +191,10 @@ See sign_accuracy in the regression metrics table above.
 
 | Baseline | MCQ acc | Binary acc | Pairwise acc | Regression MAE |
 |---|---|---|---|---|
-| Majority | 0.2188 | 0.3333 | 0.5 | None |
-| Random | 0.3438 | 0.3704 | 0.6667 | None |
+| Majority | 0.2041 | 0.3617 | 0.5 | None |
+| Random | 0.3673 | 0.4468 | 0.6667 | None |
+| Population Prior Prediction | 0.4118 | 0.5 | — | 25.45 |
 
 _Majority baseline uses per-format most-frequent label from training split._  
-_Random baseline draws uniformly from valid label set per format (A/B/C for MCQ, A/B for binary/pairwise)._
+_Random baseline draws uniformly from valid label set per format (A/B/C for MCQ, A/B for binary/pairwise)._  
+_Population Prior Prediction baseline samples regression age from US Census 2025 population estimates conditioned on donor sex (no train labels used)._
