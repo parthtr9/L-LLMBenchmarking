@@ -139,18 +139,22 @@ Must serve from this directory — CSS tokens and JSON files resolve relative to
 
 ## Current benchmark results
 
-All results on test split. Balanced accuracy for classification; MAE for regression.
+All results on the test split. Per-task headline metric matches the spec in each task's table below.
 
 ### Task A — Senescence Perturbation (n=104 evaluated)
 
-| Model | MCQ (bal acc) | Binary (bal acc) | Pairwise (acc) | Regression (MAE) |
+| Model | MCQ (accuracy) | Binary (accuracy) | Pairwise (balanced accuracy) | Regression (MAE) |
 |-------|--------------|-----------------|----------------|-----------------|
 | L-LLM | 0.367 | 0.500 | 0.556 | 10.571 |
 | Claude Sonnet 4.5 | 0.258 | 0.500 | **0.778** | 25.787 |
 | Majority baseline | 0.171 | 0.500 | 0.500 | — |
 | Random baseline | 0.258 | 0.389 | 0.667 | — |
 
-L-LLM leads on MCQ and regression (lower MAE); Claude leads on pairwise.
+L-LLM leads on MCQ and regression (lower MAE); Claude leads on pairwise. Regression column is from the previous Log2FC variant (since replaced by Binary significance) — re-run with the current parquet to refresh.
+
+### Task B — Lipidomics
+
+Eval not yet run end-to-end on the current parquet. Headline metrics when run: MCQ → off-by-one accuracy, Regression → MAE, Binary → accuracy.
 
 ### Trace faithfulness (L-LLM thinking, n=29 traces)
 
@@ -232,7 +236,7 @@ Task B parquet  ─┤
          run_inspect.py
               ├── parquet_task (@task)        reads parquet, builds ChatML samples
               ├── litellm_solver              calls L-LLM / Claude / baselines via LiteLLM
-              └── longebench_scorer           format-aware: mcq/binary/pairwise/regression
+              └── longebench_scorer           metric-aware: accuracy / balanced_accuracy / off_by_one_accuracy / mae
                  ↓
          outputs/inspect/<model_name>/*.eval  (Inspect AI binary logs)
                  ↓
@@ -265,9 +269,9 @@ Task B parquet  ─┤
 
 | Format | N | Task | Gold | Metric |
 |--------|---|------|------|--------|
-| MCQ | 99 | Given experiment metadata, predict direction of gene expression change | A / B / C | Balanced accuracy |
-| Binary | 100 | Predict whether perturbation produces a significant change (|LogFC| > 1.0, p < 0.05) | A / B | Balanced accuracy |
-| Pairwise | 99 | Given two genes from same experiment, predict which shows larger |LogFC| | A / B | Accuracy |
+| MCQ | 99 | Given experiment metadata, predict direction of gene expression change | A / B / C | `accuracy` (33/33/33 balanced → equals balanced accuracy) |
+| Binary | 100 | Predict whether perturbation produces a significant change (\|LogFC\| > 1.0, p < 0.05) | A / B | `accuracy` (50/50 balanced → equals balanced accuracy) |
+| Pairwise | 99 | Given two genes from same experiment, predict which shows larger \|LogFC\| | A / B | `balanced accuracy` |
 
 Train/test split by GEO accession — 239 train / 59 test, 15 train accessions / 28 test accessions. Zero leaked treatments.
 
@@ -293,11 +297,13 @@ Outputs: `processed/task_a_senescence_{train,test}.parquet`, `…_{train,test}.j
 
 | Format | N | Task | Gold | Metric |
 |--------|---|------|------|--------|
-| MCQ | 85 | Predict age bracket from lipid profile (A=20–39 / B=40–59 / C=60–79 / D=80+) | A / B / C / D | Accuracy |
-| Regression | 100 | Predict numeric age in years from lipid profile + diabetes status | integer years | MAE |
-| Binary | 100 | Predict diabetes status (A=Yes / B=No) from lipid profile + age | A / B | Balanced accuracy |
+| MCQ | 85 | Predict age bracket from lipid profile (A=20–39 / B=40–59 / C=60–79 / D=80+) | A / B / C / D | `off-by-one accuracy` (ordinal: 1.0 exact, 0.5 adjacent, 0.0 else) |
+| Regression | 100 | Predict numeric age in years from lipid profile + diabetes status | integer years | `mae` |
+| Binary | 100 | Predict diabetes status (A=Yes / B=No) from lipid profile + age | A / B | `accuracy` (class prior ≈ 61/39 No/Yes — also report majority baseline) |
 
 Train/test: stratified by format, grouped by `individual_id` — 228 train / 57 test. No donor appears in both splits.
+
+> ⚠️ The default `--min-train-per-task=50` floor only works at `--target-per-task ≥ 80`. At smaller targets the floor swallows the test split; the pipeline prints a per-format `WARNING` and tells you which knob to turn.
 
 ### Regenerate prompts
 
@@ -319,7 +325,7 @@ python balance_gender.py
 python lipidomics_pipeline.py \
   --input balanced_lipidomics.tsv \
   --output-dir . \
-  --target-per-task 50
+  --target-per-task 100
 ```
 
 Outputs: `task_b_lipidomics_{train,test}.parquet`, `…_{train,test}.json`, `task_b_lipidomics_summary.json`.
@@ -357,7 +363,7 @@ Replaces V3 (DeBERTa NLI) which gave 3.4% consistency — biological traces too 
 | Utility | 5 | Tasks target failure modes that break real research workflows |
 | Diversity | 5 | Both tasks cover binary, MCQ, regression, and pairwise formats |
 | Retrieval resistance | 5 | All questions derived from raw GEO/MetaboLights records, not paper text |
-| Statistical rigor | 5 | Macro F1 + balanced accuracy + MAE + bootstrap CIs + baselines |
+| Statistical rigor | 5 | Macro F1 + balanced accuracy + off-by-one accuracy + MAE + bootstrap CIs + baselines |
 
 **Total: 20 points.**
 
@@ -374,3 +380,4 @@ Replaces V3 (DeBERTa NLI) which gave 3.4% consistency — biological traces too 
 | Keyword consistency (V4) replaces DeBERTa NLI (V3) | DeBERTa truncated at 1024 chars → missed biological conclusions; keywords work on full trace |
 | Regression score = 1/(1+MAE) | Converts MAE to 0–1 ascending scale for unified dashboard display |
 | Report macro F1 + balanced accuracy (not plain accuracy) | Class imbalance in all tasks makes plain accuracy misleading |
+| Task B MCQ uses off-by-one accuracy | Age brackets are ordinal — predicting B when truth is A is much better than predicting D. Plain accuracy treats them identically. Off-by-one credits adjacent-bracket predictions at 0.5 |

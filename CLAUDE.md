@@ -64,8 +64,7 @@ and why L-LLM succeeds or fails compared to general-purpose models.
 
 1. `task_a_senescence/` — Gene-level differential expression across senescence perturbation experiments benchmark (298 prompts)
 2. `task_b_lipidomics/` — Lipidomics age-prediction + diabetes benchmark (285 prompts)
-3. `task_c_metabolite/` — Microbiome–metabolite prediction benchmark (~150 prompts, planned)
-4. `trace_scorer/` — Automated biological fact-checker for L-LLM reasoning traces (implemented)
+3. `trace_scorer/` — Automated biological fact-checker for L-LLM reasoning traces (implemented)
 
 All benchmark tasks submitted as parquet files with ChatML-formatted messages column.
 JSONL export available via the row schema below.
@@ -79,7 +78,7 @@ JSONL export available via the row schema below.
 | Utility             | 5      | Tasks target failure modes that break real research workflows   |
 | Diversity           | 5      | Every task has binary, ternary, regression, and pairwise variants |
 | Retrieval resistance| 5      | All questions derived from raw database records, not paper text |
-| Statistical rigor   | 5      | Macro F1 + balanced accuracy + MAE + bootstrap CIs + baselines |
+| Statistical rigor   | 5      | Macro F1 + balanced accuracy + off-by-one accuracy + MAE + bootstrap CIs + baselines |
 
 **Total: 20 points.** Do not sacrifice any criterion to speed up another.
 
@@ -449,7 +448,7 @@ display_name	string	Human-readable task name
 display_group	string	Task family this row belongs to (Senescence Perturbation, Lipidomics Age, Metabolite Prediction)
 domain	string	transcriptomics, lipidomics, metabolomics, or multi-omics
 format	string	binary, multiclass, ternary, pairwise, regression, generation
-metric	string	Scoring metric: accuracy, mae, or jaccard
+metric	string	Scoring metric: `accuracy`, `balanced accuracy`, `off-by-one accuracy`, or `mae`
 units	string | null	Units for regression/pairwise tasks (log2fc, years, µM) where applicable
 task	string	Free-text task description embedded in the source data
 messages	list of dicts	OpenAI-style chat messages (role, content)
@@ -598,6 +597,24 @@ Must serve from this directory — CSS tokens and JSON files resolve relative to
 
 ### Metrics (implement all — judges check)
 
+Implemented in [src/eval/inspect_scorers.py](src/eval/inspect_scorers.py) (per-eval aggregates from
+Inspect AI) and [src/analysis/gap_analysis.py](src/analysis/gap_analysis.py) (post-hoc per-format
+metrics with bootstrap CIs for the dashboard).
+
+**Per-sample `score.value` semantics** (so unfiltered means stay in [0,1]):
+
+| Metric (in parquet `metric` field) | `score.value` per sample | Aggregate in `longebench_scorer` |
+|---|---|---|
+| `accuracy` | 1.0 / 0.0 exact match | `mean()` |
+| `balanced accuracy` | 1.0 / 0.0 exact match | `balanced_accuracy()` — per-class average over `score.metadata["gold"]` |
+| `off-by-one accuracy` | 1.0 / 0.5 / 0.0 graded by bracket distance | `off_by_one_accuracy()` — filtered mean |
+| `mae` | 1 / (1 + MAE), raw MAE in `score.metadata["mae"]` | `mae()` — mean of raw MAE values |
+
+Each aggregate filters by `sample_metadata["metric"]` so a single eval run can mix formats
+without cross-polluting metrics. nan when no applicable rows.
+
+**Post-hoc metrics (gap_analysis.py)** — recomputed from raw gold/pred pairs using sklearn:
+
 ```python
 from sklearn.metrics import f1_score, balanced_accuracy_score
 from scipy.stats import bootstrap
@@ -622,8 +639,12 @@ def score_regression(y_true, y_pred):
     }
 ```
 
-Always report the majority-class baseline F1 alongside model F1.
-A model that scores 0.62 F1 on a task where majority-class gets 0.61 is not impressive.
+For MCQ rows whose `metric` is `off-by-one accuracy` (Task B age brackets), gap_analysis also
+emits `off_by_one_accuracy` + bootstrap CI in the per-format metrics dict. The dashboard
+`_primaryScore` helper picks it up automatically as the MCQ headline metric for that task.
+
+Always report the majority-class baseline alongside model scores. A model that scores 0.62 on
+a task where the majority baseline scores 0.61 is not impressive.
 
 ---
 
@@ -974,6 +995,10 @@ Use balanced accuracy and macro F1 (not plain accuracy) in all reported metrics.
 | Task A replaces Log2FC regression with binary significance | Regression on Log2FC was retrieval-vulnerable (model could plausibly memorize ranges); binary "is this perturbation significant at all?" is a harder retrieval-resistant variant that still uses the same underlying data | — | 2026-05-23 |
 | Train/test split for Task B stratified by task format, grouped by `individual_id` | Per-format stratification guarantees every task hits the test fraction; group split prevents donor leakage even though MTBLS4461 currently has 1 sample per donor (forward-compatible) | — | 2026-05-23 |
 | Task B MCQ uses 4 brackets (20-39 / 40-59 / 60-79 / 80+) instead of original 3 (young / middle / older) | Matches what user requested; 80+ bracket caps MCQ at 40 prompts (10/class) but exposes high-age failure modes | — | 2026-05-24 |
+| Task B MCQ metric is off-by-one accuracy (1.0 exact / 0.5 adjacent / 0.0 else) instead of plain accuracy | Age brackets are ordinal — predicting B when truth is A is much better than predicting D. Plain accuracy ignores that and penalizes "close" identically to "wildly wrong". Wired through `inspect_scorers.longebench_scorer` (per-sample graded value + `off_by_one_accuracy()` aggregate), `gap_analysis._mcq_metrics` (filtered subset + bootstrap CI), and `GapAnalysisView._primaryScore` (auto-promotes to headline). | — | 2026-05-24 |
+| Task A MCQ + Binary use plain `accuracy` (not balanced) | Both are balanced by construction (33/33/33 MCQ classes, 50/50 binary), so plain accuracy ≡ balanced accuracy. Saves a metric branch. | — | 2026-05-24 |
+| Task A Pairwise uses `balanced accuracy` | Pairwise is NOT balanced by construction — gold "winner" label distribution depends on which gene happens to have the larger |LogFC|. Position bias toward A or B would inflate plain accuracy. | — | 2026-05-24 |
+| Task B Binary diabetes uses plain `accuracy` despite ~61/39 class skew | Smaller benchmark — chose simpler metric. Majority-baseline number is reported alongside so reviewers can tell whether the model beat the prior. Switch to balanced accuracy if dataset grows more imbalanced. | — | 2026-05-24 |
 | Task B replaces Pairwise with Binary diabetes-from-profile | More clinically meaningful than "which donor is older"; complements the age tasks and exercises a second label dimension already in the data | — | 2026-05-24 |
 | Task B expanded to 285 prompts (228 train / 57 test) | More data available after second data pull; old count was 101/25 | — | 2026-05-24 |
 | Train/test split for Task C by study/cohort, not random | Samples within a study share sequencing protocols, dietary contexts, and batch effects | — | — |
