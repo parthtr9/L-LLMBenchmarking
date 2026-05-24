@@ -262,14 +262,21 @@ _FORMAT_RANDOM_CHOICES: dict[str, list[str]] = {
 
 
 @solver
-def random_baseline_solver(seed: int = 42):
-    """Emit a random valid label sampled uniformly from the format's label set."""
+def random_baseline_solver(seed: int = 42, regression_range: tuple[int, int] = (20, 90)):
+    """Emit a random valid label sampled uniformly from the format's label set.
+
+    For regression format, samples a random integer uniformly from regression_range
+    (derived from training target min/max) instead of a letter.
+    """
     rng = random.Random(seed)
 
     async def solve(state: TaskState, generate: Generate) -> TaskState:
         fmt = str((state.metadata or {}).get("format", "")).lower()
-        choices = _FORMAT_RANDOM_CHOICES.get(fmt, ["A", "B"])
-        answer = rng.choice(choices)
+        if fmt == "regression":
+            answer = str(rng.randint(regression_range[0], regression_range[1]))
+        else:
+            choices = _FORMAT_RANDOM_CHOICES.get(fmt, ["A", "B"])
+            answer = rng.choice(choices)
         state.output = ModelOutput.from_content(model="random_baseline", content=answer)
         state.completed = True
         return state

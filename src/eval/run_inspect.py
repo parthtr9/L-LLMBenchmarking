@@ -99,13 +99,15 @@ def main() -> None:
             model_name, parquet_path.name, args.fmt_filter, args.limit, args.dry_run,
         )
 
+        effective_max_tokens = model_cfg.get("max_tokens", args.max_tokens)
+
         t = parquet_task(
             parquet_path=str(parquet_path),
             model_name=model_name,
             fmt_filter=args.fmt_filter,
             limit=args.limit,
             dry_run=args.dry_run,
-            max_tokens=args.max_tokens,
+            max_tokens=effective_max_tokens,
             temperature=args.temperature,
             seed=args.seed,
         )

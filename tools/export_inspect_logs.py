@@ -57,6 +57,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import math
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -84,6 +85,17 @@ def _model_meta(model_id: str) -> dict[str, str]:
     return {"id": model_id, **base}
 
 
+def _sanitize_floats(obj: Any) -> Any:
+    """Recursively replace NaN/Inf floats with None for JSON-safe output."""
+    if isinstance(obj, float):
+        return None if (math.isnan(obj) or math.isinf(obj)) else obj
+    if isinstance(obj, dict):
+        return {k: _sanitize_floats(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_sanitize_floats(v) for v in obj]
+    return obj
+
+
 def _extract_score(log: EvalLog) -> dict[str, Any]:
     """Pull aggregate score values + CIs out of an Inspect EvalLog."""
     out: dict[str, Any] = {}
@@ -91,7 +103,11 @@ def _extract_score(log: EvalLog) -> dict[str, Any]:
         return out
     for s in log.results.scores:
         for metric_name, m in s.metrics.items():
-            out[metric_name] = round(m.value, 4)
+            v = m.value
+            if v is None or (isinstance(v, float) and math.isnan(v)):
+                out[metric_name] = None
+            else:
+                out[metric_name] = round(v, 4)
     return out
 
 
@@ -160,10 +176,16 @@ def _gather(log_dir: Path) -> dict[str, Any]:
             models[model_id] = _model_meta(model_id)
 
         task_name = log.eval.task or ""
-        if task_name in ("senescence_task", "parquet_task"):
+        task_args = log.eval.task_args or {}
+        parquet_path = str(task_args.get("parquet_path", ""))
+        if "task_a_senescence" in parquet_path:
+            lb_id = "task_a_senescence"
+        elif "task_b_lipidomics" in parquet_path:
+            lb_id = "task_b_lipidomics"
+        elif task_name in ("senescence_task", "parquet_task"):
             lb_id = "task_a_senescence"
         else:
-            lb_id = (log.eval.task_args or {}).get("lb_id", "unknown")
+            lb_id = task_args.get("lb_id", "unknown")
         if lb_id not in tasks:
             tasks[lb_id] = {"id": lb_id, "name": lb_id, "format": None,
                             "n": 0, "metric": None}
@@ -250,8 +272,12 @@ def main() -> None:
         sys.exit(1)
 
     bundle = _gather(args.log_dir)
+    bundle = _sanitize_floats(bundle)
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(bundle, indent=2, default=str), encoding="utf-8")
+    args.out.write_text(
+        json.dumps(bundle, indent=2, default=str, allow_nan=False),
+        encoding="utf-8",
+    )
     logger.info("wrote %d samples, %d runs across %d models → %s",
                 len(bundle["samples"]), len(bundle["runs"]),
                 len(bundle["models"]), args.out)

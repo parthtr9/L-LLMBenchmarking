@@ -16,6 +16,7 @@ models:
       chat_template_kwargs:
         enable_thinking: true
     max_concurrency: 4
+    max_tokens: 3000
 
   claude_sonnet:
     litellm_model: "anthropic/claude-sonnet-4-6"

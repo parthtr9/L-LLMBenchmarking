@@ -176,7 +176,8 @@ def step_choose_dataset(datasets: list[dict]) -> list[tuple[Path, str | None, in
         sys.exit(1)
 
     print("\n  Available datasets:")
-    print(f"    0) ALL test sets (runs every dataset below in sequence)")
+    print(f"    0) ALL test sets  (runs every dataset — test split)")
+    print(f"    t) ALL train sets (runs every dataset — train split)")
     for i, ds in enumerate(datasets, 1):
         splits = []
         if ds["test_path"]:
@@ -187,25 +188,31 @@ def step_choose_dataset(datasets: list[dict]) -> list[tuple[Path, str | None, in
         print(f"    {i}) {ds['label']:<30s}  [{', '.join(splits)}]  formats: {fmts}")
 
     while True:
-        raw = input(f"\n  dataset number [0=all, 1–{len(datasets)}]: ").strip()
+        raw = input(f"\n  dataset [0=all test, t=all train, 1–{len(datasets)}=single]: ").strip().lower()
         if raw == "0":
             selected_datasets = [ds for ds in datasets if ds["test_path"]]
-            run_all = True
+            run_all_split = "test"
+            break
+        if raw == "t":
+            selected_datasets = [ds for ds in datasets if ds["train_path"]]
+            run_all_split = "train"
             break
         if raw.isdigit() and 1 <= int(raw) <= len(datasets):
             selected_datasets = [datasets[int(raw) - 1]]
-            run_all = False
+            run_all_split = None
             break
-        print(f"  enter 0–{len(datasets)}")
+        print(f"  enter 0, t, or 1–{len(datasets)}")
 
-    # When running all, use test split, no format filter
-    if run_all:
-        print(f"\n  Running all {len(selected_datasets)} test sets (no format filter)")
+    # When running all test or all train
+    if run_all_split:
+        split_key = "test_path" if run_all_split == "test" else "train_path"
+        n_key = "n_test" if run_all_split == "test" else "n_train"
+        print(f"\n  Running all {len(selected_datasets)} {run_all_split} sets (no format filter)")
         raw = input("  sample limit per model per dataset [none=all]: ").strip()
         limit: int | None = None if (not raw or raw.lower() == "none") else int(raw)
-        result = [(ds["test_path"], None, limit) for ds in selected_datasets]
+        result = [(ds[split_key], None, limit) for ds in selected_datasets]
         for ds, (path, _, _) in zip(selected_datasets, result):
-            print(f"    {ds['label']}: {path.name} ({ds['n_test']} samples)")
+            print(f"    {ds['label']}: {path.name} ({ds[n_key]} samples)")
         return result
 
     # Single dataset
@@ -363,6 +370,23 @@ def step_export() -> bool:
     return True
 
 
+# ── step 5.5: export task prompt-browser data ────────────────────────────────
+
+def step_export_task_data() -> None:
+    header("STEP 5.5 — Export task prompt-browser data")
+
+    print(f"\n  Output : public/task_a_data.json, public/task_b_data.json")
+
+    cmd = [PYTHON, "-m", "tools.export_task_data"]
+    print("\n  Exporting task data...")
+    rc = run_cmd(cmd)
+
+    if rc != 0:
+        print(f"\n  Task data export failed (exit code {rc}) — continuing anyway.")
+    else:
+        print("\n  Task data export complete.")
+
+
 # ── step 6: generate gap analysis report ─────────────────────────────────────
 
 def _split_siblings(parquet_path: Path) -> tuple[Path | None, Path | None]:
@@ -436,6 +460,38 @@ def step_gap_report(dataset_runs: list[tuple[Path, str | None, int | None]]) -> 
     return True
 
 
+# ── step 6.5: trace scoring ──────────────────────────────────────────────────
+
+def step_trace_scoring() -> None:
+    header("STEP 6.5 — Score L-LLM thinking traces (V5 + Claude oracle)")
+
+    if not DATA_JSON.exists():
+        print("\n  data.json not found — skipping trace scoring.")
+        return
+
+    if not confirm("Run V5 trace scorer (gene verification + keyword consistency)?"):
+        print("  Skipping trace scoring.")
+        return
+
+    rc = run_cmd([PYTHON, "-m", "src.trace_scorer.trace_scorer"])
+    if rc != 0:
+        print(f"\n  V5 scorer exited with code {rc}.")
+        return
+
+    print("\n  V5 scoring complete.")
+
+    if not confirm("Run Claude oracle tier (~$0.01/trace, uses ANTHROPIC_API_KEY)?"):
+        print("  Skipping oracle.")
+        return
+
+    rc = run_cmd([PYTHON, "-m", "src.trace_scorer.run_oracle"])
+    if rc != 0:
+        print(f"\n  Oracle exited with code {rc}.")
+        return
+
+    print("\n  Oracle scoring complete.")
+
+
 # ── step 7: serve dashboard ──────────────────────────────────────────────────
 
 def step_serve() -> None:
@@ -485,7 +541,13 @@ def main() -> None:
         exported = step_export()
 
     if exported or DATA_JSON.exists():
+        step_export_task_data()
+
+    if exported or DATA_JSON.exists():
         step_gap_report(dataset_runs)
+
+    if exported or DATA_JSON.exists():
+        step_trace_scoring()
 
     step_serve()
 

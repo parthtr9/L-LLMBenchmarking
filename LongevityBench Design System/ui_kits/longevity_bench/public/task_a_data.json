@@ -242,18 +242,6 @@
       "follow_up": "Gene: BUB1 (BUB1 mitotic checkpoint serine/threonine kinase). Log2FC=-3.179, p=1.57e-22. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE24810. According to CellAge, BUB1 inhibits cellular senescence (senescence type: Oncogene-induced). CellAge PMID: 17488820."
     },
     {
-      "lb_id": "LB-SEN-MCQ-0027",
-      "format": "mcq",
-      "pool": "senescence_perturbation_mcq",
-      "display_group": "Senescence Perturbation",
-      "domain": "transcriptomics",
-      "metric": "accuracy",
-      "split": "train",
-      "question": "<question>\nYou are presented with a senescence perturbation experiment. In HDF skin fibroblasts undergoing replicative senescence at 15d post-senescence induction, treatment with Y27632 at dose 2.5uM is applied. Compared to untreated replicatively senescent cells, the mRNA expression of POU5F1 (POU class 5 homeobox 1) measured by microarray:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: HDF skin fibroblasts. Senescence model: replicative senescence. Perturbation: treatment with Y27632 at dose 2.5uM. Control condition: untreated replicatively senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>",
-      "gold": "C",
-      "follow_up": "Gene: POU5F1 (POU class 5 homeobox 1). Log2FC=0.1667, p=9.92e-01. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE178115. According to CellAge, POU5F1 induces cellular senescence (senescence type: Oncogene-induced). CellAge PMID: 22746537."
-    },
-    {
       "lb_id": "LB-SEN-MCQ-0029",
       "format": "mcq",
       "pool": "senescence_perturbation_mcq",
@@ -266,18 +254,6 @@
       "follow_up": "Gene: EP300 (E1A binding protein p300). Log2FC=2.2154, p=5.93e-06. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE122079. According to CellAge, EP300 induces cellular senescence (senescence type: Replicative). CellAge PMID: 30773298."
     },
     {
-      "lb_id": "LB-SEN-MCQ-0030",
-      "format": "mcq",
-      "pool": "senescence_perturbation_mcq",
-      "display_group": "Senescence Perturbation",
-      "domain": "transcriptomics",
-      "metric": "accuracy",
-      "split": "train",
-      "question": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction, siRNA knockdown of LTR10 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of MAGOHB (mago homolog B, exon junction complex subunit) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR10. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR10.\n</gene_context>",
-      "gold": "B",
-      "follow_up": "Gene: MAGOHB (mago homolog B, exon junction complex subunit). Log2FC=-1.0803, p=7.81e-06. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE127116. According to CellAge, MAGOHB inhibits cellular senescence (senescence type: Replicative). CellAge PMID: 26206181."
-    },
-    {
       "lb_id": "LB-SEN-MCQ-0031",
       "format": "mcq",
       "pool": "senescence_perturbation_mcq",
@@ -288,6 +264,18 @@
       "question": "<question>\nYou are presented with a senescence perturbation experiment. In WI-38 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 6d post-senescence induction, siRNA knockdown of RELA at dose 20uM is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of TOM1 (target of myb1 membrane trafficking protein) measured by microarray:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: WI-38 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of RELA at dose 20uM. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 4. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): RELA.\n</gene_context>",
       "gold": "C",
       "follow_up": "Gene: TOM1 (target of myb1 membrane trafficking protein). Log2FC=-0.275, p=1.34e-05. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE122918. According to CellAge, TOM1 induces cellular senescence. CellAge PMID: 15265694."
+    },
+    {
+      "lb_id": "LB-SEN-MCQ-0032",
+      "format": "mcq",
+      "pool": "senescence_perturbation_mcq",
+      "display_group": "Senescence Perturbation",
+      "domain": "transcriptomics",
+      "metric": "accuracy",
+      "split": "train",
+      "question": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (IR) at 10d post-senescence induction, treatment with TSA (targeting HDAC) at dose 100nM is applied. Compared to untreated DNA damage-induced senescent cells, the mRNA expression of G6PD (glucose-6-phosphate dehydrogenase) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (IR). Perturbation: treatment with TSA (targeting HDAC) at dose 100nM. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): HDAC.\n</gene_context>",
+      "gold": "A",
+      "follow_up": "Gene: G6PD (glucose-6-phosphate dehydrogenase). Log2FC=1.1301, p=3.23e-06. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE132370. According to CellAge, G6PD inhibits cellular senescence (senescence type: Stress-induced). CellAge PMID: 10980404."
     },
     {
       "lb_id": "LB-SEN-MCQ-0033",
@@ -434,18 +422,6 @@
       "follow_up": "Gene: PTGS2 (prostaglandin-endoperoxide synthase 2). Log2FC=2.3275, p=3.61e-05. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE128711. According to CellAge, PTGS2 induces cellular senescence (senescence type: Replicative). CellAge PMID: 28803844."
     },
     {
-      "lb_id": "LB-SEN-MCQ-0048",
-      "format": "mcq",
-      "pool": "senescence_perturbation_mcq",
-      "display_group": "Senescence Perturbation",
-      "domain": "transcriptomics",
-      "metric": "accuracy",
-      "split": "train",
-      "question": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction, siRNA knockdown of LTR10 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of BRIP1 (BRCA1 interacting helicase 1) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR10. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR10.\n</gene_context>",
-      "gold": "C",
-      "follow_up": "Gene: BRIP1 (BRCA1 interacting helicase 1). Log2FC=0.0, p=1.00e+00. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE127116. According to CellAge, BRIP1 inhibits cellular senescence (senescence type: Oncogene-induced). CellAge PMID: 22137763."
-    },
-    {
       "lb_id": "LB-SEN-MCQ-0049",
       "format": "mcq",
       "pool": "senescence_perturbation_mcq",
@@ -468,18 +444,6 @@
       "question": "<question>\nYou are presented with a senescence perturbation experiment. In HMF3A skin fibroblasts undergoing oncogene-induced senescence (SV40) at 7d post-senescence induction, shRNA knockdown of p21 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of CCND1 (cyclin D1) measured by microarray:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: HMF3A skin fibroblasts. Senescence model: oncogene-induced senescence (SV40). Perturbation: shRNA knockdown of p21. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p21.\n</gene_context>",
       "gold": "B",
       "follow_up": "Gene: CCND1 (cyclin D1). Log2FC=-1.3988, p=2.24e-06. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE24810. According to CellAge, CCND1 induces cellular senescence. CellAge PMID: 7698220."
-    },
-    {
-      "lb_id": "LB-SEN-MCQ-0054",
-      "format": "mcq",
-      "pool": "senescence_perturbation_mcq",
-      "display_group": "Senescence Perturbation",
-      "domain": "transcriptomics",
-      "metric": "accuracy",
-      "split": "train",
-      "question": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (AKT) at 14d post-senescence induction, shRNA knockdown of p53 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of ZMPSTE24 (zinc metallopeptidase STE24) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (AKT). Perturbation: shRNA knockdown of p53. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p53.\n</gene_context>",
-      "gold": "C",
-      "follow_up": "Gene: ZMPSTE24 (zinc metallopeptidase STE24). Log2FC=-0.1021, p=4.74e-01. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE200479. According to CellAge, ZMPSTE24 inhibits cellular senescence (senescence type: Replicative). CellAge PMID: 24101728."
     },
     {
       "lb_id": "LB-SEN-MCQ-0055",
@@ -578,18 +542,6 @@
       "follow_up": "Gene: ID1 (inhibitor of DNA binding 1, HLH protein). Log2FC=1.2212, p=1.96e-05. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE133292. According to CellAge, ID1 inhibits cellular senescence (senescence type: Replicative). CellAge PMID: 12177246."
     },
     {
-      "lb_id": "LB-SEN-MCQ-0064",
-      "format": "mcq",
-      "pool": "senescence_perturbation_mcq",
-      "display_group": "Senescence Perturbation",
-      "domain": "transcriptomics",
-      "metric": "accuracy",
-      "split": "train",
-      "question": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction, siRNA knockdown of LTR10 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of SUV39H1 (SUV39H1 histone lysine methyltransferase) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR10. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR10.\n</gene_context>",
-      "gold": "B",
-      "follow_up": "Gene: SUV39H1 (SUV39H1 histone lysine methyltransferase). Log2FC=-1.184, p=2.69e-05. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE127116. According to CellAge, SUV39H1 inhibits cellular senescence. CellAge PMID: 26160351."
-    },
-    {
       "lb_id": "LB-SEN-MCQ-0065",
       "format": "mcq",
       "pool": "senescence_perturbation_mcq",
@@ -660,6 +612,18 @@
       "question": "<question>\nYou are presented with a senescence perturbation experiment. In HFF skin fibroblasts undergoing DNA damage-induced senescence (Doxorubicin) at 1d post-senescence induction, knockdown of p130 is applied. Compared to untreated DNA damage-induced senescent cells, the mRNA expression of NFE2L2 (nuclear factor, erythroid 2 like 2) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: HFF skin fibroblasts. Senescence model: DNA damage-induced senescence (Doxorubicin). Perturbation: knockdown of p130. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 2. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p130.\n</gene_context>",
       "gold": "C",
       "follow_up": "Gene: NFE2L2 (nuclear factor, erythroid 2 like 2). Log2FC=-0.2998, p=3.48e-01. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE128711. According to CellAge, NFE2L2 inhibits cellular senescence. CellAge PMID: 20068043."
+    },
+    {
+      "lb_id": "LB-SEN-MCQ-0073",
+      "format": "mcq",
+      "pool": "senescence_perturbation_mcq",
+      "display_group": "Senescence Perturbation",
+      "domain": "transcriptomics",
+      "metric": "accuracy",
+      "split": "train",
+      "question": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing nan (nan), treatment with TSA (targeting HDAC) at dose 100nM is applied. Compared to untreated DNA damage-induced senescent cells, the mRNA expression of GRK4 (G protein-coupled receptor kinase 4) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: nan (nan). Perturbation: treatment with TSA (targeting HDAC) at dose 100nM. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): HDAC.\n</gene_context>",
+      "gold": "C",
+      "follow_up": "Gene: GRK4 (G protein-coupled receptor kinase 4). Log2FC=0.0678, p=6.83e-01. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE132370. According to CellAge, GRK4 induces cellular senescence. CellAge PMID: 28912086."
     },
     {
       "lb_id": "LB-SEN-MCQ-0074",
@@ -744,18 +708,6 @@
       "question": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (Etoposide) at 7d post-senescence induction, shRNA knockdown of p53 is applied. Compared to untreated DNA damage-induced senescent cells, the mRNA expression of CCND1 (cyclin D1) measured by microarray:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (Etoposide). Perturbation: shRNA knockdown of p53. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p53.\n</gene_context>",
       "gold": "A",
       "follow_up": "Gene: CCND1 (cyclin D1). Log2FC=1.0915, p=2.27e-11. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE53379. According to CellAge, CCND1 induces cellular senescence. CellAge PMID: 7698220."
-    },
-    {
-      "lb_id": "LB-SEN-MCQ-0084",
-      "format": "mcq",
-      "pool": "senescence_perturbation_mcq",
-      "display_group": "Senescence Perturbation",
-      "domain": "transcriptomics",
-      "metric": "accuracy",
-      "split": "train",
-      "question": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (AKT) at 14d post-senescence induction, shRNA knockdown of NF1 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of SFRP1 (secreted frizzled related protein 1) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (AKT). Perturbation: shRNA knockdown of NF1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): NF1.\n</gene_context>",
-      "gold": "A",
-      "follow_up": "Gene: SFRP1 (secreted frizzled related protein 1). Log2FC=1.1883, p=6.44e-08. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE200479. According to CellAge, SFRP1 induces cellular senescence (senescence type: Stress-induced). CellAge PMID: 22927647."
     },
     {
       "lb_id": "LB-SEN-MCQ-0085",
@@ -852,18 +804,6 @@
       "question": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (RAF) at 2d post-senescence induction, treatment with clobetasol (targeting GR) at dose 2nM_2h is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of CDK4 (cyclin dependent kinase 4) measured by microarray:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (RAF). Perturbation: treatment with clobetasol (targeting GR) at dose 2nM_2h. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 4. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): GR.\n</gene_context>",
       "gold": "A",
       "follow_up": "Gene: CDK4 (cyclin dependent kinase 4). Log2FC=1474.469, p=1.18e-05. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE134747. According to CellAge, CDK4 inhibits cellular senescence (senescence type: Replicative). CellAge PMID: 12082615."
-    },
-    {
-      "lb_id": "LB-SEN-MCQ-0095",
-      "format": "mcq",
-      "pool": "senescence_perturbation_mcq",
-      "display_group": "Senescence Perturbation",
-      "domain": "transcriptomics",
-      "metric": "accuracy",
-      "split": "train",
-      "question": "<question>\nYou are presented with a senescence perturbation experiment. In HDF skin fibroblasts undergoing replicative senescence at 15d post-senescence induction, treatment with Y27632_KU60019 at dose 2.5uM_0.5uM is applied. Compared to untreated replicatively senescent cells, the mRNA expression of EIF4EBP1 (eukaryotic translation initiation factor 4E binding protein 1) measured by microarray:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: HDF skin fibroblasts. Senescence model: replicative senescence. Perturbation: treatment with Y27632_KU60019 at dose 2.5uM_0.5uM. Control condition: untreated replicatively senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>",
-      "gold": "A",
-      "follow_up": "Gene: EIF4EBP1 (eukaryotic translation initiation factor 4E binding protein 1). Log2FC=2462.333, p=7.40e-05. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE178115. According to CellAge, EIF4EBP1 inhibits cellular senescence (senescence type: Oncogene-induced). CellAge PMID: 19878875."
     },
     {
       "lb_id": "LB-SEN-MCQ-0096",
@@ -1056,18 +996,6 @@
       "question": "<question>\nIn a senescence perturbation experiment using HMF3A skin fibroblasts undergoing oncogene-induced senescence (SV40) at 7d post-senescence induction, shRNA knockdown of laminA is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by microarray:\n\nGene A: TP53INP1 (tumor protein p53 inducible nuclear protein 1)\nGene B: CAV1 (caveolin 1)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: HMF3A skin fibroblasts. Senescence model: oncogene-induced senescence (SV40). Perturbation: shRNA knockdown of laminA. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): laminA.\n</gene_context>",
       "gold": "A",
       "follow_up": "Gene A: TP53INP1 (tumor protein p53 inducible nuclear protein 1), Log2FC=2.1462, p=3.19e-18. Gene B: CAV1 (caveolin 1), Log2FC=-0.0404, p=6.42e-01. |Log2FC_A|=2.1462, |Log2FC_B|=0.0404. GEO accession: GSE24810."
-    },
-    {
-      "lb_id": "LB-SEN-PAIR-0020",
-      "format": "pairwise",
-      "pool": "senescence_perturbation_pairwise",
-      "display_group": "Senescence Perturbation",
-      "domain": "transcriptomics",
-      "metric": "accuracy",
-      "split": "train",
-      "question": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction, siRNA knockdown of LTR2 is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: E2F7 (E2F transcription factor 7)\nGene B: WNT2 (Wnt family member 2)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR2. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR2.\n</gene_context>",
-      "gold": "A",
-      "follow_up": "Gene A: E2F7 (E2F transcription factor 7), Log2FC=-1.1979, p=9.46e-06. Gene B: WNT2 (Wnt family member 2), Log2FC=0.0, p=1.00e+00. |Log2FC_A|=1.1979, |Log2FC_B|=0.0000. GEO accession: GSE127116."
     },
     {
       "lb_id": "LB-SEN-PAIR-0021",
@@ -1574,18 +1502,6 @@
       "follow_up": "Gene A: NEK4 (NIMA related kinase 4), Log2FC=0.0, p=1.00e+00. Gene B: TRIM28 (tripartite motif containing 28), Log2FC=-1.062, p=1.40e-04. |Log2FC_A|=0.0000, |Log2FC_B|=1.0620. GEO accession: GSE101766."
     },
     {
-      "lb_id": "LB-SEN-PAIR-0072",
-      "format": "pairwise",
-      "pool": "senescence_perturbation_pairwise",
-      "display_group": "Senescence Perturbation",
-      "domain": "transcriptomics",
-      "metric": "accuracy",
-      "split": "train",
-      "question": "<question>\nIn a senescence perturbation experiment using HDF skin fibroblasts undergoing replicative senescence at 15d post-senescence induction, treatment with Y27632_KU60019 at dose 2.5uM_0.5uM is applied. Compared to untreated replicatively senescent cells, consider the following two genes measured by microarray:\n\nGene A: WWP1 (WW domain containing E3 ubiquitin protein ligase 1)\nGene B: TGFB1I1 (transforming growth factor beta 1 induced transcript 1)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: HDF skin fibroblasts. Senescence model: replicative senescence. Perturbation: treatment with Y27632_KU60019 at dose 2.5uM_0.5uM. Control condition: untreated replicatively senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>",
-      "gold": "B",
-      "follow_up": "Gene A: WWP1 (WW domain containing E3 ubiquitin protein ligase 1), Log2FC=-301.0, p=4.26e-07. Gene B: TGFB1I1 (transforming growth factor beta 1 induced transcript 1), Log2FC=4340.667, p=4.66e-10. |Log2FC_A|=301.0000, |Log2FC_B|=4340.6670. GEO accession: GSE178115."
-    },
-    {
       "lb_id": "LB-SEN-PAIR-0073",
       "format": "pairwise",
       "pool": "senescence_perturbation_pairwise",
@@ -1596,18 +1512,6 @@
       "question": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 12d post-senescence induction, shRNA knockdown of p53_pRb is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: BRIP1 (BRCA1 interacting helicase 1)\nGene B: MAP3K7 (mitogen-activated protein kinase kinase kinase 7)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of p53_pRb. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p53_pRb.\n</gene_context>",
       "gold": "A",
       "follow_up": "Gene A: BRIP1 (BRCA1 interacting helicase 1), Log2FC=2.099, p=2.31e-15. Gene B: MAP3K7 (mitogen-activated protein kinase kinase kinase 7), Log2FC=-0.0236, p=6.96e-01. |Log2FC_A|=2.0990, |Log2FC_B|=0.0236. GEO accession: GSE74324."
-    },
-    {
-      "lb_id": "LB-SEN-PAIR-0074",
-      "format": "pairwise",
-      "pool": "senescence_perturbation_pairwise",
-      "display_group": "Senescence Perturbation",
-      "domain": "transcriptomics",
-      "metric": "accuracy",
-      "split": "train",
-      "question": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction, siRNA knockdown of LTR10 is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: ENTPD7 (ectonucleoside triphosphate diphosphohydrolase 7)\nGene B: CASP2 (caspase 2)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR10. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR10.\n</gene_context>",
-      "gold": "A",
-      "follow_up": "Gene A: ENTPD7 (ectonucleoside triphosphate diphosphohydrolase 7), Log2FC=-1.009, p=4.26e-05. Gene B: CASP2 (caspase 2), Log2FC=0.1564, p=4.05e-01. |Log2FC_A|=1.0090, |Log2FC_B|=0.1564. GEO accession: GSE127116."
     },
     {
       "lb_id": "LB-SEN-PAIR-0075",
@@ -1656,18 +1560,6 @@
       "question": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 12d post-senescence induction, shRNA knockdown of p16_p21 is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: PCGF2 (polycomb group ring finger 2)\nGene B: DDB2 (damage specific DNA binding protein 2)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of p16_p21. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p16_p21.\n</gene_context>",
       "gold": "B",
       "follow_up": "Gene A: PCGF2 (polycomb group ring finger 2), Log2FC=-0.0418, p=5.60e-01. Gene B: DDB2 (damage specific DNA binding protein 2), Log2FC=2.344, p=9.71e-19. |Log2FC_A|=0.0418, |Log2FC_B|=2.3440. GEO accession: GSE74324."
-    },
-    {
-      "lb_id": "LB-SEN-PAIR-0080",
-      "format": "pairwise",
-      "pool": "senescence_perturbation_pairwise",
-      "display_group": "Senescence Perturbation",
-      "domain": "transcriptomics",
-      "metric": "accuracy",
-      "split": "train",
-      "question": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction, siRNA knockdown of LTR2 is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: ZMPSTE24 (zinc metallopeptidase STE24)\nGene B: LAYN (layilin)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR2. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR2.\n</gene_context>",
-      "gold": "B",
-      "follow_up": "Gene A: ZMPSTE24 (zinc metallopeptidase STE24), Log2FC=-0.0565, p=7.68e-01. Gene B: LAYN (layilin), Log2FC=1.1631, p=1.40e-05. |Log2FC_A|=0.0565, |Log2FC_B|=1.1631. GEO accession: GSE127116."
     },
     {
       "lb_id": "LB-SEN-PAIR-0081",
@@ -2004,18 +1896,6 @@
       "question": "<question>\nYou are presented with a senescence perturbation experiment. In HMF3A skin fibroblasts undergoing oncogene-induced senescence (SV40) at 7d post-senescence induction, knockdown of E2F is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of RAD21 (RAD21 cohesin complex component) measured by microarray significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: HMF3A skin fibroblasts. Senescence model: oncogene-induced senescence (SV40). Perturbation: knockdown of E2F. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): E2F.\n</gene_context>",
       "gold": "A",
       "follow_up": "Gene: RAD21 (RAD21 cohesin complex component). Log2FC=1.1031, p=3.63e-16. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE24810. According to CellAge, RAD21 inhibits cellular senescence. CellAge PMID: 26529363."
-    },
-    {
-      "lb_id": "LB-SEN-SIG-0016",
-      "format": "binary",
-      "pool": "senescence_perturbation_significance",
-      "display_group": "Senescence Perturbation",
-      "domain": "transcriptomics",
-      "metric": "accuracy",
-      "split": "train",
-      "question": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 5d post-senescence induction, siRNA knockdown of LTR2 is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of CENPA (centromere protein A) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR2. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR2.\n</gene_context>",
-      "gold": "B",
-      "follow_up": "Gene: CENPA (centromere protein A). Log2FC=0.0, p=1.00e+00. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE127116. According to CellAge, CENPA inhibits cellular senescence. CellAge PMID: 20160010."
     },
     {
       "lb_id": "LB-SEN-SIG-0017",
@@ -2546,18 +2426,6 @@
       "follow_up": "Gene: CDK2 (cyclin dependent kinase 2). Log2FC=1.1466, p=5.71e-12. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE74324. According to CellAge, CDK2 inhibits cellular senescence (senescence type: Replicative). CellAge PMID: 25149358."
     },
     {
-      "lb_id": "LB-SEN-SIG-0067",
-      "format": "binary",
-      "pool": "senescence_perturbation_significance",
-      "display_group": "Senescence Perturbation",
-      "domain": "transcriptomics",
-      "metric": "accuracy",
-      "split": "train",
-      "question": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (AKT) at 14d post-senescence induction, shRNA knockdown of NF1 is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of SFRP1 (secreted frizzled related protein 1) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (AKT). Perturbation: shRNA knockdown of NF1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): NF1.\n</gene_context>",
-      "gold": "A",
-      "follow_up": "Gene: SFRP1 (secreted frizzled related protein 1). Log2FC=1.1883, p=6.44e-08. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE200479. According to CellAge, SFRP1 induces cellular senescence (senescence type: Stress-induced). CellAge PMID: 22927647."
-    },
-    {
       "lb_id": "LB-SEN-SIG-0068",
       "format": "binary",
       "pool": "senescence_perturbation_significance",
@@ -2762,18 +2630,6 @@
       "follow_up": "Gene: PRKD1 (protein kinase D1). Log2FC=-1.1083, p=4.80e-13. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE24810. According to CellAge, PRKD1 induces cellular senescence (senescence type: Oncogene-induced). CellAge PMID: 24828530."
     },
     {
-      "lb_id": "LB-SEN-SIG-0087",
-      "format": "binary",
-      "pool": "senescence_perturbation_significance",
-      "display_group": "Senescence Perturbation",
-      "domain": "transcriptomics",
-      "metric": "accuracy",
-      "split": "train",
-      "question": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (AKT) at 14d post-senescence induction, shRNA knockdown of p53 is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of ZMPSTE24 (zinc metallopeptidase STE24) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (AKT). Perturbation: shRNA knockdown of p53. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p53.\n</gene_context>",
-      "gold": "B",
-      "follow_up": "Gene: ZMPSTE24 (zinc metallopeptidase STE24). Log2FC=-0.1021, p=4.74e-01. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE200479. According to CellAge, ZMPSTE24 inhibits cellular senescence (senescence type: Replicative). CellAge PMID: 24101728."
-    },
-    {
       "lb_id": "LB-SEN-SIG-0089",
       "format": "binary",
       "pool": "senescence_perturbation_significance",
@@ -2822,18 +2678,6 @@
       "follow_up": "Gene: LMNB1 (lamin B1). Log2FC=2.3916, p=1.08e-07. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE40349. According to CellAge, LMNB1 inhibits cellular senescence (senescence type: Oncogene-induced). CellAge PMID: 22155925."
     },
     {
-      "lb_id": "LB-SEN-SIG-0095",
-      "format": "binary",
-      "pool": "senescence_perturbation_significance",
-      "display_group": "Senescence Perturbation",
-      "domain": "transcriptomics",
-      "metric": "accuracy",
-      "split": "train",
-      "question": "<question>\nYou are presented with a senescence perturbation experiment. In HDF skin fibroblasts undergoing replicative senescence at 15d post-senescence induction, treatment with Y27632 at dose 2.5uM is applied. Compared to untreated replicatively senescent cells, is the mRNA expression of POU5F1 (POU class 5 homeobox 1) measured by microarray significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: HDF skin fibroblasts. Senescence model: replicative senescence. Perturbation: treatment with Y27632 at dose 2.5uM. Control condition: untreated replicatively senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>",
-      "gold": "B",
-      "follow_up": "Gene: POU5F1 (POU class 5 homeobox 1). Log2FC=0.1667, p=9.92e-01. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE178115. According to CellAge, POU5F1 induces cellular senescence (senescence type: Oncogene-induced). CellAge PMID: 22746537."
-    },
-    {
       "lb_id": "LB-SEN-SIG-0098",
       "format": "binary",
       "pool": "senescence_perturbation_significance",
@@ -2856,18 +2700,6 @@
       "question": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 12d post-senescence induction, shRNA knockdown of p16_p21 is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of SMC1A (structural maintenance of chromosomes 1A) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of p16_p21. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p16_p21.\n</gene_context>",
       "gold": "B",
       "follow_up": "Gene: SMC1A (structural maintenance of chromosomes 1A). Log2FC=0.0559, p=7.71e-01. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE74324. According to CellAge, SMC1A inhibits cellular senescence. CellAge PMID: 27731420."
-    },
-    {
-      "lb_id": "LB-SEN-SIG-0100",
-      "format": "binary",
-      "pool": "senescence_perturbation_significance",
-      "display_group": "Senescence Perturbation",
-      "domain": "transcriptomics",
-      "metric": "accuracy",
-      "split": "train",
-      "question": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (AKT) at 14d post-senescence induction, shRNA knockdown of NF1 is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of KDM1A (lysine demethylase 1A) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (AKT). Perturbation: shRNA knockdown of NF1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): NF1.\n</gene_context>",
-      "gold": "B",
-      "follow_up": "Gene: KDM1A (lysine demethylase 1A). Log2FC=0.1913, p=9.05e-02. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE200479. According to CellAge, KDM1A inhibits cellular senescence (senescence type: Oncogene-induced). CellAge PMID: 29438700."
     },
     {
       "lb_id": "LB-SEN-MCQ-0003",
@@ -2942,6 +2774,18 @@
       "follow_up": "Gene: IGFBP3 (insulin like growth factor binding protein 3). Log2FC=1.3964, p=5.86e-05. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE103938. According to CellAge, IGFBP3 induces cellular senescence (senescence type: Stress-induced). CellAge PMID: 18329388."
     },
     {
+      "lb_id": "LB-SEN-MCQ-0027",
+      "format": "mcq",
+      "pool": "senescence_perturbation_mcq",
+      "display_group": "Senescence Perturbation",
+      "domain": "transcriptomics",
+      "metric": "accuracy",
+      "split": "test",
+      "question": "<question>\nYou are presented with a senescence perturbation experiment. In HDF skin fibroblasts undergoing replicative senescence at 15d post-senescence induction, treatment with Y27632 at dose 2.5uM is applied. Compared to untreated replicatively senescent cells, the mRNA expression of POU5F1 (POU class 5 homeobox 1) measured by microarray:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: HDF skin fibroblasts. Senescence model: replicative senescence. Perturbation: treatment with Y27632 at dose 2.5uM. Control condition: untreated replicatively senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>",
+      "gold": "C",
+      "follow_up": "Gene: POU5F1 (POU class 5 homeobox 1). Log2FC=0.1667, p=9.92e-01. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE178115. According to CellAge, POU5F1 induces cellular senescence (senescence type: Oncogene-induced). CellAge PMID: 22746537."
+    },
+    {
       "lb_id": "LB-SEN-MCQ-0028",
       "format": "mcq",
       "pool": "senescence_perturbation_mcq",
@@ -2954,16 +2798,16 @@
       "follow_up": "Gene: HOPX (HOP homeobox). Log2FC=-2.5125, p=2.45e-06. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE224071. According to CellAge, HOPX induces cellular senescence (senescence type: Oncogene-induced). CellAge PMID: 25345926."
     },
     {
-      "lb_id": "LB-SEN-MCQ-0032",
+      "lb_id": "LB-SEN-MCQ-0030",
       "format": "mcq",
       "pool": "senescence_perturbation_mcq",
       "display_group": "Senescence Perturbation",
       "domain": "transcriptomics",
       "metric": "accuracy",
       "split": "test",
-      "question": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (IR) at 10d post-senescence induction, treatment with TSA (targeting HDAC) at dose 100nM is applied. Compared to untreated DNA damage-induced senescent cells, the mRNA expression of G6PD (glucose-6-phosphate dehydrogenase) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (IR). Perturbation: treatment with TSA (targeting HDAC) at dose 100nM. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): HDAC.\n</gene_context>",
-      "gold": "A",
-      "follow_up": "Gene: G6PD (glucose-6-phosphate dehydrogenase). Log2FC=1.1301, p=3.23e-06. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE132370. According to CellAge, G6PD inhibits cellular senescence (senescence type: Stress-induced). CellAge PMID: 10980404."
+      "question": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction, siRNA knockdown of LTR10 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of MAGOHB (mago homolog B, exon junction complex subunit) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR10. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR10.\n</gene_context>",
+      "gold": "B",
+      "follow_up": "Gene: MAGOHB (mago homolog B, exon junction complex subunit). Log2FC=-1.0803, p=7.81e-06. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE127116. According to CellAge, MAGOHB inhibits cellular senescence (senescence type: Replicative). CellAge PMID: 26206181."
     },
     {
       "lb_id": "LB-SEN-MCQ-0034",
@@ -3002,6 +2846,18 @@
       "follow_up": "Gene: BLVRA (biliverdin reductase A). Log2FC=1.2411, p=1.25e-07. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE76125. According to CellAge, BLVRA inhibits cellular senescence (senescence type: Stress-induced). CellAge PMID: 21099244."
     },
     {
+      "lb_id": "LB-SEN-MCQ-0048",
+      "format": "mcq",
+      "pool": "senescence_perturbation_mcq",
+      "display_group": "Senescence Perturbation",
+      "domain": "transcriptomics",
+      "metric": "accuracy",
+      "split": "test",
+      "question": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction, siRNA knockdown of LTR10 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of BRIP1 (BRCA1 interacting helicase 1) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR10. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR10.\n</gene_context>",
+      "gold": "C",
+      "follow_up": "Gene: BRIP1 (BRCA1 interacting helicase 1). Log2FC=0.0, p=1.00e+00. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE127116. According to CellAge, BRIP1 inhibits cellular senescence (senescence type: Oncogene-induced). CellAge PMID: 22137763."
+    },
+    {
       "lb_id": "LB-SEN-MCQ-0050",
       "format": "mcq",
       "pool": "senescence_perturbation_mcq",
@@ -3038,6 +2894,18 @@
       "follow_up": "Gene: FOXQ1 (forkhead box Q1). Log2FC=-1.8842, p=4.13e-07. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE141991. According to CellAge, FOXQ1 inhibits cellular senescence. CellAge PMID: 29500491."
     },
     {
+      "lb_id": "LB-SEN-MCQ-0054",
+      "format": "mcq",
+      "pool": "senescence_perturbation_mcq",
+      "display_group": "Senescence Perturbation",
+      "domain": "transcriptomics",
+      "metric": "accuracy",
+      "split": "test",
+      "question": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (AKT) at 14d post-senescence induction, shRNA knockdown of p53 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of ZMPSTE24 (zinc metallopeptidase STE24) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (AKT). Perturbation: shRNA knockdown of p53. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p53.\n</gene_context>",
+      "gold": "C",
+      "follow_up": "Gene: ZMPSTE24 (zinc metallopeptidase STE24). Log2FC=-0.1021, p=4.74e-01. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE200479. According to CellAge, ZMPSTE24 inhibits cellular senescence (senescence type: Replicative). CellAge PMID: 24101728."
+    },
+    {
       "lb_id": "LB-SEN-MCQ-0061",
       "format": "mcq",
       "pool": "senescence_perturbation_mcq",
@@ -3048,6 +2916,18 @@
       "question": "<question>\nYou are presented with a senescence perturbation experiment. In WI-38 lung fibroblasts undergoing DNA damage-induced senescence (Etoposide) at 8d post-senescence induction, treatment with Verteporfin at dose 1.5uM is applied. Compared to untreated DNA damage-induced senescent cells, the mRNA expression of CCL2 (C-C motif chemokine ligand 2) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: WI-38 lung fibroblasts. Senescence model: DNA damage-induced senescence (Etoposide). Perturbation: treatment with Verteporfin at dose 1.5uM. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>",
       "gold": "B",
       "follow_up": "Gene: CCL2 (C-C motif chemokine ligand 2). Log2FC=-1.5338, p=2.85e-08. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE221104. According to CellAge, CCL2 induces cellular senescence. CellAge PMID: 26573462."
+    },
+    {
+      "lb_id": "LB-SEN-MCQ-0064",
+      "format": "mcq",
+      "pool": "senescence_perturbation_mcq",
+      "display_group": "Senescence Perturbation",
+      "domain": "transcriptomics",
+      "metric": "accuracy",
+      "split": "test",
+      "question": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction, siRNA knockdown of LTR10 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of SUV39H1 (SUV39H1 histone lysine methyltransferase) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR10. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR10.\n</gene_context>",
+      "gold": "B",
+      "follow_up": "Gene: SUV39H1 (SUV39H1 histone lysine methyltransferase). Log2FC=-1.184, p=2.69e-05. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE127116. According to CellAge, SUV39H1 inhibits cellular senescence. CellAge PMID: 26160351."
     },
     {
       "lb_id": "LB-SEN-MCQ-0066",
@@ -3072,18 +2952,6 @@
       "question": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing replicative senescence, knockdown of p38 at dose 10uM_48h is applied. Compared to untreated replicatively senescent cells, the mRNA expression of SIK1 (salt inducible kinase 1) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: replicative senescence. Perturbation: knockdown of p38 at dose 10uM_48h. Control condition: untreated replicatively senescent cells. Biological replicates: 2. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p38.\n</gene_context>",
       "gold": "C",
       "follow_up": "Gene: SIK1 (salt inducible kinase 1). Log2FC=0.0, p=1.00e+00. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE56293. According to CellAge, SIK1 induces cellular senescence. CellAge PMID: 26583757."
-    },
-    {
-      "lb_id": "LB-SEN-MCQ-0073",
-      "format": "mcq",
-      "pool": "senescence_perturbation_mcq",
-      "display_group": "Senescence Perturbation",
-      "domain": "transcriptomics",
-      "metric": "accuracy",
-      "split": "test",
-      "question": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing nan (nan), treatment with TSA (targeting HDAC) at dose 100nM is applied. Compared to untreated DNA damage-induced senescent cells, the mRNA expression of GRK4 (G protein-coupled receptor kinase 4) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: nan (nan). Perturbation: treatment with TSA (targeting HDAC) at dose 100nM. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): HDAC.\n</gene_context>",
-      "gold": "C",
-      "follow_up": "Gene: GRK4 (G protein-coupled receptor kinase 4). Log2FC=0.0678, p=6.83e-01. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE132370. According to CellAge, GRK4 induces cellular senescence. CellAge PMID: 28912086."
     },
     {
       "lb_id": "LB-SEN-MCQ-0075",
@@ -3122,6 +2990,18 @@
       "follow_up": "Gene: SUV39H1 (SUV39H1 histone lysine methyltransferase). Log2FC=0.1561, p=6.93e-01. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE93535. According to CellAge, SUV39H1 inhibits cellular senescence. CellAge PMID: 26160351."
     },
     {
+      "lb_id": "LB-SEN-MCQ-0084",
+      "format": "mcq",
+      "pool": "senescence_perturbation_mcq",
+      "display_group": "Senescence Perturbation",
+      "domain": "transcriptomics",
+      "metric": "accuracy",
+      "split": "test",
+      "question": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (AKT) at 14d post-senescence induction, shRNA knockdown of NF1 is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of SFRP1 (secreted frizzled related protein 1) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (AKT). Perturbation: shRNA knockdown of NF1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): NF1.\n</gene_context>",
+      "gold": "A",
+      "follow_up": "Gene: SFRP1 (secreted frizzled related protein 1). Log2FC=1.1883, p=6.44e-08. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE200479. According to CellAge, SFRP1 induces cellular senescence (senescence type: Stress-induced). CellAge PMID: 22927647."
+    },
+    {
       "lb_id": "LB-SEN-MCQ-0088",
       "format": "mcq",
       "pool": "senescence_perturbation_mcq",
@@ -3144,6 +3024,18 @@
       "question": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 4d post-senescence induction, shRNA knockdown of DOT1L is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of NOLC1 (nucleolar and coiled-body phosphoprotein 1) measured by RNA-seq:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of DOT1L. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): DOT1L.\n</gene_context>",
       "gold": "B",
       "follow_up": "Gene: NOLC1 (nucleolar and coiled-body phosphoprotein 1). Log2FC=-1.1439, p=1.50e-06. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE156648. According to CellAge, NOLC1 induces cellular senescence. CellAge PMID: 28493459."
+    },
+    {
+      "lb_id": "LB-SEN-MCQ-0095",
+      "format": "mcq",
+      "pool": "senescence_perturbation_mcq",
+      "display_group": "Senescence Perturbation",
+      "domain": "transcriptomics",
+      "metric": "accuracy",
+      "split": "test",
+      "question": "<question>\nYou are presented with a senescence perturbation experiment. In HDF skin fibroblasts undergoing replicative senescence at 15d post-senescence induction, treatment with Y27632_KU60019 at dose 2.5uM_0.5uM is applied. Compared to untreated replicatively senescent cells, the mRNA expression of EIF4EBP1 (eukaryotic translation initiation factor 4E binding protein 1) measured by microarray:\n</question>\n<options>\nA. increases (upregulated) B. decreases (downregulated) C. no significant change\n</options>\n<experiment>\nCell line: HDF skin fibroblasts. Senescence model: replicative senescence. Perturbation: treatment with Y27632_KU60019 at dose 2.5uM_0.5uM. Control condition: untreated replicatively senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>",
+      "gold": "A",
+      "follow_up": "Gene: EIF4EBP1 (eukaryotic translation initiation factor 4E binding protein 1). Log2FC=2462.333, p=7.40e-05. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE178115. According to CellAge, EIF4EBP1 inhibits cellular senescence (senescence type: Oncogene-induced). CellAge PMID: 19878875."
     },
     {
       "lb_id": "LB-SEN-MCQ-0098",
@@ -3228,6 +3120,18 @@
       "question": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 6d post-senescence induction, treatment with 3deazaadenosine at dose 10uM is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: MCM3AP (minichromosome maintenance complex component 3 associated protein)\nGene B: MCM7 (minichromosome maintenance complex component 7)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: treatment with 3deazaadenosine at dose 10uM. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 4. Differential expression analysis: Limma.\n</experiment>",
       "gold": "B",
       "follow_up": "Gene A: MCM3AP (minichromosome maintenance complex component 3 associated protein), Log2FC=-0.2886, p=5.64e-01. Gene B: MCM7 (minichromosome maintenance complex component 7), Log2FC=1.0985, p=8.57e-08. |Log2FC_A|=0.2886, |Log2FC_B|=1.0985. GEO accession: GSE155903."
+    },
+    {
+      "lb_id": "LB-SEN-PAIR-0020",
+      "format": "pairwise",
+      "pool": "senescence_perturbation_pairwise",
+      "display_group": "Senescence Perturbation",
+      "domain": "transcriptomics",
+      "metric": "accuracy",
+      "split": "test",
+      "question": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction, siRNA knockdown of LTR2 is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: E2F7 (E2F transcription factor 7)\nGene B: WNT2 (Wnt family member 2)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR2. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR2.\n</gene_context>",
+      "gold": "A",
+      "follow_up": "Gene A: E2F7 (E2F transcription factor 7), Log2FC=-1.1979, p=9.46e-06. Gene B: WNT2 (Wnt family member 2), Log2FC=0.0, p=1.00e+00. |Log2FC_A|=1.1979, |Log2FC_B|=0.0000. GEO accession: GSE127116."
     },
     {
       "lb_id": "LB-SEN-PAIR-0022",
@@ -3338,6 +3242,30 @@
       "follow_up": "Gene A: LMNB1 (lamin B1), Log2FC=-2.1089, p=3.78e-06. Gene B: MCM7 (minichromosome maintenance complex component 7), Log2FC=-1.1049, p=2.49e-06. |Log2FC_A|=2.1089, |Log2FC_B|=1.1049. GEO accession: GSE222676."
     },
     {
+      "lb_id": "LB-SEN-PAIR-0072",
+      "format": "pairwise",
+      "pool": "senescence_perturbation_pairwise",
+      "display_group": "Senescence Perturbation",
+      "domain": "transcriptomics",
+      "metric": "accuracy",
+      "split": "test",
+      "question": "<question>\nIn a senescence perturbation experiment using HDF skin fibroblasts undergoing replicative senescence at 15d post-senescence induction, treatment with Y27632_KU60019 at dose 2.5uM_0.5uM is applied. Compared to untreated replicatively senescent cells, consider the following two genes measured by microarray:\n\nGene A: WWP1 (WW domain containing E3 ubiquitin protein ligase 1)\nGene B: TGFB1I1 (transforming growth factor beta 1 induced transcript 1)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: HDF skin fibroblasts. Senescence model: replicative senescence. Perturbation: treatment with Y27632_KU60019 at dose 2.5uM_0.5uM. Control condition: untreated replicatively senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>",
+      "gold": "B",
+      "follow_up": "Gene A: WWP1 (WW domain containing E3 ubiquitin protein ligase 1), Log2FC=-301.0, p=4.26e-07. Gene B: TGFB1I1 (transforming growth factor beta 1 induced transcript 1), Log2FC=4340.667, p=4.66e-10. |Log2FC_A|=301.0000, |Log2FC_B|=4340.6670. GEO accession: GSE178115."
+    },
+    {
+      "lb_id": "LB-SEN-PAIR-0074",
+      "format": "pairwise",
+      "pool": "senescence_perturbation_pairwise",
+      "display_group": "Senescence Perturbation",
+      "domain": "transcriptomics",
+      "metric": "accuracy",
+      "split": "test",
+      "question": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction, siRNA knockdown of LTR10 is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: ENTPD7 (ectonucleoside triphosphate diphosphohydrolase 7)\nGene B: CASP2 (caspase 2)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR10. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR10.\n</gene_context>",
+      "gold": "A",
+      "follow_up": "Gene A: ENTPD7 (ectonucleoside triphosphate diphosphohydrolase 7), Log2FC=-1.009, p=4.26e-05. Gene B: CASP2 (caspase 2), Log2FC=0.1564, p=4.05e-01. |Log2FC_A|=1.0090, |Log2FC_B|=0.1564. GEO accession: GSE127116."
+    },
+    {
       "lb_id": "LB-SEN-PAIR-0079",
       "format": "pairwise",
       "pool": "senescence_perturbation_pairwise",
@@ -3348,6 +3276,18 @@
       "question": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing nan (Prolif) at 7d post-senescence induction, overexpression of WSTF is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: SAT2 (spermidine/spermine N1-acetyltransferase family member 2)\nGene B: ATG7 (autophagy related 7)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: nan (Prolif). Perturbation: overexpression of WSTF. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): WSTF.\n</gene_context>",
       "gold": "B",
       "follow_up": "Gene A: SAT2 (spermidine/spermine N1-acetyltransferase family member 2), Log2FC=-1.1189, p=2.71e-08. Gene B: ATG7 (autophagy related 7), Log2FC=-1.7659, p=7.08e-05. |Log2FC_A|=1.1189, |Log2FC_B|=1.7659. GEO accession: GSE214409."
+    },
+    {
+      "lb_id": "LB-SEN-PAIR-0080",
+      "format": "pairwise",
+      "pool": "senescence_perturbation_pairwise",
+      "display_group": "Senescence Perturbation",
+      "domain": "transcriptomics",
+      "metric": "accuracy",
+      "split": "test",
+      "question": "<question>\nIn a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 8d post-senescence induction, siRNA knockdown of LTR2 is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:\n\nGene A: ZMPSTE24 (zinc metallopeptidase STE24)\nGene B: LAYN (layilin)\n\nWhich gene shows a larger absolute change in mRNA expression (|Log2FC|)?\n</question>\n<options>\nA. Gene A shows a larger absolute change B. Gene B shows a larger absolute change\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR2. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR2.\n</gene_context>",
+      "gold": "B",
+      "follow_up": "Gene A: ZMPSTE24 (zinc metallopeptidase STE24), Log2FC=-0.0565, p=7.68e-01. Gene B: LAYN (layilin), Log2FC=1.1631, p=1.40e-05. |Log2FC_A|=0.0565, |Log2FC_B|=1.1631. GEO accession: GSE127116."
     },
     {
       "lb_id": "LB-SEN-PAIR-0084",
@@ -3422,6 +3362,18 @@
       "follow_up": "Gene: CALR (calreticulin). Log2FC=-1.8096, p=8.55e-11. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE196610. According to CellAge, CALR inhibits cellular senescence. CellAge PMID: 25378661."
     },
     {
+      "lb_id": "LB-SEN-SIG-0016",
+      "format": "binary",
+      "pool": "senescence_perturbation_significance",
+      "display_group": "Senescence Perturbation",
+      "domain": "transcriptomics",
+      "metric": "accuracy",
+      "split": "test",
+      "question": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 5d post-senescence induction, siRNA knockdown of LTR2 is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of CENPA (centromere protein A) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: siRNA knockdown of LTR2. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): LTR2.\n</gene_context>",
+      "gold": "B",
+      "follow_up": "Gene: CENPA (centromere protein A). Log2FC=0.0, p=1.00e+00. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE127116. According to CellAge, CENPA inhibits cellular senescence. CellAge PMID: 20160010."
+    },
+    {
       "lb_id": "LB-SEN-SIG-0024",
       "format": "binary",
       "pool": "senescence_perturbation_significance",
@@ -3494,6 +3446,18 @@
       "follow_up": "Gene: SIN3B (SIN3 transcription regulator family member B). Log2FC=0.0759, p=1.41e-01. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE132369. According to CellAge, SIN3B induces cellular senescence. CellAge PMID: 19654306."
     },
     {
+      "lb_id": "LB-SEN-SIG-0067",
+      "format": "binary",
+      "pool": "senescence_perturbation_significance",
+      "display_group": "Senescence Perturbation",
+      "domain": "transcriptomics",
+      "metric": "accuracy",
+      "split": "test",
+      "question": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (AKT) at 14d post-senescence induction, shRNA knockdown of NF1 is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of SFRP1 (secreted frizzled related protein 1) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (AKT). Perturbation: shRNA knockdown of NF1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): NF1.\n</gene_context>",
+      "gold": "A",
+      "follow_up": "Gene: SFRP1 (secreted frizzled related protein 1). Log2FC=1.1883, p=6.44e-08. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE200479. According to CellAge, SFRP1 induces cellular senescence (senescence type: Stress-induced). CellAge PMID: 22927647."
+    },
+    {
       "lb_id": "LB-SEN-SIG-0073",
       "format": "binary",
       "pool": "senescence_perturbation_significance",
@@ -3516,6 +3480,18 @@
       "question": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing DNA damage-induced senescence (IR) at 10d post-senescence induction, treatment with CCCP (targeting Parkin) at dose 12uM is applied. Compared to untreated DNA damage-induced senescent cells, is the mRNA expression of E2F1 (E2F transcription factor 1) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: DNA damage-induced senescence (IR). Perturbation: treatment with CCCP (targeting Parkin) at dose 12uM. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): Parkin.\n</gene_context>",
       "gold": "A",
       "follow_up": "Gene: E2F1 (E2F transcription factor 1). Log2FC=-1.0924, p=4.60e-09. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE196610. According to CellAge, E2F1 induces cellular senescence. CellAge PMID: 10594030."
+    },
+    {
+      "lb_id": "LB-SEN-SIG-0087",
+      "format": "binary",
+      "pool": "senescence_perturbation_significance",
+      "display_group": "Senescence Perturbation",
+      "domain": "transcriptomics",
+      "metric": "accuracy",
+      "split": "test",
+      "question": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (AKT) at 14d post-senescence induction, shRNA knockdown of p53 is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of ZMPSTE24 (zinc metallopeptidase STE24) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (AKT). Perturbation: shRNA knockdown of p53. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): p53.\n</gene_context>",
+      "gold": "B",
+      "follow_up": "Gene: ZMPSTE24 (zinc metallopeptidase STE24). Log2FC=-0.1021, p=4.74e-01. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE200479. According to CellAge, ZMPSTE24 inhibits cellular senescence (senescence type: Replicative). CellAge PMID: 24101728."
     },
     {
       "lb_id": "LB-SEN-SIG-0088",
@@ -3554,6 +3530,18 @@
       "follow_up": "Gene: CSNK2A1 (casein kinase 2 alpha 1). Log2FC=-0.0225, p=8.64e-01. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE93535. According to CellAge, CSNK2A1 inhibits cellular senescence (senescence type: Replicative). CellAge PMID: 16442104."
     },
     {
+      "lb_id": "LB-SEN-SIG-0095",
+      "format": "binary",
+      "pool": "senescence_perturbation_significance",
+      "display_group": "Senescence Perturbation",
+      "domain": "transcriptomics",
+      "metric": "accuracy",
+      "split": "test",
+      "question": "<question>\nYou are presented with a senescence perturbation experiment. In HDF skin fibroblasts undergoing replicative senescence at 15d post-senescence induction, treatment with Y27632 at dose 2.5uM is applied. Compared to untreated replicatively senescent cells, is the mRNA expression of POU5F1 (POU class 5 homeobox 1) measured by microarray significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: HDF skin fibroblasts. Senescence model: replicative senescence. Perturbation: treatment with Y27632 at dose 2.5uM. Control condition: untreated replicatively senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>",
+      "gold": "B",
+      "follow_up": "Gene: POU5F1 (POU class 5 homeobox 1). Log2FC=0.1667, p=9.92e-01. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE178115. According to CellAge, POU5F1 induces cellular senescence (senescence type: Oncogene-induced). CellAge PMID: 22746537."
+    },
+    {
       "lb_id": "LB-SEN-SIG-0096",
       "format": "binary",
       "pool": "senescence_perturbation_significance",
@@ -3576,6 +3564,18 @@
       "question": "<question>\nYou are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 7d post-senescence induction, overexpression of WSTF is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of CAV1 (caveolin 1) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: overexpression of WSTF. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, overexpressed gene(s): WSTF.\n</gene_context>",
       "gold": "A",
       "follow_up": "Gene: CAV1 (caveolin 1). Log2FC=1.1291, p=1.17e-09. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE214409. According to CellAge, CAV1 induces cellular senescence. CellAge PMID: 15263006."
+    },
+    {
+      "lb_id": "LB-SEN-SIG-0100",
+      "format": "binary",
+      "pool": "senescence_perturbation_significance",
+      "display_group": "Senescence Perturbation",
+      "domain": "transcriptomics",
+      "metric": "accuracy",
+      "split": "test",
+      "question": "<question>\nYou are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (AKT) at 14d post-senescence induction, shRNA knockdown of NF1 is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of KDM1A (lysine demethylase 1A) measured by RNA-seq significantly dysregulated?\n</question>\n<options>\nA. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| \u2264 1.0 or p \u2265 0.05)\n</options>\n<experiment>\nCell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (AKT). Perturbation: shRNA knockdown of NF1. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.\n</experiment>\n<gene_context>\nIn this experiment, knocked down gene(s): NF1.\n</gene_context>",
+      "gold": "B",
+      "follow_up": "Gene: KDM1A (lysine demethylase 1A). Log2FC=0.1913, p=9.05e-02. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE200479. According to CellAge, KDM1A inhibits cellular senescence (senescence type: Oncogene-induced). CellAge PMID: 29438700."
     }
   ]
 }

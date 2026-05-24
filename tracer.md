@@ -201,10 +201,111 @@ Only the two components that are **verifiable and reliable** without a strong LL
 
 ---
 
+## V5 — Two-tier scorer: cheap proxy + DB-anchored property check + LLM oracle (current)
+
+The benchmark spec asks for "a fast, programmatic signal that scores the trace... cheap
+enough to call millions of times when used as a training signal for reasoning, and
+resistant to surface-level hacking." V5 splits that ask into three layers, each chosen
+to match a specific spec criterion.
+
+```
+┌────────────────────────────────────────────────────────────────────────────┐
+│ TIER 1 — cheap proxy (millions of calls)                                   │
+│   gene_score              MyGene.info: does the symbol exist in any of     │
+│                           {human, mouse, rat, fly, c_elegans, yeast}?      │
+│   keyword_consistency     up/down/no-change scan w/ negation handling      │
+│                                                                            │
+│   Latency: ms (cached). Cost: $0 after warm cache.                         │
+│   Hackable? Symbol existence is unhackable (DB lookup). Keyword check is   │
+│   the weakest link — but is a *consistency* signal, not a fact signal.    │
+├────────────────────────────────────────────────────────────────────────────┤
+│ TIER 2 — DB-anchored property check (hundreds of calls)                    │
+│   property_score          CellAge v3 cross-reference: for every verified   │
+│                           gene G mentioned in trace, extract directional   │
+│                           claim from ±250-char window, compare against     │
+│                           G's annotated effect (Induces/Inhibits           │
+│                           senescence). Returns counts + violations list.   │
+│                                                                            │
+│   Latency: ms (in-memory dict, 845 genes). Cost: $0.                       │
+│   Hackable? No — claims are checked against fixed DB facts. Falsifiable    │
+│   and language-agnostic. A model that claims "TP53 inhibits senescence"   │
+│   loses points regardless of how convincingly it argues.                   │
+├────────────────────────────────────────────────────────────────────────────┤
+│ TIER 3 — LLM oracle (validation pass only)                                 │
+│   pathway_correctness     Claude Sonnet 4.6 + instructor + Pydantic:       │
+│   evidence_use            structured judgment over the full trace.         │
+│   claim_score             Returns pathway 0–5, evidence 0–5, claims list.  │
+│                                                                            │
+│   Latency: ~7s/trace. Cost: ~$0.015/trace.                                 │
+│   Hackable? Harder than keyword scoring, but a strong model can still be   │
+│   persuaded by confident-sounding prose. Used to validate Tier 1+2, not    │
+│   as a training signal.                                                    │
+└────────────────────────────────────────────────────────────────────────────┘
+```
+
+**The research contribution is the Spearman correlation between Tier 1+2 (cheap) and
+Tier 3 (oracle) on a held-out set.** If the cheap proxy tracks the oracle, the cheap
+proxy is a usable RLHF/reward signal. If it doesn't, the cheap proxy is too easy to
+game and a stronger judge is required.
+
+### V5 formula (per trace)
+
+```
+faithfulness = 0.40 × gene_score
+             + 0.20 × keyword_consistency
+             + 0.40 × property_score      # DB-anchored, replaces hand-tuned slack
+```
+
+`property_score` returns 0.5 (neutral) when no CellAge-annotated genes are found in
+the trace — common on lipidomics tasks. This keeps the score from being penalized
+just because a task is not gene-centric, while still scoring CellAge-anchored traces
+strictly.
+
+### Multi-species entity extractor (addresses spec's named failure mode)
+
+The spec explicitly calls out: *"a regex over capitalized tokens to detect genes
+fails the moment a model stops capitalizing, or the moment we evaluate on murine
+and C. elegans genes whose symbols are not capitalized."*
+
+`src/trace_scorer/entity_extractor.py` runs three independent regex patterns
+in parallel and unions the candidates before sending the de-duplicated set to
+the verifier:
+
+```python
+_HUMAN_GENE_RE    = re.compile(r'\b([A-Z][A-Z0-9]{1,9})\b')   # FOXO3, TP53, MTOR
+_CELEGANS_GENE_RE = re.compile(r'\b([a-z]{2,4}-\d+[a-z]?)\b') # daf-2, age-1, clk-1
+_MOUSE_GENE_RE    = re.compile(r'\b([A-Z][a-z0-9]{1,9})\b')   # Trp53, Igf1r, Sirt6
+```
+
+Title-case English (`The`, `Cell`, `Study`) is filtered before the API call to
+keep the candidate set clean. The verifier itself queries
+`taxid=9606,10090,10116,7227,6239,4932` (human/mouse/rat/fruitfly/c_elegans/yeast)
+in one batch — so a single `daf-16` token gets resolved to its c_elegans entrez ID
+and counts towards the gene_score the same way `FOXO3` does for human.
+
+### Smoke run (n=5, both tasks)
+
+| lb_id              | fmt    | gene_score | property_score | violations                       |
+|--------------------|--------|------------|----------------|----------------------------------|
+| LB-LIP-MCQ-0057    | mcq    | 0.86       | 0.50 (0/0)     | — (lipid trace, no CellAge gene) |
+| LB-LIP-REG-0038    | reg    | 0.50       | 0.50 (0/0)     | —                                |
+| LB-SEN-MCQ-0007    | mcq    | 0.39       | 1.00 (2/2)     | —                                |
+| LB-SEN-PAIR-0040   | pair   | 0.67       | 0.50 (1/2)     | **RB1: inhibits ≠ Induces**      |
+| LB-SEN-SIG-0038    | bin    | 0.50       | 1.00 (1/1)     | —                                |
+
+The property checker pinpointed the same biological inaccuracy on LB-SEN-PAIR-0040
+that Claude judge flagged in prose form — but did so via DB lookup, not LLM opinion.
+
+---
+
 ## Future directions (if more compute/API budget)
 
-- Fine-tune a small biomedical NLI model (BioLinkBERT or PubMedBERT) on senescence-specific
-  claim pairs derived from Task A ground truth + CellAge annotations
-- Use Groq 70B with sequential calls + exponential backoff to stay under TPM (not TPD)
-- Expand n from 29 → full test set (59 samples) for meaningful Spearman CI
-- Per-gene directional scoring using sentence-level extraction + CellAge cross-reference
+- Run n=467 L-LLM thinking traces (Task A + Task B train combined) → tighter Spearman CI
+- KEGG REST grounding for pathway-membership claims (e.g. "FOXO3 is in PI3K/AKT" → check
+  `hsa04151` member list). Currently only directional CellAge claims are DB-grounded.
+- Adding-Mistakes hack-resistance harness re-run on V5 (wrong-gene + flipped-direction
+  perturbations) with a published drop-threshold per component
+- Weight-fit the V5 formula on dev set (Task A train) maximizing Spearman(cheap, oracle),
+  report Task A+B test as held-out generalization
+- Negative-control floor (Lorem ipsum) and positive-control ceiling (gold completions)
+  to calibrate the 0–1 faithfulness scale

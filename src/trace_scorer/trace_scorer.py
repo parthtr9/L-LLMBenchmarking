@@ -1,18 +1,23 @@
-"""Score L-LLM thinking traces — V4 (keyword consistency).
+"""Score L-LLM thinking traces — V5 (DB-anchored property check).
 
-2-component faithfulness formula:
-    faithfulness = 0.60 * gene_score
-                 + 0.40 * keyword_consistency
+3-component faithfulness formula:
+    faithfulness = 0.40 * gene_score
+                 + 0.20 * keyword_consistency
+                 + 0.40 * property_score
 
-gene_score          — MyGene.info batch lookup: fraction of cited gene symbols that
-                      exist in human/mouse/rat/fly/nematode/yeast namespaces.
-keyword_consistency — Directional keyword scan: does the trace use up/down/no-change
-                      language consistent with the predicted answer label?
-                      Negation detection prevents "does NOT decrease" → down mismatch.
-                      Returns 0.5 for pairwise/unknown (no directional semantics).
+gene_score          — MyGene.info batch lookup across 6 species. Fraction of cited
+                      gene symbols (human, mouse, rat, fly, c_elegans, yeast) that
+                      exist. Multi-species extractor handles UPPER, lower-hyphen,
+                      and Title-case patterns.
+keyword_consistency — Directional keyword scan: trace direction matches predicted
+                      label? Negation handling. 0.5 for pairwise/regression.
+property_score      — CellAge v3 cross-reference. For every verified gene G, extract
+                      directional claim from ±250 char window, compare against G's
+                      annotated effect (Induces / Inhibits senescence). Falsifiable,
+                      language-agnostic, DB-anchored. 0.5 if no annotated genes.
 
-Replaces DeBERTa NLI (V3) which gave 3.4% consistency because biological traces
-are too long — truncation at 1024 chars missed conclusions.
+Replaces V4 keyword-only formula. The new property tier directly addresses the spec's
+ask: "verifying that mentioned genes... exist AND have the properties claimed".
 
 Output: outputs/trace_faithfulness_scores.json + public/trace_faithfulness_scores.json
 """
@@ -30,6 +35,7 @@ import scipy.stats
 
 from .consistency_checker import nli_score
 from .entity_extractor import extract_gene_candidates
+from .property_checker import check_properties
 from .verifiers.mygene_verifier import MyGeneVerifier
 
 logger = logging.getLogger(__name__)
@@ -45,8 +51,12 @@ _THINKING_MODEL = "longevity_llm_thinking"
 _MAX_CONCURRENT = 8
 
 
-def _faithfulness(gene_score: float, nli_consistency: float) -> float:
-    return round(0.60 * gene_score + 0.40 * nli_consistency, 4)
+def _faithfulness(
+    gene_score: float, nli_consistency: float, property_score: float
+) -> float:
+    return round(
+        0.40 * gene_score + 0.20 * nli_consistency + 0.40 * property_score, 4
+    )
 
 
 async def _score_sample(
@@ -64,7 +74,7 @@ async def _score_sample(
 
     candidates = extract_gene_candidates(trace) if trace else []
 
-    # ── Tier 0: gene verification ───────────────────────────────────────────
+    # ── Tier 1a: gene existence ─────────────────────────────────────────────
     gene_score = 0.0
     verified_genes: list[str] = []
     unverified_genes: list[str] = []
@@ -75,11 +85,24 @@ async def _score_sample(
             unverified_genes = [g for g, r in results.items() if not r.get("verified")]
             gene_score = len(verified_genes) / len(candidates) if candidates else 0.0
 
-    # ── Tier 1: keyword consistency ─────────────────────────────────────────
+    # ── Tier 1b: keyword consistency ────────────────────────────────────────
     kw_consistency = nli_score(trace, pred, fmt) if trace else 0.5
     consistent = kw_consistency >= 0.75
 
-    faith = _faithfulness(gene_score, kw_consistency)
+    # ── Tier 2: DB-anchored property check (CellAge directional claims) ─────
+    prop = check_properties(trace, verified_genes) if trace else None
+    if prop is None:
+        property_score = 0.5
+        n_checked = 0
+        n_violated = 0
+        violations: list[list[str]] = []
+    else:
+        property_score = prop.score
+        n_checked = prop.n_checked
+        n_violated = prop.n_violated
+        violations = [list(v) for v in prop.violations]
+
+    faith = _faithfulness(gene_score, kw_consistency, property_score)
 
     return {
         "id": sample["id"],
@@ -95,6 +118,9 @@ async def _score_sample(
         "gene_score": round(gene_score, 4),
         "nli_consistency": round(kw_consistency, 4),
         "consistent": consistent,
+        "property_score": round(property_score, 4),
+        "property_checked": n_checked,
+        "property_violations": violations,
         "faithfulness": faith,
     }
 
@@ -135,6 +161,9 @@ async def _run(data_path: Path, out_path: Path) -> None:
     verified_total = sum(len(r["verified_genes"]) for r in results)
     avg_nli = sum(r["nli_consistency"] for r in results) / n
     avg_gene = sum(r["gene_score"] for r in results) / n
+    avg_property = sum(r["property_score"] for r in results) / n
+    total_property_checked = sum(r["property_checked"] for r in results)
+    total_violations = sum(len(r["property_violations"]) for r in results)
 
     # ── Spearman faithfulness vs correctness ─────────────────────────────────
     faiths = np.array([r["faithfulness"] for r in results])
@@ -166,7 +195,7 @@ async def _run(data_path: Path, out_path: Path) -> None:
 
     # ── Per-format breakdown ─────────────────────────────────────────────────
     faithfulness_by_format: dict = {}
-    for fmt in ("mcq", "binary", "pairwise"):
+    for fmt in ("mcq", "binary", "pairwise", "regression"):
         fmtr = [r for r in results if r["format"] == fmt]
         if fmtr:
             faithfulness_by_format[fmt] = {
@@ -175,17 +204,21 @@ async def _run(data_path: Path, out_path: Path) -> None:
                 "avg_accuracy": round(sum(1 for r in fmtr if r["pass"]) / len(fmtr), 4),
                 "avg_gene_score": round(sum(r["gene_score"] for r in fmtr) / len(fmtr), 4),
                 "avg_nli": round(sum(r["nli_consistency"] for r in fmtr) / len(fmtr), 4),
+                "avg_property": round(sum(r["property_score"] for r in fmtr) / len(fmtr), 4),
             }
 
     summary = {
         "model": _THINKING_MODEL,
-        "scorer_version": "v4",
-        "formula": "0.60 * gene_score + 0.40 * keyword_consistency",
+        "scorer_version": "v5",
+        "formula": "0.40 * gene_score + 0.20 * keyword_consistency + 0.40 * property_score",
         "n_scored": n,
         "n_with_trace": sum(1 for r in results if r["trace_present"]),
         "avg_faithfulness": round(avg_faith, 4),
         "avg_gene_score": round(avg_gene, 4),
         "avg_nli_consistency": round(avg_nli, 4),
+        "avg_property_score": round(avg_property, 4),
+        "property_genes_checked": total_property_checked,
+        "property_violations": total_violations,
         "n_consistent": n_consistent,
         "pct_consistent": round(n_consistent / n * 100, 1) if n else 0.0,
         "total_gene_candidates": total_genes,
@@ -204,12 +237,13 @@ async def _run(data_path: Path, out_path: Path) -> None:
 
     # ── Print summary ────────────────────────────────────────────────────────
     print(f"\n{'─'*62}")
-    print(f"  Trace Faithfulness V4 · {_THINKING_MODEL}")
+    print(f"  Trace Faithfulness V5 · {_THINKING_MODEL}")
     print(f"{'─'*62}")
     print(f"  Scored:            {n} traces")
-    print(f"  Avg faithfulness:  {avg_faith:.3f}  (0.60×gene + 0.40×keyword)")
+    print(f"  Avg faithfulness:  {avg_faith:.3f}  (0.40×gene + 0.20×keyword + 0.40×property)")
     print(f"  Gene score:        {avg_gene:.3f}  ({verified_total}/{total_genes} verified)")
     print(f"  Keyword consist:   {avg_nli:.3f}  ({n_consistent}/{n} directionally consistent)")
+    print(f"  Property score:    {avg_property:.3f}  ({total_property_checked} CellAge claims, {total_violations} violations)")
     print()
     for fmt, s in faithfulness_by_format.items():
         print(f"  {fmt:10s}  faith={s['avg_faithfulness']:.3f}  acc={s['avg_accuracy']:.3f}  gene={s['avg_gene_score']:.3f}  kw={s['avg_nli']:.3f}  n={s['n']}")

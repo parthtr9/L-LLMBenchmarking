@@ -117,26 +117,32 @@ def _row_to_sample(row: dict[str, Any], index: int, is_thinking: bool = False) -
     )
 
 
-def _compute_fmt_majority(test_path: Path, test_samples: list[Sample]) -> dict[str, str]:
-    """Compute per-format majority label from the training split (if available).
+def _get_target(msgs_val: Any) -> str:
+    msgs = _ensure_messages(msgs_val)
+    return str(msgs[-1]["content"]).strip()
 
+
+def _compute_fmt_majority(test_path: Path, test_samples: list[Sample]) -> dict[str, str]:
+    """Compute per-format majority/mean label from the training split (if available).
+
+    Classification formats (mcq, binary, pairwise): most-frequent label.
+    Regression format: mean of training targets rounded to nearest integer.
     Falls back to test samples when no train file found.
-    Supported formats: mcq, binary, pairwise.
     """
     train_path = Path(str(test_path).replace("_test.parquet", "_train.parquet"))
     if not train_path.exists():
-        train_path = None
+        # Also try task_b path (no processed/ subdir)
+        alt = test_path.parent / test_path.name.replace("_test.parquet", "_train.parquet")
+        train_path = alt if alt.exists() else None
 
     fmt_majority: dict[str, str] = {}
-
-    def _get_target(msgs_val: Any) -> str:
-        msgs = _ensure_messages(msgs_val)
-        return str(msgs[-1]["content"]).strip()
+    train_df: pd.DataFrame | None = None
+    if train_path:
+        train_df = pd.read_parquet(train_path)
 
     for fmt in ("mcq", "binary", "pairwise"):
-        if train_path:
-            df = pd.read_parquet(train_path)
-            rows = df[df["format"] == fmt] if "format" in df.columns else pd.DataFrame()
+        if train_df is not None and "format" in train_df.columns:
+            rows = train_df[train_df["format"] == fmt]
         else:
             rows = pd.DataFrame()
 
@@ -150,9 +156,64 @@ def _compute_fmt_majority(test_path: Path, test_samples: list[Sample]) -> dict[s
             continue
         fmt_majority[fmt] = Counter(fmt_targets).most_common(1)[0][0]
 
+    # Regression: majority baseline = mean of training targets (MAE minimizer is median,
+    # but mean is a reasonable constant predictor and avoids needing sorted data).
+    if train_df is not None and "format" in train_df.columns:
+        reg_rows = train_df[train_df["format"] == "regression"]
+    else:
+        reg_rows = pd.DataFrame()
+
+    if not reg_rows.empty:
+        reg_targets = reg_rows["messages"].apply(_get_target).tolist()
+    else:
+        reg_targets = [s.target for s in test_samples
+                       if (s.metadata or {}).get("format") == "regression"]
+
+    if reg_targets:
+        vals = []
+        for t in reg_targets:
+            try:
+                vals.append(float(t.strip()))
+            except ValueError:
+                pass
+        if vals:
+            fmt_majority["regression"] = str(round(sum(vals) / len(vals)))
+
     fmt_majority.setdefault("default", "A")
     logger.info("majority baseline labels: %s", fmt_majority)
     return fmt_majority
+
+
+def _compute_regression_range(test_path: Path, test_samples: list[Sample]) -> tuple[int, int]:
+    """Return (min, max) of regression targets from training data for random baseline."""
+    train_path = Path(str(test_path).replace("_test.parquet", "_train.parquet"))
+    if not train_path.exists():
+        alt = test_path.parent / test_path.name.replace("_test.parquet", "_train.parquet")
+        train_path = alt if alt.exists() else None
+
+    targets: list[float] = []
+    if train_path:
+        df = pd.read_parquet(train_path)
+        if "format" in df.columns:
+            rows = df[df["format"] == "regression"]
+            for t in rows["messages"].apply(_get_target):
+                try:
+                    targets.append(float(t.strip()))
+                except ValueError:
+                    pass
+
+    if not targets:
+        targets = []
+        for s in test_samples:
+            if (s.metadata or {}).get("format") == "regression":
+                try:
+                    targets.append(float(s.target.strip()))
+                except ValueError:
+                    pass
+
+    if not targets:
+        return (20, 90)  # fallback: age range
+    return (int(min(targets)), int(max(targets)))
 
 
 def load_parquet_samples(
@@ -209,13 +270,19 @@ def parquet_task(
         .get("chat_template_kwargs", {})
         .get("enable_thinking", False)
     )
+    # Model config max_tokens takes precedence over CLI default when thinking is on.
+    if "max_tokens" in model_cfg:
+        max_tokens = model_cfg["max_tokens"]
     samples = load_parquet_samples(path, limit, fmt_filter, is_thinking=is_thinking)
 
     baseline_type = model_cfg.get("type") == "baseline"
     strategy = model_cfg.get("strategy", "")
 
     if baseline_type and strategy == "random":
-        slvr = random_baseline_solver(seed=seed)
+        slvr = random_baseline_solver(
+            seed=seed,
+            regression_range=_compute_regression_range(path, samples),
+        )
     elif baseline_type and strategy == "majority":
         slvr = majority_baseline_solver(
             fmt_majority=_compute_fmt_majority(path, samples),
