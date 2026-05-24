@@ -1,6 +1,6 @@
 # LongevityBench-X · Task A Senescence · Gap Analysis Report
 
-_Generated: 2026-05-24T15:23:49.876096+00:00_
+_Generated: 2026-05-24T19:21:43.588128+00:00_
 
 ## 1. Dataset Summary
 
@@ -32,7 +32,6 @@ Prevents label leakage from shared batch effects and analysis pipelines.
 | Model | binary/significance | mcq | pairwise | regression |
 |---|---|---|---|---|
 | L-LLM | 158 | 138 | 77 | 80 |
-| L-LLM (think) | 158 | 138 | 77 | 80 |
 | Claude Sonnet | 158 | 138 | 77 | 80 |
 | Majority | 158 | 138 | 77 | 80 |
 | Random | 158 | 138 | 77 | 80 |
@@ -45,7 +44,6 @@ Prevents label leakage from shared batch effects and analysis pipelines.
 | Model | N | Accuracy | Balanced Acc | Acc(A) | Acc(B) | CI (Acc) |
 |---|---|---|---|---|---|---|
 | L-LLM | 158 | 0.468 | 0.468 | 0.4815 | 0.4545 | [0.386, 0.544] |
-| L-LLM (think) | 158 | 0.506 | 0.507 | 0.4815 | 0.5325 | [0.424, 0.589] |
 | Claude Sonnet | 158 | 0.608 | 0.615 | 0.3086 | 0.9221 | [0.532, 0.683] |
 | Majority | 158 | 0.538 | 0.538 | 0.5309 | 0.5455 | [0.462, 0.620] |
 | Random | 158 | 0.411 | 0.409 | 0.5062 | 0.3117 | [0.329, 0.494] |
@@ -56,7 +54,6 @@ Prevents label leakage from shared batch effects and analysis pipelines.
 | Model | N | Accuracy | Macro F1 | Balanced Acc | Off-by-one | CI (Off-by-one) |
 |---|---|---|---|---|---|---|
 | L-LLM | 138 | 0.312 | 0.202 | 0.271 | 0.559 | [0.478, 0.640] |
-| L-LLM (think) | 138 | 0.275 | 0.179 | 0.248 | 0.493 | [0.404, 0.581] |
 | Claude Sonnet | 138 | 0.377 | 0.285 | 0.302 | 0.500 | [0.404, 0.596] |
 | Majority | 138 | 0.348 | 0.208 | 0.258 | 0.596 | [0.514, 0.676] |
 | Random | 138 | 0.261 | 0.202 | 0.217 | 0.419 | [0.338, 0.507] |
@@ -72,15 +69,6 @@ _L-LLM_
 | gold=B | 1 | 17 | 28 | 0 |
 | gold=C | 1 | 10 | 25 | 0 |
 | gold=D | 0 | 5 | 4 | 0 |
-
-_L-LLM (think)_
-
-| pred→ | A | B | C | D |
-|---|---|---|---|---|
-| gold=A | 5 | 9 | 33 | 0 |
-| gold=B | 3 | 5 | 38 | 0 |
-| gold=C | 4 | 4 | 28 | 0 |
-| gold=D | 0 | 0 | 9 | 0 |
 
 _Claude Sonnet_
 
@@ -123,7 +111,6 @@ _Population Prior Prediction_
 | Model | N | Accuracy | Balanced Acc | Pred A% | Pred B% | A-bias | CI (Acc) |
 |---|---|---|---|---|---|---|---|
 | L-LLM | 77 | 0.597 | 0.600 | 53.2% | 46.8% | 0.065 | [0.480, 0.701] |
-| L-LLM (think) | 77 | 0.558 | 0.572 | 70.1% | 29.9% | 0.2338 | [0.442, 0.662] |
 | Claude Sonnet | 77 | 0.558 | 0.568 | 64.9% | 35.1% | 0.1819 | [0.454, 0.675] |
 | Majority | 77 | 0.532 | 0.500 | 0.0% | 100.0% | -0.4675 | [0.429, 0.636] |
 | Random | 77 | 0.519 | 0.520 | 50.6% | 49.4% | 0.039 | [0.403, 0.636] |
@@ -134,7 +121,6 @@ _Population Prior Prediction_
 | Model | N | MAE | Median AE | Spearman r | Sign Acc | CI (MAE) |
 |---|---|---|---|---|---|---|
 | L-LLM | 80 | 11.425 | 10.000 | -0.021 | 1.000 | [9.487, 13.589] |
-| L-LLM (think) | 80 | 11.838 | 9.500 | -0.060 | 1.000 | [9.887, 13.726] |
 | Claude Sonnet | 80 | 75.200 | 12.500 | 0.017 | 0.963 | [16.337, 186.624] |
 | Majority | 80 | 11.050 | 9.000 | 0.000 | 1.000 | [9.262, 12.913] |
 | Random | 80 | 16.775 | 13.500 | 0.001 | 1.000 | [13.975, 19.865] |
@@ -148,11 +134,6 @@ _Population Prior Prediction_
 - gold=A predicted as C: 32×
 - gold=B predicted as C: 28×
 - gold=A predicted as B: 14×
-
-**L-LLM (think):** most-confused pairs:
-- gold=B predicted as C: 38×
-- gold=A predicted as C: 33×
-- gold=D predicted as C: 9×
 
 **Claude Sonnet:** most-confused pairs:
 - gold=A predicted as C: 20×
@@ -176,7 +157,6 @@ _Population Prior Prediction_
 
 ### Binary/significance — class-wise accuracy
 - **L-LLM**: class A acc=0.4815, class B acc=0.4545
-- **L-LLM (think)**: class A acc=0.4815, class B acc=0.5325
 - **Claude Sonnet**: class A acc=0.3086, class B acc=0.9221
 - **Majority**: class A acc=0.5309, class B acc=0.5455
 - **Random**: class A acc=0.5062, class B acc=0.3117
@@ -184,7 +164,6 @@ _Population Prior Prediction_
 
 ### Pairwise — A/B prediction bias
 - **L-LLM**: predicted A=53.2%, predicted B=46.8%, A-bias=0.065
-- **L-LLM (think)**: predicted A=70.1%, predicted B=29.9%, A-bias=0.2338
 - **Claude Sonnet**: predicted A=64.9%, predicted B=35.1%, A-bias=0.1819
 - **Majority**: predicted A=0.0%, predicted B=100.0%, A-bias=-0.4675
 - **Random**: predicted A=50.6%, predicted B=49.4%, A-bias=0.039

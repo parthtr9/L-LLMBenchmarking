@@ -221,17 +221,22 @@ def load_parquet_samples(
     limit: int | None = None,
     fmt_filter: str | None = None,
     is_thinking: bool = False,
+    bootstrap_seed: int | None = None,
 ) -> list[Sample]:
     df = pd.read_parquet(parquet_path)
     if fmt_filter:
         df = df[df["format"] == fmt_filter]
+    # Bootstrap: shuffle rows with a reproducible seed before applying limit.
+    # Different bootstrap_seed values → different subsets → variance for whisker plots.
+    if bootstrap_seed is not None:
+        df = df.sample(frac=1, random_state=bootstrap_seed).reset_index(drop=True)
     if limit is not None:
         df = df.head(limit)
     samples = [_row_to_sample(row.to_dict(), i, is_thinking=is_thinking)
                for i, (_, row) in enumerate(df.iterrows())]
     logger.info(
-        "loaded %d samples from %s (fmt=%s limit=%s thinking=%s)",
-        len(samples), parquet_path.name, fmt_filter, limit, is_thinking,
+        "loaded %d samples from %s (fmt=%s limit=%s thinking=%s bootstrap_seed=%s)",
+        len(samples), parquet_path.name, fmt_filter, limit, is_thinking, bootstrap_seed,
     )
     return samples
 
@@ -246,6 +251,7 @@ def parquet_task(
     max_tokens: int = 500,
     temperature: float = 0.0,
     seed: int = 42,
+    bootstrap_seed: int | None = None,
 ) -> Task:
     """Generic eval task — runs any parquet benchmark file.
 
@@ -273,7 +279,8 @@ def parquet_task(
     # Model config max_tokens takes precedence over CLI default when thinking is on.
     if "max_tokens" in model_cfg:
         max_tokens = model_cfg["max_tokens"]
-    samples = load_parquet_samples(path, limit, fmt_filter, is_thinking=is_thinking)
+    samples = load_parquet_samples(path, limit, fmt_filter,
+                                   is_thinking=is_thinking, bootstrap_seed=bootstrap_seed)
 
     baseline_type = model_cfg.get("type") == "baseline"
     strategy = model_cfg.get("strategy", "")

@@ -62,6 +62,12 @@ def main() -> None:
     parser.add_argument("--max-tokens", type=int, default=500)
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--bootstrap-seed", type=int, default=None,
+                        help="Shuffle rows with this seed before --limit sampling. "
+                             "Use different values across runs to get whisker-plot variance.")
+    parser.add_argument("--run-tag", type=str, default=None,
+                        help="Sub-directory tag, e.g. 'run1'. Logs go to "
+                             "outputs/inspect/<model>/<run-tag>/")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
@@ -91,7 +97,8 @@ def main() -> None:
                 logger.error("model %s requires %s to be set", model_name, api_base_env)
                 sys.exit(1)
 
-        log_subdir = args.log_dir / model_name
+        subdir = f"{model_name}/{args.run_tag}" if args.run_tag else model_name
+        log_subdir = args.log_dir / subdir
         log_subdir.mkdir(parents=True, exist_ok=True)
 
         logger.info(
@@ -110,6 +117,7 @@ def main() -> None:
             max_tokens=effective_max_tokens,
             temperature=args.temperature,
             seed=args.seed,
+            bootstrap_seed=args.bootstrap_seed,
         )
 
         logs = inspect_eval(t, model="none", log_dir=str(log_subdir))

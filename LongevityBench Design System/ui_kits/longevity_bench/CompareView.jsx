@@ -32,7 +32,7 @@ const GroupedBarChart = ({ matrix, models, formats, refValues }) => {
 
   const groupX = (fi) => ML + fi * (barAreaW + GROUP_GAP);
 
-  const TT_W = 140, TT_H = 44, TT_PAD = 7;
+  const TT_W = 152, TT_H = 52, TT_PAD = 9;
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', maxWidth: '100%', display: 'block' }}
@@ -140,14 +140,13 @@ const GroupedBarChart = ({ matrix, models, formats, refValues }) => {
       {tooltip && (
         <g style={{ pointerEvents: 'none' }}>
           <rect x={tooltip.x} y={tooltip.y} width={TT_W} height={TT_H}
-            rx={4} fill="var(--lb-bg-1, #1a1a1a)" stroke={tooltip.color}
-            strokeWidth={1} opacity={0.97} />
-          <text x={tooltip.x + TT_PAD} y={tooltip.y + TT_PAD + 11}
-            style={{ font: '600 11px var(--lb-font-sans)', fill: tooltip.color }}>
+            rx={5} fill="#ffffff" stroke={tooltip.color} strokeWidth={1.5} />
+          <text x={tooltip.x + TT_PAD} y={tooltip.y + TT_PAD + 13}
+            style={{ font: '600 12px var(--lb-font-sans)', fill: tooltip.color }}>
             {tooltip.model}
           </text>
-          <text x={tooltip.x + TT_PAD} y={tooltip.y + TT_PAD + 27}
-            style={{ font: '11px var(--lb-font-mono)', fill: 'var(--lb-fg-2)' }}>
+          <text x={tooltip.x + TT_PAD} y={tooltip.y + TT_PAD + 31}
+            style={{ font: '11px var(--lb-font-mono)', fill: '#333' }}>
             {tooltip.fmt} · {(tooltip.v * 100).toFixed(1)}%
           </text>
         </g>
@@ -228,6 +227,170 @@ const ModelCard = ({ model, formatScores, formats, avgScore, nCorrect, nTotal })
   );
 };
 
+// ── Box/whisker chart (SVG, multi-run bootstrap) ─────────────────────────────
+
+function _boxStats(vals) {
+  const sorted = [...vals].sort((a, b) => a - b);
+  const n = sorted.length;
+  const q = (p) => {
+    const idx = p * (n - 1);
+    const lo = Math.floor(idx);
+    const hi = Math.ceil(idx);
+    return sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo);
+  };
+  return {
+    min: sorted[0], q1: q(0.25), median: q(0.5), q3: q(0.75), max: sorted[n - 1],
+    mean: vals.reduce((a, b) => a + b, 0) / n,
+  };
+}
+
+const WhiskerChart = ({ whiskerData, models, formats, refValues }) => {
+  const [tooltip, setTooltip] = React.useState(null);
+  const W = 1100;
+  const LEGEND_COLS = Math.min(models.length, 4);
+  const LEGEND_ROW_H = 18;
+  const legendRows = Math.max(1, Math.ceil(models.length / LEGEND_COLS));
+  const ML = 52, MR = 24, MT = 28;
+  const MB = 52 + legendRows * LEGEND_ROW_H;
+  const H = 360 + legendRows * LEGEND_ROW_H;
+  const chartW = W - ML - MR;
+  const chartH = H - MT - MB;
+  const legendSpacing = chartW / LEGEND_COLS;
+  const GROUP_GAP = 80;
+  const barAreaW = (chartW - GROUP_GAP * (formats.length - 1)) / formats.length;
+  const barW = Math.min(36, (barAreaW - 20) / models.length);
+  const barSpacing = 3;
+  const groupBarTotalW = barW * models.length + barSpacing * (models.length - 1);
+  const barPad = (barAreaW - groupBarTotalW) / 2;
+  const yTicks = [0, 0.25, 0.5, 0.75, 1.0];
+  const groupX = (fi) => ML + fi * (barAreaW + GROUP_GAP);
+  const TT_W = 200, TT_H = 80, TT_PAD = 9;
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', maxWidth: '100%', display: 'block' }}
+      onMouseLeave={() => setTooltip(null)}>
+      {yTicks.map(t => {
+        const y = MT + chartH - t * chartH;
+        return (
+          <g key={t}>
+            <line x1={ML} x2={ML + chartW} y1={y} y2={y}
+              stroke="var(--lb-border)" strokeWidth={t === 0 ? 1.5 : 1} strokeDasharray={t > 0 ? '3 3' : ''} />
+            <text x={ML - 6} y={y + 4} textAnchor="end"
+              style={{ font: '10px var(--lb-font-mono)', fill: 'var(--lb-fg-4)' }}>
+              {t.toFixed(2)}
+            </text>
+          </g>
+        );
+      })}
+      {formats.map((fmt, fi) => {
+        const gx = groupX(fi);
+        return (
+          <g key={fmt}>
+            <text x={gx + barAreaW / 2} y={MT + chartH + 24} textAnchor="middle"
+              style={{ font: '500 11px var(--lb-font-sans)', fill: 'var(--lb-fg-2)' }}>
+              {FORMAT_LABELS[fmt] || fmt}
+            </text>
+            {models.map((m, mi) => {
+              const vals = whiskerData[m.id]?.[fmt];
+              const isBaseline = BASELINE_IDS.includes(m.id);
+              const cx = gx + barPad + mi * (barW + barSpacing) + barW / 2;
+              const toY = v => MT + chartH - v * chartH;
+              if (!vals || vals.length < 2) {
+                const sv = vals?.[0];
+                if (sv == null) return null;
+                const bH = sv * chartH;
+                return (
+                  <rect key={m.id} x={cx - barW / 2} y={toY(sv)} width={barW}
+                    height={Math.max(bH, 1)} fill={m.color} opacity={isBaseline ? 0.4 : 0.88} rx={2} />
+                );
+              }
+              const s = _boxStats(vals);
+              const isHover = tooltip?.modelId === m.id && tooltip?.fmt === fmt;
+              const wHW = barW * 0.35;
+              const ttX = Math.min(cx - TT_W / 2, W - TT_W - 4);
+              const ttY = Math.max(toY(s.max) - TT_H - 6, MT);
+              return (
+                <g key={m.id}
+                  onMouseEnter={() => setTooltip({ x: ttX, y: ttY, modelId: m.id, model: m.name, fmt, s, color: m.color, n: vals.length })}
+                  onMouseLeave={() => setTooltip(null)}
+                  style={{ cursor: 'default' }}>
+                  <line x1={cx} x2={cx} y1={toY(s.min)} y2={toY(s.q1)}
+                    stroke={m.color} strokeWidth={1.5} opacity={isBaseline ? 0.4 : 0.8} />
+                  <line x1={cx} x2={cx} y1={toY(s.q3)} y2={toY(s.max)}
+                    stroke={m.color} strokeWidth={1.5} opacity={isBaseline ? 0.4 : 0.8} />
+                  <line x1={cx - wHW} x2={cx + wHW} y1={toY(s.min)} y2={toY(s.min)}
+                    stroke={m.color} strokeWidth={1.5} opacity={isBaseline ? 0.4 : 0.8} />
+                  <line x1={cx - wHW} x2={cx + wHW} y1={toY(s.max)} y2={toY(s.max)}
+                    stroke={m.color} strokeWidth={1.5} opacity={isBaseline ? 0.4 : 0.8} />
+                  <rect x={cx - barW / 2} y={toY(s.q3)} width={barW}
+                    height={Math.max(toY(s.q1) - toY(s.q3), 1)}
+                    fill={m.color} opacity={isBaseline ? 0.2 : (isHover ? 0.55 : 0.35)} rx={2}
+                    style={{ transition: 'opacity 0.1s' }} />
+                  <line x1={cx - barW / 2} x2={cx + barW / 2} y1={toY(s.median)} y2={toY(s.median)}
+                    stroke={m.color} strokeWidth={2.5} opacity={isBaseline ? 0.6 : 1} />
+                  <circle cx={cx} cy={toY(s.mean)} r={2.5}
+                    fill="#fff" stroke={m.color} strokeWidth={1.5} opacity={isBaseline ? 0.5 : 0.9} />
+                </g>
+              );
+            })}
+            {(() => {
+              const ref = refValues?.[fmt] ?? 0.5;
+              const ry = MT + chartH - ref * chartH;
+              return (
+                <g key="ref">
+                  <line x1={gx} x2={gx + barAreaW} y1={ry} y2={ry}
+                    stroke="var(--lb-error)" strokeWidth={1.5} strokeDasharray="4 3" />
+                  <text x={gx + barAreaW + 3} y={ry + 4}
+                    style={{ font: '9px var(--lb-font-mono)', fill: 'var(--lb-fg-4)' }}>
+                    avg {ref.toFixed(2)}
+                  </text>
+                </g>
+              );
+            })()}
+          </g>
+        );
+      })}
+      {models.map((m, i) => {
+        const row = Math.floor(i / LEGEND_COLS);
+        const col = i % LEGEND_COLS;
+        const lx = ML + col * legendSpacing;
+        const ly = H - 12 - (legendRows - 1 - row) * LEGEND_ROW_H;
+        return (
+          <g key={m.id} transform={`translate(${lx}, ${ly})`}>
+            <rect x={0} y={-7} width={10} height={10} fill={m.color}
+              opacity={BASELINE_IDS.includes(m.id) ? 0.45 : 0.9} rx={2} />
+            <text x={14} y={2} style={{ font: '11px var(--lb-font-sans)', fill: 'var(--lb-fg-2)' }}>
+              {m.name}
+            </text>
+          </g>
+        );
+      })}
+      {tooltip && (
+        <g style={{ pointerEvents: 'none' }}>
+          <rect x={tooltip.x} y={tooltip.y} width={TT_W} height={TT_H}
+            rx={5} fill="#ffffff" stroke={tooltip.color} strokeWidth={1.5} />
+          <text x={tooltip.x + TT_PAD} y={tooltip.y + TT_PAD + 13}
+            style={{ font: '600 12px var(--lb-font-sans)', fill: tooltip.color }}>
+            {tooltip.model} · {FORMAT_LABELS[tooltip.fmt] || tooltip.fmt}
+          </text>
+          <text x={tooltip.x + TT_PAD} y={tooltip.y + TT_PAD + 30}
+            style={{ font: '10px var(--lb-font-mono)', fill: '#333' }}>
+            median {(tooltip.s.median * 100).toFixed(1)}%  ·  mean {(tooltip.s.mean * 100).toFixed(1)}%
+          </text>
+          <text x={tooltip.x + TT_PAD} y={tooltip.y + TT_PAD + 46}
+            style={{ font: '10px var(--lb-font-mono)', fill: '#555' }}>
+            Q1–Q3: {(tooltip.s.q1 * 100).toFixed(1)}% – {(tooltip.s.q3 * 100).toFixed(1)}%
+          </text>
+          <text x={tooltip.x + TT_PAD} y={tooltip.y + TT_PAD + 62}
+            style={{ font: '10px var(--lb-font-mono)', fill: '#555' }}>
+            range: {(tooltip.s.min * 100).toFixed(1)}% – {(tooltip.s.max * 100).toFixed(1)}%  n={tooltip.n}
+          </text>
+        </g>
+      )}
+    </svg>
+  );
+};
+
 // ── Main CompareView ──────────────────────────────────────────────────────────
 
 const CompareView = ({ runs = [], records = [] }) => {
@@ -273,6 +436,23 @@ const CompareView = ({ runs = [], records = [] }) => {
       matrix[fmt][m.id] = scored.reduce((s, c) => s + c.score, 0) / scored.length;
     });
   });
+
+  // Build whisker data from per-format run scores (populated after 5-run bootstrap)
+  const whiskerData = {};
+  runs.filter(r => r.status === 'complete').forEach(r => {
+    const mid = r.modelId;
+    if (!whiskerData[mid]) whiskerData[mid] = {};
+    formats.forEach(fmt => {
+      const v = r.scores?.[`${fmt}_mean`];
+      if (v != null) {
+        if (!whiskerData[mid][fmt]) whiskerData[mid][fmt] = [];
+        whiskerData[mid][fmt].push(v);
+      }
+    });
+  });
+  const hasWhiskerData = formats.some(fmt =>
+    models.some(m => (whiskerData[m.id]?.[fmt]?.length ?? 0) >= 3)
+  );
 
   // Per-model stats
   const modelStats = models.map(m => {
@@ -367,9 +547,10 @@ const CompareView = ({ runs = [], records = [] }) => {
       <div className="card" style={{ marginBottom: 20, padding: '18px 24px 22px' }}>
         <div className="head" style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
           <div>
-            <h3>Accuracy by format</h3>
+            <h3>{hasWhiskerData ? 'Score distribution by format (5-run bootstrap)' : 'Accuracy by format'}</h3>
             <p className="sub">
               {showBaselines ? 'all models' : 'models only'} · score per question format · higher is better
+              {hasWhiskerData ? ' · box = IQR, line = median, dot = mean' : ''}
             </p>
           </div>
           <button
@@ -392,17 +573,31 @@ const CompareView = ({ runs = [], records = [] }) => {
             {showBaselines ? 'Hide baselines' : 'Show baselines'}
           </button>
         </div>
-        <GroupedBarChart
-          matrix={matrix}
-          models={visibleModels}
-          formats={formats}
-          refValues={Object.fromEntries(
-            formats.map(f => {
-              const vals = visibleModels.map(m => matrix[f]?.[m.id]).filter(v => v != null);
-              return [f, vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0.5];
-            })
-          )}
-        />
+        {hasWhiskerData ? (
+          <WhiskerChart
+            whiskerData={whiskerData}
+            models={visibleModels}
+            formats={formats}
+            refValues={Object.fromEntries(
+              formats.map(f => {
+                const vals = visibleModels.flatMap(m => whiskerData[m.id]?.[f] ?? []).filter(v => v != null);
+                return [f, vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0.5];
+              })
+            )}
+          />
+        ) : (
+          <GroupedBarChart
+            matrix={matrix}
+            models={visibleModels}
+            formats={formats}
+            refValues={Object.fromEntries(
+              formats.map(f => {
+                const vals = visibleModels.map(m => matrix[f]?.[m.id]).filter(v => v != null);
+                return [f, vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0.5];
+              })
+            )}
+          />
+        )}
       </div>
 
       {/* Per-model cards */}
