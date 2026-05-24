@@ -6,8 +6,8 @@
 const EXPLANATIONS = {
   avg_faithfulness: {
     title: 'Avg faithfulness',
-    plain: 'How grounded is the model\'s chain-of-thought in real biology? Each thinking trace is scored by (1) checking whether the gene symbols it mentions actually exist in NCBI Gene and (2) verifying that the reasoning direction matches the final answer. A score of 1.0 means every gene cited is real and the reasoning never contradicts the prediction.',
-    formula: '0.4 × (verified genes ÷ cited genes) + 0.3 × consistency score',
+    plain: 'How grounded is the model\'s chain-of-thought in real biology? Each thinking trace is scored by three components: (1) gene existence — are the gene symbols cited in the trace real, verified genes? (2) keyword consistency — does the directional language in the trace match the predicted answer? (3) property score — do the directional claims about specific genes agree with their annotated effects in CellAge v3? A score of 1.0 means every cited gene is real, the reasoning direction matches the answer, and no CellAge property violations are found.',
+    formula: '0.40 × gene_score + 0.20 × keyword_consistency + 0.40 × property_score',
     scale: [
       { range: '≥ 0.70', label: 'High trust — reasoning is well-grounded', color: 'var(--lb-green-700)' },
       { range: '0.40 – 0.69', label: 'Moderate — some hallucination or inconsistency', color: '#8a5d12' },
@@ -16,40 +16,190 @@ const EXPLANATIONS = {
   },
   consistent: {
     title: 'Trace ↔ answer consistency',
-    plain: 'What fraction of thinking traces are judged by an NLI model (DeBERTa-v3-large) to entail the predicted answer? The trace is the "premise"; the hypothesis is a short statement like "the correct choice is A". DeBERTa scores entailment probability — if ≥ 0.5, the trace is "consistent". The 3.4% rate is a known limitation: biological reasoning traces discuss genes and pathways at length but rarely state the answer choice explicitly within the first 1024 tokens that DeBERTa sees. This is a signal-quality issue with the NLI approach, not necessarily model inconsistency.',
-    formula: 'P(trace entails predicted answer) ≥ 0.5 · scored by DeBERTa-v3-large MNLI',
+    plain: 'What fraction of thinking traces contain directional language that matches the predicted answer? The full trace is scanned for up-regulation keywords (upregulat, increas, elevat, activat, …) and down-regulation keywords (downregulat, decreas, inhibit, suppress, …) with negation detection on a 50-character window before each match. A trace is "consistent" if its keyword score ≥ 0.75. For pairwise and regression formats, 0.5 is returned (no directional semantics in the label). This approach replaced DeBERTa NLI (V3), which gave 3.4% consistency because biological traces exceed the 1024-token truncation limit.',
+    formula: 'keyword_score ≥ 0.75 · directional keyword scan with negation detection (full trace, no truncation)',
     scale: [
-      { range: '> 50%', label: 'Strong — NLI confirms reasoning matches answer', color: 'var(--lb-green-700)' },
-      { range: '20 – 50%', label: 'Moderate — partial signal', color: '#8a5d12' },
-      { range: '< 20%', label: 'Weak NLI signal — biological traces too long for DeBERTa', color: 'var(--lb-error)' },
+      { range: '≥ 75%', label: 'Strong — trace direction matches predicted label', color: 'var(--lb-green-700)' },
+      { range: '50 – 74%', label: 'Moderate — partial directional signal', color: '#8a5d12' },
+      { range: '< 50%', label: 'Weak — trace discusses mechanisms without clear direction', color: 'var(--lb-error)' },
     ],
-    note: 'Low consistency does NOT mean the model is wrong — it means DeBERTa cannot match long biological text to a short answer label. The Spearman ρ = −0.39 (p=0.04) between faithfulness and accuracy is the more meaningful signal.',
+    note: 'Low consistency does NOT mean the model is wrong — it means the trace discusses biological mechanisms without explicitly stating directional language that matches the answer label. Pairwise and regression formats always return 0.5 (no directional semantics).',
   },
   genes_verified: {
     title: 'Genes verified',
-    plain: 'Of all the gene symbols the model mentioned in its thinking traces, how many actually exist as real human genes in NCBI Gene? Symbols that fail lookup may be hallucinated names, symbols from the wrong organism, or common English words that happen to match the gene-symbol regex.',
-    formula: 'Verified gene symbols ÷ total candidate symbols extracted from traces',
+    plain: 'Of all the human gene symbols the model mentioned in its thinking traces, how many actually exist as verified genes in NCBI Gene via the mygene.info API? Both benchmark tasks (Task A: human senescence fibroblasts, Task B: human plasma lipidomics) are entirely human biology — cited symbols should be real human gene identifiers. Symbols that fail lookup may be hallucinated names, common English words, or lab abbreviations that match the uppercase gene-symbol pattern.',
+    formula: 'Verified gene symbols ÷ total candidate symbols extracted from traces · mygene.info lookup',
     scale: [
       { range: '> 70%', label: 'Good — most cited genes are real', color: 'var(--lb-green-700)' },
-      { range: '40 – 70%', label: 'Moderate — false positives from regex filter', color: '#8a5d12' },
-      { range: '< 40%', label: 'Low — many cited genes not found in NCBI', color: 'var(--lb-error)' },
+      { range: '40 – 70%', label: 'Moderate — some false positives from regex', color: '#8a5d12' },
+      { range: '< 40%', label: 'Low — many cited genes not found in NCBI Gene', color: 'var(--lb-error)' },
     ],
-    note: 'The regex matches all 2–10 char uppercase tokens. Common words (AND, RNA, etc.) are filtered via a stoplist, but some non-gene tokens still pass. The verified % is a conservative lower bound.',
+    note: 'Extractor matches uppercase tokens (FOXO3, MTOR, TP53). Common non-gene tokens (RNA, DNA, PCR, OIS, etc.) are filtered via a stoplist before API lookup. The verified % is a conservative lower bound — some real genes are missed by the uppercase-only pattern.',
   },
   format_faithfulness: {
     title: 'Faithfulness by question format',
-    plain: 'The model\'s reasoning quality varies by task type. MCQ (multiple-choice direction) requires the model to reason about biological direction across three possibilities. Binary and pairwise tasks ask simpler relative comparisons. Faithfulness color reflects the score: green ≥ 0.70, amber 0.40–0.69, red < 0.40.',
-    formula: '0.60 × gene_score + 0.40 × nli_consistency · computed per format',
+    plain: 'Reasoning quality varies by task type. MCQ requires the model to reason about biological direction across three possibilities. Binary asks whether a perturbation is significant or not. Pairwise compares two genes — directional semantics in the label are absent, so keyword_consistency and property_score both return 0.5. Faithfulness color: green ≥ 0.70, amber 0.40–0.69, red < 0.40.',
+    formula: '0.40 × gene_score + 0.20 × keyword_consistency + 0.40 × property_score · computed per format',
     scale: [
       { range: '≥ 0.70', label: 'High — reasoning well-grounded', color: 'var(--lb-green-700)' },
       { range: '0.40 – 0.69', label: 'Moderate — some hallucination or drift', color: '#8a5d12' },
       { range: '< 0.40', label: 'Low — reasoning unreliable for this format', color: 'var(--lb-error)' },
     ],
-    note: 'Low MCQ faithfulness + low MCQ accuracy together show the model is not just wrong — it\'s reasoning incorrectly. That\'s the key extra-credit finding.',
+    note: 'Low MCQ faithfulness + low MCQ accuracy together indicate the model is not just answering incorrectly — it is reasoning incorrectly. That is the key finding this scorer is designed to surface.',
   },
 };
 
-const ExplanationModal = ({ metricKey, data, onClose }) => {
+// ── Mini bar helper ───────────────────────────────────────────────────────────
+
+const MiniBar = ({ value, max = 1, color = 'var(--lb-green-500)', label, valueLabel }) => (
+  <div style={{ marginBottom: 10 }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+      <span style={{ font: '400 12px var(--lb-font-sans)', color: 'var(--lb-fg-2)' }}>{label}</span>
+      <span style={{ font: '500 12px var(--lb-font-mono)', color: 'var(--lb-fg-1)' }}>{valueLabel ?? (typeof value === 'number' ? value.toFixed(3) : value)}</span>
+    </div>
+    <div style={{ height: 6, background: 'var(--lb-ink-100)', borderRadius: 3 }}>
+      <div style={{ width: `${Math.min(100, (value / max) * 100)}%`, height: '100%', background: color, borderRadius: 3, transition: 'width 0.3s' }} />
+    </div>
+  </div>
+);
+
+// ── Live data panels per metric ───────────────────────────────────────────────
+
+const LiveData = ({ metricKey, derived, samples }) => {
+  if (!derived || !samples) return null;
+  const { avg_faithfulness, pct_consistent, n_consistent, n_scored,
+          verified_genes, total_gene_candidates, pct_genes_verified,
+          faithfulness_by_format } = derived;
+
+  const label = (txt, color) => (
+    <div style={{ font: '500 11px var(--lb-font-sans)', color: color || 'var(--lb-fg-4)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>{txt}</div>
+  );
+
+  if (metricKey === 'avg_faithfulness') {
+    const low = samples.filter(s => (s.faithfulness ?? 0) < 0.4).length;
+    const med = samples.filter(s => (s.faithfulness ?? 0) >= 0.4 && (s.faithfulness ?? 0) < 0.7).length;
+    const high = samples.filter(s => (s.faithfulness ?? 0) >= 0.7).length;
+    const avgGene = n_scored ? samples.reduce((a, s) => a + (s.gene_score ?? 0), 0) / n_scored : 0;
+    const avgKw   = n_scored ? samples.reduce((a, s) => a + (s.nli_consistency ?? 0), 0) / n_scored : 0;
+    const avgProp = n_scored ? samples.reduce((a, s) => a + (s.property_score ?? 0), 0) / n_scored : 0;
+    return (
+      <div>
+        {label('Current scores — ' + n_scored + ' traces')}
+        <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
+          {[['Overall', avg_faithfulness, 'var(--lb-green-600)'],
+            ['Gene', avgGene, '#7c3aed'],
+            ['Keyword', avgKw, '#0369a1'],
+            ['Property', avgProp, '#b45309']].map(([l, v, c]) => (
+            <div key={l} style={{ flex: 1, textAlign: 'center', padding: '10px 6px', background: 'var(--lb-ink-50)', borderRadius: 6 }}>
+              <div style={{ font: `600 18px var(--lb-font-mono)`, color: c }}>{(v || 0).toFixed(3)}</div>
+              <div style={{ font: '400 11px var(--lb-font-sans)', color: 'var(--lb-fg-3)', marginTop: 3 }}>{l}</div>
+            </div>
+          ))}
+        </div>
+        {label('Distribution')}
+        {[['High ≥ 0.70', high, 'var(--lb-green-500)'],
+          ['Medium 0.40–0.69', med, 'var(--lb-warning)'],
+          ['Low < 0.40', low, 'var(--lb-error)']].map(([l, v, c]) => (
+          <MiniBar key={l} label={l} value={v} max={n_scored || 1} color={c}
+            valueLabel={`${v} traces (${n_scored ? ((v/n_scored)*100).toFixed(0) : 0}%)`} />
+        ))}
+      </div>
+    );
+  }
+
+  if (metricKey === 'consistent') {
+    const fmts = ['mcq', 'binary', 'pairwise'];
+    return (
+      <div>
+        {label('Consistency — ' + n_scored + ' traces')}
+        <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
+          <div style={{ flex: 1, textAlign: 'center', padding: '10px 6px', background: 'var(--lb-ink-50)', borderRadius: 6 }}>
+            <div style={{ font: '600 22px var(--lb-font-mono)', color: pct_consistent >= 50 ? 'var(--lb-green-700)' : '#8a5d12' }}>{pct_consistent.toFixed(1)}%</div>
+            <div style={{ font: '400 11px var(--lb-font-sans)', color: 'var(--lb-fg-3)', marginTop: 3 }}>consistent</div>
+          </div>
+          <div style={{ flex: 1, textAlign: 'center', padding: '10px 6px', background: 'var(--lb-ink-50)', borderRadius: 6 }}>
+            <div style={{ font: '600 22px var(--lb-font-mono)', color: 'var(--lb-fg-2)' }}>{n_consistent}/{n_scored}</div>
+            <div style={{ font: '400 11px var(--lb-font-sans)', color: 'var(--lb-fg-3)', marginTop: 3 }}>traces</div>
+          </div>
+        </div>
+        {label('By format')}
+        {fmts.map(fmt => {
+          const fs = samples.filter(s => s.format === fmt);
+          if (!fs.length) return null;
+          const nc = fs.filter(s => s.consistent).length;
+          return <MiniBar key={fmt} label={fmt} value={nc} max={fs.length}
+            valueLabel={`${nc}/${fs.length} (${((nc/fs.length)*100).toFixed(0)}%)`}
+            color="var(--lb-green-500)" />;
+        })}
+      </div>
+    );
+  }
+
+  if (metricKey === 'genes_verified') {
+    const unverified = total_gene_candidates - verified_genes;
+    return (
+      <div>
+        {label('Gene verification — ' + n_scored + ' traces')}
+        <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
+          <div style={{ flex: 1, textAlign: 'center', padding: '10px 6px', background: 'var(--lb-ink-50)', borderRadius: 6 }}>
+            <div style={{ font: '600 22px var(--lb-font-mono)', color: 'var(--lb-green-700)' }}>{verified_genes}</div>
+            <div style={{ font: '400 11px var(--lb-font-sans)', color: 'var(--lb-fg-3)', marginTop: 3 }}>verified</div>
+          </div>
+          <div style={{ flex: 1, textAlign: 'center', padding: '10px 6px', background: 'var(--lb-ink-50)', borderRadius: 6 }}>
+            <div style={{ font: '600 22px var(--lb-font-mono)', color: 'var(--lb-error)' }}>{unverified}</div>
+            <div style={{ font: '400 11px var(--lb-font-sans)', color: 'var(--lb-fg-3)', marginTop: 3 }}>not found</div>
+          </div>
+          <div style={{ flex: 1, textAlign: 'center', padding: '10px 6px', background: 'var(--lb-ink-50)', borderRadius: 6 }}>
+            <div style={{ font: '600 22px var(--lb-font-mono)', color: 'var(--lb-fg-2)' }}>{total_gene_candidates}</div>
+            <div style={{ font: '400 11px var(--lb-font-sans)', color: 'var(--lb-fg-3)', marginTop: 3 }}>total cited</div>
+          </div>
+        </div>
+        <MiniBar label="Verification rate" value={pct_genes_verified} max={100}
+          valueLabel={`${pct_genes_verified.toFixed(1)}%`}
+          color={pct_genes_verified >= 70 ? 'var(--lb-green-500)' : pct_genes_verified >= 40 ? 'var(--lb-warning)' : 'var(--lb-error)'} />
+      </div>
+    );
+  }
+
+  if (metricKey === 'format_faithfulness') {
+    const fmts = ['mcq', 'binary', 'pairwise', 'regression'];
+    return (
+      <div>
+        {label('Faithfulness by format')}
+        <table style={{ width: '100%', borderCollapse: 'collapse', font: '400 12px var(--lb-font-sans)' }}>
+          <thead>
+            <tr style={{ borderBottom: '1px solid var(--lb-border)' }}>
+              {['Format', 'n', 'Faithfulness', 'Accuracy'].map(h => (
+                <th key={h} style={{ padding: '4px 8px', textAlign: h === 'Format' ? 'left' : 'right', font: '500 11px var(--lb-font-sans)', color: 'var(--lb-fg-4)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {fmts.map(fmt => {
+              const d = faithfulness_by_format[fmt];
+              if (!d) return null;
+              const fc = d.avg_faithfulness >= 0.7 ? 'var(--lb-green-700)' : d.avg_faithfulness >= 0.4 ? '#8a5d12' : 'var(--lb-error)';
+              return (
+                <tr key={fmt} style={{ borderBottom: '1px solid var(--lb-ink-100)' }}>
+                  <td style={{ padding: '7px 8px', fontWeight: 500 }}>{fmt}</td>
+                  <td style={{ padding: '7px 8px', textAlign: 'right', color: 'var(--lb-fg-3)', fontFamily: 'var(--lb-font-mono)' }}>{d.n}</td>
+                  <td style={{ padding: '7px 8px', textAlign: 'right', color: fc, fontFamily: 'var(--lb-font-mono)', fontWeight: 600 }}>{d.avg_faithfulness.toFixed(3)}</td>
+                  <td style={{ padding: '7px 8px', textAlign: 'right', color: d.avg_accuracy >= 0.5 ? 'var(--lb-green-700)' : 'var(--lb-fg-3)', fontFamily: 'var(--lb-font-mono)' }}>{d.avg_accuracy.toFixed(3)}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  return null;
+};
+
+// ── Explanation modal ─────────────────────────────────────────────────────────
+
+const ExplanationModal = ({ metricKey, derived, samples, onClose }) => {
   const exp = EXPLANATIONS[metricKey];
   if (!exp) return null;
 
@@ -71,14 +221,15 @@ const ExplanationModal = ({ metricKey, data, onClose }) => {
       <div
         onClick={e => e.stopPropagation()}
         style={{
-          background: '#fff', borderRadius: 10, maxWidth: 520, width: '100%',
+          background: '#fff', borderRadius: 10, maxWidth: 600, width: '100%',
           boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
           border: '1px solid var(--lb-border)',
           overflow: 'hidden',
+          maxHeight: '90vh', display: 'flex', flexDirection: 'column',
         }}
       >
         {/* Header */}
-        <div style={{ padding: '18px 22px 14px', borderBottom: '1px solid var(--lb-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ padding: '18px 22px 14px', borderBottom: '1px solid var(--lb-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
           <div>
             <div className="lb-eyebrow" style={{ marginBottom: 4 }}>Metric explanation</div>
             <h3 style={{ margin: 0 }}>{exp.title}</h3>
@@ -86,8 +237,16 @@ const ExplanationModal = ({ metricKey, data, onClose }) => {
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', font: '400 22px var(--lb-font-sans)', color: 'var(--lb-fg-3)', lineHeight: 1 }}>×</button>
         </div>
 
-        {/* Body */}
-        <div style={{ padding: '18px 22px' }}>
+        {/* Body — scrollable */}
+        <div style={{ padding: '18px 22px', overflowY: 'auto', flex: 1 }}>
+
+          {/* Live data panel */}
+          {derived && (
+            <div style={{ marginBottom: 18, padding: '14px 16px', background: 'var(--lb-ink-50)', borderRadius: 8, border: '1px solid var(--lb-border)' }}>
+              <LiveData metricKey={metricKey} derived={derived} samples={samples} />
+            </div>
+          )}
+
           {/* Plain English */}
           <p style={{ margin: '0 0 16px', font: '400 14px var(--lb-font-sans)', lineHeight: 1.65, color: 'var(--lb-fg-1)' }}>
             {exp.plain}
@@ -118,7 +277,7 @@ const ExplanationModal = ({ metricKey, data, onClose }) => {
           )}
         </div>
 
-        <div style={{ padding: '10px 22px 16px', borderTop: '1px solid var(--lb-border)', display: 'flex', justifyContent: 'flex-end' }}>
+        <div style={{ padding: '10px 22px 16px', borderTop: '1px solid var(--lb-border)', display: 'flex', justifyContent: 'flex-end', flexShrink: 0 }}>
           <button onClick={onClose} className="btn small secondary">Close</button>
         </div>
       </div>
@@ -286,7 +445,7 @@ const SampleTable = ({ samples, records, onOpenRecord }) => {
 
 // ── Main TrustView ────────────────────────────────────────────────────────────
 
-const TrustView = ({ records = [], onOpenRecord }) => {
+const TrustView = ({ records = [], activeTask, onOpenRecord }) => {
   const [tsData, setTsData] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
   const [openModal, setOpenModal] = React.useState(null);
@@ -297,6 +456,40 @@ const TrustView = ({ records = [], onOpenRecord }) => {
       .then(d => { setTsData(d); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
+
+  // Filter per_sample by active task using lb_id prefix
+  const filteredSamples = React.useMemo(() => {
+    if (!tsData) return [];
+    const all = tsData.per_sample || [];
+    if (!activeTask || activeTask === 'All Tasks') return all;
+    const t = activeTask.toLowerCase();
+    if (t.includes('senescence')) return all.filter(s => (s.lb_id || '').startsWith('LB-SEN'));
+    if (t.includes('lipidomics') || t.includes('lipid')) return all.filter(s => (s.lb_id || '').startsWith('LB-LIP'));
+    return all;
+  }, [tsData, activeTask]);
+
+  // Recompute aggregates from filtered samples
+  const derived = React.useMemo(() => {
+    const n = filteredSamples.length;
+    if (!n) return null;
+    const avg_faithfulness = filteredSamples.reduce((a, s) => a + (s.faithfulness ?? 0), 0) / n;
+    const n_consistent = filteredSamples.filter(s => s.consistent).length;
+    const total_gene_candidates = filteredSamples.reduce((a, s) => a + (s.gene_candidates ?? 0), 0);
+    const verified_genes = filteredSamples.reduce((a, s) => a + (s.verified_genes?.length ?? 0), 0);
+    const faithfulness_by_format = {};
+    for (const fmt of ['mcq', 'binary', 'pairwise', 'regression']) {
+      const fs = filteredSamples.filter(s => s.format === fmt);
+      if (fs.length) faithfulness_by_format[fmt] = {
+        n: fs.length,
+        avg_faithfulness: fs.reduce((a, s) => a + (s.faithfulness ?? 0), 0) / fs.length,
+        avg_accuracy: fs.filter(s => s.pass).length / fs.length,
+      };
+    }
+    return { n_scored: n, avg_faithfulness, n_consistent,
+      pct_consistent: n_consistent / n * 100, total_gene_candidates,
+      verified_genes, pct_genes_verified: total_gene_candidates ? verified_genes / total_gene_candidates * 100 : 0,
+      faithfulness_by_format };
+  }, [filteredSamples]);
 
   if (loading) {
     return (
@@ -326,9 +519,33 @@ const TrustView = ({ records = [], onOpenRecord }) => {
     );
   }
 
+  if (!derived) {
+    return (
+      <>
+        <div className="page-head">
+          <div>
+            <div className="lb-eyebrow" style={{ marginBottom: 6 }}>Extra credit · trustworthy AI reasoning</div>
+            <h1>Trust &amp; reasoning</h1>
+            <div className="sub">No thinking traces for this task.</div>
+          </div>
+        </div>
+        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+          <div className="lb-eyebrow" style={{ marginBottom: 8 }}>No traces</div>
+          <p className="lb-p" style={{ color: 'var(--lb-fg-3)' }}>
+            No L-LLM thinking traces found for <strong>{activeTask || 'this task'}</strong>. Re-run eval with <code>longevity_llm_thinking</code> then re-score.
+          </p>
+        </div>
+      </>
+    );
+  }
+
   const { avg_faithfulness, pct_consistent, n_consistent, n_scored,
           verified_genes, total_gene_candidates, pct_genes_verified,
-          faithfulness_by_format, per_sample } = tsData;
+          faithfulness_by_format } = derived;
+
+  const taskLabel = (!activeTask || activeTask === 'All Tasks')
+    ? 'all tasks'
+    : activeTask;
 
   const mcqFaith = faithfulness_by_format?.mcq?.avg_faithfulness;
   const mcqColor = mcqFaith == null
@@ -350,7 +567,7 @@ const TrustView = ({ records = [], onOpenRecord }) => {
           <div className="lb-eyebrow" style={{ marginBottom: 6 }}>Extra credit · trustworthy AI reasoning</div>
           <h1>Trust &amp; reasoning</h1>
           <div className="sub">
-            Automated bio-fact-checker on L-LLM thinking traces · NCBI Gene · click any metric to learn more
+            Automated bio-fact-checker on L-LLM thinking traces · mygene.info · CellAge v3 · click any metric to learn more
           </div>
         </div>
         <div className="actions">
@@ -360,7 +577,7 @@ const TrustView = ({ records = [], onOpenRecord }) => {
 
       <div style={{ marginBottom: 16, padding: '10px 16px', background: 'var(--lb-ink-50)', border: '1px solid var(--lb-border)', borderRadius: 6, font: '400 12px var(--lb-font-sans)', color: 'var(--lb-fg-3)', display: 'flex', alignItems: 'center', gap: 10 }}>
         <span style={{ fontWeight: 500, color: 'var(--lb-fg-2)' }}>Scope:</span>
-        Trace scores cover <strong>Task A · Senescence Perturbation</strong> only — {n_scored} L-LLM thinking-mode traces. Task switching above does not affect this view. Task B traces will appear here after running the trace scorer on lipidomics outputs.
+        Showing <strong>{n_scored}</strong> L-LLM thinking-mode traces for <strong>{taskLabel}</strong>. Use the task switcher above to filter.
       </div>
 
       {/* Metric cards — all clickable */}
@@ -378,7 +595,7 @@ const TrustView = ({ records = [], onOpenRecord }) => {
         <div className="metric" {...clickable('genes_verified')}>
           <div className="lbl">Genes verified <span style={{ fontSize: 10, color: 'var(--lb-fg-4)', marginLeft: 4 }}>ⓘ</span></div>
           <div className="val">{verified_genes}</div>
-          <div className="sub">{pct_genes_verified}% of {total_gene_candidates} cited</div>
+          <div className="sub">{pct_genes_verified.toFixed(1)}% of {total_gene_candidates} cited</div>
         </div>
         <div className="metric" {...clickable('format_faithfulness')}>
           <div className="lbl">MCQ faithfulness <span style={{ fontSize: 10, color: 'var(--lb-fg-4)', marginLeft: 4 }}>ⓘ</span></div>
@@ -391,18 +608,18 @@ const TrustView = ({ records = [], onOpenRecord }) => {
 
       {/* Histogram + Format breakdown */}
       <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: 16, marginBottom: 16 }}>
-        <FaithfulnessHist samples={per_sample} />
+        <FaithfulnessHist samples={filteredSamples} />
         {faithfulness_by_format && Object.keys(faithfulness_by_format).length > 0 && (
           <FormatBreakdown byFormat={faithfulness_by_format} onExplain={setOpenModal} />
         )}
       </div>
 
       {/* Per-sample table */}
-      <SampleTable samples={per_sample} records={records} onOpenRecord={onOpenRecord} />
+      <SampleTable samples={filteredSamples} records={records} onOpenRecord={onOpenRecord} />
 
       {/* Explanation modal */}
       {openModal && (
-        <ExplanationModal metricKey={openModal} data={tsData} onClose={() => setOpenModal(null)} />
+        <ExplanationModal metricKey={openModal} derived={derived} samples={filteredSamples} onClose={() => setOpenModal(null)} />
       )}
     </>
   );
