@@ -1,31 +1,164 @@
 // TrustView — primary screen. Shows trace faithfulness, entity verification,
-// trace ↔ label consistency. This is the trust-in-AI-reasoning story.
+// and trace ↔ label consistency. Data loaded from public/trace_faithfulness_scores.json.
 
-const FaithfulnessHist = () => {
-  // 10 buckets, 0.0 → 1.0
-  const buckets = [2, 1, 3, 5, 8, 12, 22, 38, 65, 34];
-  const max = Math.max(...buckets);
+// ── Explanation modal ─────────────────────────────────────────────────────────
+
+const EXPLANATIONS = {
+  avg_faithfulness: {
+    title: 'Avg faithfulness',
+    plain: 'How grounded is the model\'s chain-of-thought in real biology? Each thinking trace is scored by (1) checking whether the gene symbols it mentions actually exist in NCBI Gene and (2) verifying that the reasoning direction matches the final answer. A score of 1.0 means every gene cited is real and the reasoning never contradicts the prediction.',
+    formula: '0.4 × (verified genes ÷ cited genes) + 0.3 × consistency score',
+    scale: [
+      { range: '≥ 0.70', label: 'High trust — reasoning is well-grounded', color: 'var(--lb-green-700)' },
+      { range: '0.40 – 0.69', label: 'Moderate — some hallucination or inconsistency', color: '#8a5d12' },
+      { range: '< 0.40', label: 'Low — reasoning is unreliable', color: 'var(--lb-error)' },
+    ],
+  },
+  consistent: {
+    title: 'Trace ↔ answer consistency',
+    plain: 'What fraction of thinking traces agree with the model\'s final predicted answer? We scan each trace for directional language — words like "upregulated", "decreased", "no change" — and check whether that direction matches the predicted letter (A / B / C). When a trace says "gene X is downregulated" but the model then answers A (upregulated), the reasoning is internally inconsistent.',
+    formula: 'Count of traces where reasoning direction = final answer direction ÷ total traces',
+    scale: [
+      { range: '> 90%', label: 'Strong — model\'s reasoning and answer align', color: 'var(--lb-green-700)' },
+      { range: '70 – 90%', label: 'Moderate — occasional reasoning drift', color: '#8a5d12' },
+      { range: '< 70%', label: 'Weak — model contradicts itself often', color: 'var(--lb-error)' },
+    ],
+  },
+  genes_verified: {
+    title: 'Genes verified',
+    plain: 'Of all the gene symbols the model mentioned in its thinking traces, how many actually exist as real human genes in NCBI Gene? Symbols that fail lookup may be hallucinated names, symbols from the wrong organism, or common English words that happen to match the gene-symbol regex.',
+    formula: 'Verified gene symbols ÷ total candidate symbols extracted from traces',
+    scale: [
+      { range: '> 70%', label: 'Good — most cited genes are real', color: 'var(--lb-green-700)' },
+      { range: '40 – 70%', label: 'Moderate — false positives from regex filter', color: '#8a5d12' },
+      { range: '< 40%', label: 'Low — many cited genes not found in NCBI', color: 'var(--lb-error)' },
+    ],
+    note: 'The regex matches all 2–10 char uppercase tokens. Common words (AND, RNA, etc.) are filtered via a stoplist, but some non-gene tokens still pass. The verified % is a conservative lower bound.',
+  },
+  format_faithfulness: {
+    title: 'Faithfulness by question format',
+    plain: 'The model\'s reasoning quality varies dramatically by task type. MCQ (multiple-choice direction) requires the model to reason about biological direction across three possibilities, which is harder. Binary and pairwise tasks ask simpler relative comparisons and produce more consistent reasoning.',
+    formula: 'Average faithfulness score computed separately for each question format (mcq / binary / pairwise)',
+    scale: [
+      { range: 'MCQ', label: 'Hardest — 3-way direction, model often confused', color: 'var(--lb-error)' },
+      { range: 'Binary / Pairwise', label: 'Easier — relative comparison, more consistent reasoning', color: 'var(--lb-green-700)' },
+    ],
+    note: 'Low MCQ faithfulness + low MCQ accuracy together show the model is not just wrong — it\'s reasoning incorrectly. That\'s the key extra-credit finding.',
+  },
+};
+
+const ExplanationModal = ({ metricKey, data, onClose }) => {
+  const exp = EXPLANATIONS[metricKey];
+  if (!exp) return null;
+
+  React.useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)',
+        zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 24,
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: '#fff', borderRadius: 10, maxWidth: 520, width: '100%',
+          boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
+          border: '1px solid var(--lb-border)',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Header */}
+        <div style={{ padding: '18px 22px 14px', borderBottom: '1px solid var(--lb-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div className="lb-eyebrow" style={{ marginBottom: 4 }}>Metric explanation</div>
+            <h3 style={{ margin: 0 }}>{exp.title}</h3>
+          </div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', font: '400 22px var(--lb-font-sans)', color: 'var(--lb-fg-3)', lineHeight: 1 }}>×</button>
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: '18px 22px' }}>
+          {/* Plain English */}
+          <p style={{ margin: '0 0 16px', font: '400 14px var(--lb-font-sans)', lineHeight: 1.65, color: 'var(--lb-fg-1)' }}>
+            {exp.plain}
+          </p>
+
+          {/* Formula */}
+          <div style={{ background: 'var(--lb-ink-50)', borderRadius: 6, padding: '10px 14px', marginBottom: 16, font: '400 12px var(--lb-font-mono)', color: 'var(--lb-fg-2)', lineHeight: 1.5 }}>
+            <div style={{ font: '500 11px var(--lb-font-sans)', color: 'var(--lb-fg-4)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Formula</div>
+            {exp.formula}
+          </div>
+
+          {/* Scale */}
+          <div style={{ marginBottom: exp.note ? 14 : 0 }}>
+            <div style={{ font: '500 11px var(--lb-font-sans)', color: 'var(--lb-fg-4)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Interpretation</div>
+            {exp.scale.map((s, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 7 }}>
+                <span style={{ font: '500 12px var(--lb-font-mono)', color: s.color, minWidth: 90, whiteSpace: 'nowrap' }}>{s.range}</span>
+                <span style={{ font: '400 13px var(--lb-font-sans)', color: 'var(--lb-fg-2)' }}>{s.label}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Note */}
+          {exp.note && (
+            <div style={{ marginTop: 14, padding: '10px 14px', background: 'var(--lb-info-bg)', borderRadius: 6, font: '400 12px var(--lb-font-sans)', color: '#1b4a8c', lineHeight: 1.55, border: '1px solid #b8cef0' }}>
+              <strong>Note:</strong> {exp.note}
+            </div>
+          )}
+        </div>
+
+        <div style={{ padding: '10px 22px 16px', borderTop: '1px solid var(--lb-border)', display: 'flex', justifyContent: 'flex-end' }}>
+          <button onClick={onClose} className="btn small secondary">Close</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── Histogram ─────────────────────────────────────────────────────────────────
+
+const FaithfulnessHist = ({ samples }) => {
+  const buckets = Array(10).fill(0);
+  samples.forEach(s => {
+    const idx = Math.min(9, Math.floor((s.faithfulness ?? 0) * 10));
+    buckets[idx]++;
+  });
+  const max = Math.max(...buckets, 1);
+  const mu = samples.length
+    ? (samples.reduce((a, b) => a + (b.faithfulness ?? 0), 0) / samples.length).toFixed(3)
+    : '—';
+
   return (
     <div className="card">
       <div className="head">
         <h3>Faithfulness distribution</h3>
-        <p className="sub">all 190 L-LLM traces · weighted score · last run LB-0038</p>
+        <p className="sub">{samples.length} L-LLM thinking traces · score 0 → 1</p>
         <div className="right">
-          <span className="badge neutral">μ = 0.81</span>
-          <span className="badge neutral">σ = 0.18</span>
+          <span className="badge neutral">μ = {mu}</span>
         </div>
       </div>
       <div style={{ padding: '20px 24px 22px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', gap: 6, alignItems: 'end', height: 140 }}>
           {buckets.map((v, i) => {
             const lo = (i / 10).toFixed(1);
-            const isLow = i < 4;
-            const color = isLow ? 'var(--lb-error)' : (i < 7 ? 'var(--lb-warning)' : 'var(--lb-green-500)');
-            const h = Math.max(6, (v / max) * 120);
+            const color = i < 4 ? 'var(--lb-error)' : i < 7 ? 'var(--lb-warning)' : 'var(--lb-green-500)';
+            const h = Math.max(v > 0 ? 8 : 0, (v / max) * 120);
             return (
               <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, justifyContent: 'flex-end' }}>
-                <span style={{ font: '500 11px var(--lb-font-mono)', color: 'var(--lb-fg-3)' }}>{v}</span>
-                <div style={{ width: '100%', height: h, background: color, opacity: 0.88, borderRadius: '3px 3px 0 0' }} title={`${lo}–${(i / 10 + 0.1).toFixed(1)}: ${v} traces`} />
+                {v > 0 && <span style={{ font: '500 11px var(--lb-font-mono)', color: 'var(--lb-fg-3)' }}>{v}</span>}
+                <div
+                  style={{ width: '100%', height: h, background: color, opacity: 0.88, borderRadius: '3px 3px 0 0' }}
+                  title={`${lo}–${(i / 10 + 0.1).toFixed(1)}: ${v} traces`}
+                />
               </div>
             );
           })}
@@ -36,163 +169,227 @@ const FaithfulnessHist = () => {
           ))}
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 14, font: '400 12px var(--lb-font-sans)', color: 'var(--lb-fg-3)' }}>
-          <span><span style={{ width: 8, height: 8, background: 'var(--lb-error)', display: 'inline-block', borderRadius: 2, marginRight: 6 }} />Low (&lt; 0.4) · 11</span>
-          <span><span style={{ width: 8, height: 8, background: 'var(--lb-warning)', display: 'inline-block', borderRadius: 2, marginRight: 6 }} />Medium · 42</span>
-          <span><span style={{ width: 8, height: 8, background: 'var(--lb-green-500)', display: 'inline-block', borderRadius: 2, marginRight: 6 }} />High (≥ 0.7) · 137</span>
+          <span><span style={{ width: 8, height: 8, background: 'var(--lb-error)', display: 'inline-block', borderRadius: 2, marginRight: 6 }} />Low (&lt; 0.4) · {buckets.slice(0, 4).reduce((a, b) => a + b, 0)}</span>
+          <span><span style={{ width: 8, height: 8, background: 'var(--lb-warning)', display: 'inline-block', borderRadius: 2, marginRight: 6 }} />Medium · {buckets.slice(4, 7).reduce((a, b) => a + b, 0)}</span>
+          <span><span style={{ width: 8, height: 8, background: 'var(--lb-green-500)', display: 'inline-block', borderRadius: 2, marginRight: 6 }} />High (≥ 0.7) · {buckets.slice(7).reduce((a, b) => a + b, 0)}</span>
         </div>
       </div>
     </div>
   );
 };
 
-const EntityVerification = () => {
-  // Components of trace_faithfulness formula
-  const rows = [
-    { kind: 'C. elegans genes',  verified: 487, total: 512, source: 'WormBase REST',   color: 'var(--lb-green-500)' },
-    { kind: 'Human genes',         verified: 312, total: 318, source: 'NCBI Gene eutils', color: 'var(--lb-green-500)' },
-    { kind: 'Mouse genes',         verified: 188, total: 211, source: 'MGI API',          color: 'var(--lb-green-500)' },
-    { kind: 'KEGG pathways',       verified: 94,  total: 142, source: 'KEGG REST /get/',  color: 'var(--lb-warning)' },
-    { kind: 'Protein interactions',verified: 27,  total: 88,  source: 'STRING-DB',        color: 'var(--lb-error)' },
-    { kind: 'Trace ↔ label',      verified: 187, total: 190, source: 'keyword direction',color: 'var(--lb-green-500)' },
-  ];
-  return (
-    <div className="card">
-      <div className="head">
-        <h3>Entity verification</h3>
-        <p className="sub">live calls to external scientific databases · per trace_faithfulness formula</p>
-        <div className="right">
-          <Button variant="ghost" size="small" icon="refresh">Re-verify</Button>
-        </div>
+// ── Format breakdown ──────────────────────────────────────────────────────────
+
+const FormatBreakdown = ({ byFormat, onExplain }) => (
+  <div className="card">
+    <div className="head">
+      <h3>Faithfulness by format</h3>
+      <p className="sub">reasoning quality varies by task type</p>
+      <div className="right">
+        <button className="btn small ghost" onClick={() => onExplain('format_faithfulness')}>
+          Why does this vary?
+        </button>
       </div>
-      <div style={{ padding: '14px 24px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {rows.map((r) => {
-          const pct = (r.verified / r.total) * 100;
-          return (
-            <div key={r.kind}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4, gap: 10 }}>
-                <span style={{ font: '500 13px var(--lb-font-sans)', color: 'var(--lb-fg-1)', whiteSpace: 'nowrap' }}>{r.kind}</span>
-                <span style={{ font: '500 12px var(--lb-font-mono)', color: 'var(--lb-fg-2)', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
-                  <span style={{ color: r.color }}>{r.verified}</span>
-                  <span style={{ color: 'var(--lb-fg-4)' }}> / {r.total}</span>
-                  <span style={{ color: 'var(--lb-fg-3)', marginLeft: 8 }}>({pct.toFixed(0)}%)</span>
+    </div>
+    <div style={{ padding: '14px 24px 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+      {Object.entries(byFormat).map(([fmt, s]) => {
+        const faithColor = s.avg_faithfulness >= 0.7 ? 'var(--lb-green-700)' : s.avg_faithfulness >= 0.4 ? '#8a5d12' : 'var(--lb-error)';
+        const faithBg = s.avg_faithfulness >= 0.7 ? 'var(--lb-success-bg)' : s.avg_faithfulness >= 0.4 ? 'var(--lb-warning-bg)' : 'var(--lb-error-bg)';
+        return (
+          <div key={fmt}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Pill brand>{fmt}</Pill>
+                <span style={{ font: '400 12px var(--lb-font-sans)', color: 'var(--lb-fg-3)' }}>n = {s.n}</span>
+              </div>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <span style={{ font: '500 12px var(--lb-font-mono)', color: faithColor, background: faithBg, padding: '2px 8px', borderRadius: 4 }}>
+                  faith {s.avg_faithfulness.toFixed(3)}
+                </span>
+                <span style={{ font: '500 12px var(--lb-font-mono)', color: s.avg_accuracy >= 0.5 ? 'var(--lb-green-700)' : 'var(--lb-fg-3)', background: 'var(--lb-ink-50)', padding: '2px 8px', borderRadius: 4 }}>
+                  acc {s.avg_accuracy.toFixed(3)}
                 </span>
               </div>
-              <div style={{ height: 6, background: 'var(--lb-ink-100)', borderRadius: 3, overflow: 'hidden' }}>
-                <div style={{ width: `${pct}%`, height: '100%', background: r.color, borderRadius: 3 }} />
-              </div>
-              <div style={{ font: '400 10px var(--lb-font-mono)', color: 'var(--lb-fg-4)', marginTop: 4 }}>{r.source}</div>
             </div>
-          );
-        })}
-      </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+              {[['Faithfulness', s.avg_faithfulness, 'var(--lb-green-500)'], ['Accuracy', s.avg_accuracy, '#c98b1c']].map(([label, val, color]) => (
+                <div key={label}>
+                  <div style={{ font: '400 10px var(--lb-font-mono)', color: 'var(--lb-fg-4)', marginBottom: 3 }}>{label}</div>
+                  <div style={{ height: 5, background: 'var(--lb-ink-100)', borderRadius: 3 }}>
+                    <div style={{ width: `${val * 100}%`, height: '100%', background: color, borderRadius: 3 }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
-  );
-};
+  </div>
+);
 
-const FeaturedTrace = ({ record, onOpenRecord }) => {
-  if (!record) return null;
-  const traceText = record.trace || '';
-  const traceHtml = { __html: traceText ? ENTITY_HIGHLIGHTS(traceText) : '<em style="color:var(--lb-fg-4)">No reasoning trace for this record. Run with thinking mode enabled to populate traces.</em>' };
-  const faith = record.faithfulness;
-  const subParts = [record.lbId, record.organism !== '—' && record.organism, record.gene1 !== '—' && record.gene1, record.gene2 !== '—' && record.gene2].filter(Boolean);
-  return (
-    <div className="card">
-      <div className="head">
-        <h3>Trace inspection · row {String(record.row).padStart(3, '0')}</h3>
-        <p className="sub">{subParts.join(' · ')}</p>
-        <div className="right">
-          {record.consistent != null && (record.consistent
-            ? <Badge kind="pass">consistent</Badge>
-            : <Badge kind="err">inconsistent</Badge>)}
-          {faith != null && <Badge kind="neutral">faithfulness {faith.toFixed(2)}</Badge>}
-          <Button variant="ghost" size="small" icon="chevR" onClick={() => onOpenRecord(record)}>Open record</Button>
-        </div>
-      </div>
-      <div className="trace-body" dangerouslySetInnerHTML={traceHtml} />
-      <div style={{ padding: '10px 20px 14px', borderTop: '1px solid var(--lb-border)', display: 'flex', gap: 22, font: '400 12px var(--lb-font-sans)', color: 'var(--lb-fg-3)' }}>
-        <span><span className="gene" style={{ background: 'var(--lb-green-50)', color: 'var(--lb-green-700)', padding: '1px 6px', borderRadius: 2 }}>gene</span> verified via WormBase / NCBI</span>
-        <span><span className="verify" style={{ background: 'var(--lb-success-bg)', color: 'var(--lb-green-700)', padding: '1px 6px', borderRadius: 2 }}>direction</span> matches gold</span>
-        <span><span className="fail" style={{ background: 'var(--lb-error-bg)', color: '#8a2419', padding: '1px 6px', borderRadius: 2 }}>conflict</span> trace disagrees with label</span>
-      </div>
-    </div>
-  );
-};
+// ── Per-sample table ──────────────────────────────────────────────────────────
 
-const LowFaithList = ({ records, onOpenRecord }) => {
-  const withFaith = records.filter(r => r.faithfulness != null);
-  const sorted = (withFaith.length > 0 ? [...withFaith].sort((a, b) => a.faithfulness - b.faithfulness) : [...records]).slice(0, 4);
+const SampleTable = ({ samples, records, onOpenRecord }) => {
+  const sorted = [...samples].sort((a, b) => (a.faithfulness ?? 1) - (b.faithfulness ?? 1)).slice(0, 8);
   return (
     <div className="card" style={{ overflow: 'hidden' }}>
       <div className="head">
         <h3>Lowest-faithfulness traces</h3>
-        <p className="sub">audit these first · click to drill in</p>
-        <div className="right">
-          <Button variant="ghost" size="small">View all 11</Button>
-        </div>
+        <p className="sub">audit these first — click to inspect record</p>
       </div>
       <table className="lb">
         <thead>
-          <tr><th>Row</th><th>Task</th><th>Genes</th><th>Pred / Gold</th><th>Trace</th><th style={{ textAlign: 'right' }}>Faith.</th></tr>
+          <tr>
+            <th>Sample</th>
+            <th>Format</th>
+            <th>Pred / Gold</th>
+            <th>Genes cited</th>
+            <th>Consistent</th>
+            <th style={{ textAlign: 'right' }}>Faithfulness</th>
+          </tr>
         </thead>
         <tbody>
-          {sorted.map(r => (
-            <tr key={r.row} onClick={() => onOpenRecord(r)}>
-              <td className="id">{String(r.row).padStart(3, '0')}</td>
-              <td>{r.lbId}</td>
-              <td className="mono">{r.gene1} · {r.gene2}</td>
-              <td className="mono">
-                <span style={{ color: r.match ? 'var(--lb-green-700)' : 'var(--lb-error)' }}>{r.pred}</span>
-                <span style={{ color: 'var(--lb-fg-4)' }}> / {r.gold}</span>
-              </td>
-              <td>
-                {r.consistent != null && (r.consistent
-                  ? <Badge kind="pass">consistent</Badge>
-                  : <Badge kind="err">inconsistent</Badge>)}
-              </td>
-              <td className="num" style={{ color: r.faithfulness == null ? 'var(--lb-fg-4)' : (r.faithfulness < 0.5 ? 'var(--lb-error)' : (r.faithfulness < 0.7 ? '#8a5d12' : 'var(--lb-green-700)')) }}>
-                {r.faithfulness != null ? r.faithfulness.toFixed(2) : '—'}
-              </td>
-            </tr>
-          ))}
+          {sorted.map((s, i) => {
+            const rec = records.find(r => r.sourceId === s.id);
+            const faith = s.faithfulness ?? 0;
+            const faithColor = faith >= 0.7 ? 'var(--lb-green-700)' : faith >= 0.4 ? '#8a5d12' : 'var(--lb-error)';
+            return (
+              <tr key={s.id} onClick={() => rec && onOpenRecord(rec)} style={{ cursor: rec ? 'pointer' : 'default' }}>
+                <td style={{ font: '500 12px var(--lb-font-mono)', color: 'var(--lb-fg-3)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.id}</td>
+                <td><Pill>{s.format}</Pill></td>
+                <td className="mono">
+                  <span style={{ color: s.pass ? 'var(--lb-green-700)' : 'var(--lb-error)' }}>{s.pred || '—'}</span>
+                  <span style={{ color: 'var(--lb-fg-4)' }}> / {s.gold}</span>
+                </td>
+                <td className="mono" style={{ color: 'var(--lb-fg-3)' }}>
+                  {s.verified_genes?.length ?? 0}/{s.gene_candidates ?? 0}
+                </td>
+                <td>
+                  {s.consistent
+                    ? <Badge kind="pass">consistent</Badge>
+                    : <Badge kind="err">inconsistent</Badge>}
+                </td>
+                <td className="num" style={{ color: faithColor, fontWeight: 500 }}>
+                  {faith.toFixed(3)}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
   );
 };
 
-const TrustView = ({ records, onOpenRecord }) => {
-  const featured = records.find(r => !r.consistent) || records[0];
+// ── Main TrustView ────────────────────────────────────────────────────────────
+
+const TrustView = ({ records = [], onOpenRecord }) => {
+  const [tsData, setTsData] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [openModal, setOpenModal] = React.useState(null);
+
+  React.useEffect(() => {
+    fetch('./public/trace_faithfulness_scores.json')
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(d => { setTsData(d); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="page-head">
+        <div><h1>Trust &amp; reasoning</h1><div className="sub">Loading trace scores…</div></div>
+      </div>
+    );
+  }
+
+  if (!tsData) {
+    return (
+      <>
+        <div className="page-head">
+          <div>
+            <div className="lb-eyebrow" style={{ marginBottom: 6 }}>Primary view · trustworthy AI reasoning</div>
+            <h1>Trust &amp; reasoning</h1>
+            <div className="sub">No trace scores found. Run the scorer first.</div>
+          </div>
+        </div>
+        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+          <div className="lb-eyebrow" style={{ marginBottom: 8 }}>No data</div>
+          <p className="lb-p" style={{ color: 'var(--lb-fg-3)' }}>
+            Run: <code>.venv/bin/python -m src.trace_scorer.trace_scorer</code>
+          </p>
+        </div>
+      </>
+    );
+  }
+
+  const { avg_faithfulness, pct_consistent, n_consistent, n_scored,
+          verified_genes, total_gene_candidates, pct_genes_verified,
+          faithfulness_by_format, per_sample } = tsData;
+
+  const clickable = (metricKey) => ({
+    onClick: () => setOpenModal(metricKey),
+    style: { cursor: 'pointer' },
+    title: 'Click to learn more',
+  });
+
   return (
     <>
       <div className="page-head">
         <div>
           <div className="lb-eyebrow" style={{ marginBottom: 6 }}>Primary view · trustworthy AI reasoning</div>
           <h1>Trust &amp; reasoning</h1>
-          <div className="sub">Automated bio-fact-checker on L-LLM thinking traces · NCBI · KEGG · WormBase · MGI · STRING-DB</div>
+          <div className="sub">
+            Automated bio-fact-checker on L-LLM thinking traces · NCBI Gene · click any metric to learn more
+          </div>
         </div>
         <div className="actions">
           <Button variant="ghost" icon="download" size="small">trace_scores.json</Button>
-          <Button variant="secondary" icon="refresh" size="small">Re-score</Button>
         </div>
       </div>
 
+      {/* Metric cards — all clickable */}
       <div className="metric-grid">
-        <MetricCard label="Avg faithfulness" value="0.81" sub="190 traces · L-LLM" delta={0.04} />
-        <MetricCard label="Trace ↔ label" value="98.4%" sub="187 / 190 consistent" />
-        <MetricCard label="Entities verified" value="1,135" sub="92% of 1,234 cited" />
-        <MetricCard label="Hallucinated" value="11" sub="genes / pathways not in DB" />
+        <div className="metric" {...clickable('avg_faithfulness')}>
+          <div className="lbl">Avg faithfulness <span style={{ fontSize: 10, color: 'var(--lb-fg-4)', marginLeft: 4 }}>ⓘ</span></div>
+          <div className="val">{avg_faithfulness.toFixed(3)}</div>
+          <div className="sub">{n_scored} traces · L-LLM thinking</div>
+        </div>
+        <div className="metric" {...clickable('consistent')}>
+          <div className="lbl">Trace ↔ answer <span style={{ fontSize: 10, color: 'var(--lb-fg-4)', marginLeft: 4 }}>ⓘ</span></div>
+          <div className="val">{pct_consistent.toFixed(1)}%</div>
+          <div className="sub">{n_consistent} / {n_scored} consistent</div>
+        </div>
+        <div className="metric" {...clickable('genes_verified')}>
+          <div className="lbl">Genes verified <span style={{ fontSize: 10, color: 'var(--lb-fg-4)', marginLeft: 4 }}>ⓘ</span></div>
+          <div className="val">{verified_genes}</div>
+          <div className="sub">{pct_genes_verified}% of {total_gene_candidates} cited</div>
+        </div>
+        <div className="metric" {...clickable('format_faithfulness')}>
+          <div className="lbl">MCQ faithfulness <span style={{ fontSize: 10, color: 'var(--lb-fg-4)', marginLeft: 4 }}>ⓘ</span></div>
+          <div className="val" style={{ color: 'var(--lb-error)' }}>
+            {faithfulness_by_format?.mcq?.avg_faithfulness?.toFixed(3) ?? '—'}
+          </div>
+          <div className="sub">vs {faithfulness_by_format?.binary?.avg_faithfulness?.toFixed(3) ?? '—'} binary · click to compare</div>
+        </div>
       </div>
 
+      {/* Histogram + Format breakdown */}
       <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: 16, marginBottom: 16 }}>
-        <FaithfulnessHist />
-        <EntityVerification />
+        <FaithfulnessHist samples={per_sample} />
+        {faithfulness_by_format && Object.keys(faithfulness_by_format).length > 0 && (
+          <FormatBreakdown byFormat={faithfulness_by_format} onExplain={setOpenModal} />
+        )}
       </div>
 
-      <div style={{ marginBottom: 16 }}>
-        <FeaturedTrace record={featured} onOpenRecord={onOpenRecord} />
-      </div>
+      {/* Per-sample table */}
+      <SampleTable samples={per_sample} records={records} onOpenRecord={onOpenRecord} />
 
-      <LowFaithList records={records} onOpenRecord={onOpenRecord} />
+      {/* Explanation modal */}
+      {openModal && (
+        <ExplanationModal metricKey={openModal} data={tsData} onClose={() => setOpenModal(null)} />
+      )}
     </>
   );
 };

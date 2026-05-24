@@ -1,0 +1,710 @@
+{
+  "model": "longevity_llm_thinking",
+  "n_scored": 29,
+  "n_with_trace": 29,
+  "avg_faithfulness": 0.5828,
+  "n_consistent": 22,
+  "pct_consistent": 75.9,
+  "total_gene_candidates": 159,
+  "verified_genes": 68,
+  "pct_genes_verified": 42.8,
+  "faithfulness_by_format": {
+    "mcq": {
+      "n": 10,
+      "avg_faithfulness": 0.3585,
+      "avg_accuracy": 0.1
+    },
+    "binary": {
+      "n": 9,
+      "avg_faithfulness": 0.6945,
+      "avg_accuracy": 0.6667
+    },
+    "pairwise": {
+      "n": 10,
+      "avg_faithfulness": 0.7065,
+      "avg_accuracy": 0.5
+    }
+  },
+  "per_sample": [
+    {
+      "id": "LB-SEN-MCQ-0003_00000",
+      "lb_id": "LB-SEN-MCQ-0003",
+      "format": "mcq",
+      "gold": "C",
+      "pred": "B",
+      "pass": false,
+      "trace_present": true,
+      "gene_candidates": 3,
+      "verified_genes": [
+        "PTBP1",
+        "MCM7"
+      ],
+      "unverified_genes": [
+        "RAS"
+      ],
+      "gene_score": 0.6667,
+      "pathway_score": 0.0,
+      "consistent": true,
+      "faithfulness": 0.8095
+    },
+    {
+      "id": "LB-SEN-MCQ-0004_00001",
+      "lb_id": "LB-SEN-MCQ-0004",
+      "format": "mcq",
+      "gold": "C",
+      "pred": "A",
+      "pass": false,
+      "trace_present": true,
+      "gene_candidates": 6,
+      "verified_genes": [
+        "ZFP36L1",
+        "ARID1B"
+      ],
+      "unverified_genes": [
+        "RAS",
+        "SWI",
+        "SNF",
+        "SASP"
+      ],
+      "gene_score": 0.3333,
+      "pathway_score": 0.0,
+      "consistent": true,
+      "faithfulness": 0.619
+    },
+    {
+      "id": "LB-SEN-MCQ-0008_00002",
+      "lb_id": "LB-SEN-MCQ-0008",
+      "format": "mcq",
+      "gold": "A",
+      "pred": "C",
+      "pass": false,
+      "trace_present": true,
+      "gene_candidates": 3,
+      "verified_genes": [
+        "ZFP36L1",
+        "ITPKB"
+      ],
+      "unverified_genes": [
+        "RAS"
+      ],
+      "gene_score": 0.6667,
+      "pathway_score": 0.0,
+      "consistent": false,
+      "faithfulness": 0.381
+    },
+    {
+      "id": "LB-SEN-MCQ-0012_00003",
+      "lb_id": "LB-SEN-MCQ-0012",
+      "format": "mcq",
+      "gold": "A",
+      "pred": "C",
+      "pass": false,
+      "trace_present": true,
+      "gene_candidates": 7,
+      "verified_genes": [
+        "ITPK1",
+        "ATM",
+        "ATR"
+      ],
+      "unverified_genes": [
+        "IR",
+        "DDR",
+        "CCCP",
+        "ATP"
+      ],
+      "gene_score": 0.4286,
+      "pathway_score": 0.0,
+      "consistent": false,
+      "faithfulness": 0.2449
+    },
+    {
+      "id": "LB-SEN-MCQ-0017_00004",
+      "lb_id": "LB-SEN-MCQ-0017",
+      "format": "mcq",
+      "gold": "C",
+      "pred": "C",
+      "pass": true,
+      "trace_present": true,
+      "gene_candidates": 8,
+      "verified_genes": [
+        "BAX",
+        "ATG4D"
+      ],
+      "unverified_genes": [
+        "MRC",
+        "IR",
+        "CRISPR",
+        "BAK",
+        "BCL",
+        "MOMP"
+      ],
+      "gene_score": 0.25,
+      "pathway_score": 0.0,
+      "consistent": false,
+      "faithfulness": 0.1429
+    },
+    {
+      "id": "LB-SEN-MCQ-0022_00005",
+      "lb_id": "LB-SEN-MCQ-0022",
+      "format": "mcq",
+      "gold": "A",
+      "pred": "B",
+      "pass": false,
+      "trace_present": true,
+      "gene_candidates": 4,
+      "verified_genes": [
+        "IGFBP3"
+      ],
+      "unverified_genes": [
+        "BP1",
+        "IGF",
+        "RAS"
+      ],
+      "gene_score": 0.25,
+      "pathway_score": 0.0,
+      "consistent": true,
+      "faithfulness": 0.5714
+    },
+    {
+      "id": "LB-SEN-MCQ-0028_00006",
+      "lb_id": "LB-SEN-MCQ-0028",
+      "format": "mcq",
+      "gold": "B",
+      "pred": "C",
+      "pass": false,
+      "trace_present": true,
+      "gene_candidates": 7,
+      "verified_genes": [
+        "BRD4",
+        "MYC",
+        "HOPX"
+      ],
+      "unverified_genes": [
+        "RAS",
+        "DDD86481",
+        "BET",
+        "SASP"
+      ],
+      "gene_score": 0.4286,
+      "pathway_score": 0.0,
+      "consistent": false,
+      "faithfulness": 0.2449
+    },
+    {
+      "id": "LB-SEN-MCQ-0032_00007",
+      "lb_id": "LB-SEN-MCQ-0032",
+      "format": "mcq",
+      "gold": "A",
+      "pred": "C",
+      "pass": false,
+      "trace_present": true,
+      "gene_candidates": 8,
+      "verified_genes": [
+        "G6PD",
+        "SIRT1"
+      ],
+      "unverified_genes": [
+        "IR",
+        "TSA",
+        "NADPH",
+        "ROS",
+        "HDAC",
+        "FOXO"
+      ],
+      "gene_score": 0.25,
+      "pathway_score": 0.0,
+      "consistent": false,
+      "faithfulness": 0.1429
+    },
+    {
+      "id": "LB-SEN-MCQ-0034_00008",
+      "lb_id": "LB-SEN-MCQ-0034",
+      "format": "mcq",
+      "gold": "B",
+      "pred": "C",
+      "pass": false,
+      "trace_present": true,
+      "gene_candidates": 4,
+      "verified_genes": [
+        "YBX1",
+        "CKAP2"
+      ],
+      "unverified_genes": [
+        "BJ",
+        "RAF"
+      ],
+      "gene_score": 0.5,
+      "pathway_score": 0.0,
+      "consistent": false,
+      "faithfulness": 0.2857
+    },
+    {
+      "id": "LB-SEN-MCQ-0038_00009",
+      "lb_id": "LB-SEN-MCQ-0038",
+      "format": "mcq",
+      "gold": "B",
+      "pred": "C",
+      "pass": false,
+      "trace_present": true,
+      "gene_candidates": 4,
+      "verified_genes": [
+        "PLK1"
+      ],
+      "unverified_genes": [
+        "HDF161",
+        "H2O2",
+        "G2"
+      ],
+      "gene_score": 0.25,
+      "pathway_score": 0.0,
+      "consistent": false,
+      "faithfulness": 0.1429
+    },
+    {
+      "id": "LB-SEN-PAIR-0001_00010",
+      "lb_id": "LB-SEN-PAIR-0001",
+      "format": "pairwise",
+      "gold": "A",
+      "pred": "A",
+      "pass": true,
+      "trace_present": true,
+      "gene_candidates": 8,
+      "verified_genes": [
+        "COPB2",
+        "DIDO1",
+        "DPY30"
+      ],
+      "unverified_genes": [
+        "RAS",
+        "COPII",
+        "ER",
+        "SASP",
+        "COMPASS"
+      ],
+      "gene_score": 0.375,
+      "pathway_score": 0.0,
+      "consistent": true,
+      "faithfulness": 0.6429
+    },
+    {
+      "id": "LB-SEN-PAIR-0002_00011",
+      "lb_id": "LB-SEN-PAIR-0002",
+      "format": "pairwise",
+      "gold": "B",
+      "pred": "B",
+      "pass": true,
+      "trace_present": true,
+      "gene_candidates": 6,
+      "verified_genes": [
+        "HIF1A",
+        "PMVK",
+        "SERPINB2"
+      ],
+      "unverified_genes": [
+        "RAS",
+        "DDD86481",
+        "SASP"
+      ],
+      "gene_score": 0.5,
+      "pathway_score": 0.0,
+      "consistent": true,
+      "faithfulness": 0.7143
+    },
+    {
+      "id": "LB-SEN-PAIR-0004_00012",
+      "lb_id": "LB-SEN-PAIR-0004",
+      "format": "pairwise",
+      "gold": "A",
+      "pred": "B",
+      "pass": false,
+      "trace_present": true,
+      "gene_candidates": 12,
+      "verified_genes": [
+        "TNF",
+        "XAF1",
+        "XIAP",
+        "GDF15"
+      ],
+      "unverified_genes": [
+        "WI",
+        "IR",
+        "BAFF",
+        "NF",
+        "BH3",
+        "BCL",
+        "MAPK",
+        "SASP"
+      ],
+      "gene_score": 0.3333,
+      "pathway_score": 0.0,
+      "consistent": true,
+      "faithfulness": 0.619
+    },
+    {
+      "id": "LB-SEN-PAIR-0009_00013",
+      "lb_id": "LB-SEN-PAIR-0009",
+      "format": "pairwise",
+      "gold": "A",
+      "pred": "A",
+      "pass": true,
+      "trace_present": true,
+      "gene_candidates": 6,
+      "verified_genes": [
+        "H2AJ",
+        "CDCA2",
+        "NIPA2"
+      ],
+      "unverified_genes": [
+        "WI",
+        "H2A",
+        "NIPA"
+      ],
+      "gene_score": 0.5,
+      "pathway_score": 0.0,
+      "consistent": true,
+      "faithfulness": 0.7143
+    },
+    {
+      "id": "LB-SEN-PAIR-0010_00014",
+      "lb_id": "LB-SEN-PAIR-0010",
+      "format": "pairwise",
+      "gold": "B",
+      "pred": "B",
+      "pass": true,
+      "trace_present": true,
+      "gene_candidates": 9,
+      "verified_genes": [
+        "INO80",
+        "TP53",
+        "TP73",
+        "ID1",
+        "IL6"
+      ],
+      "unverified_genes": [
+        "RAS",
+        "WSTF",
+        "SASP",
+        "NF"
+      ],
+      "gene_score": 0.5556,
+      "pathway_score": 0.0,
+      "consistent": true,
+      "faithfulness": 0.746
+    },
+    {
+      "id": "LB-SEN-PAIR-0013_00015",
+      "lb_id": "LB-SEN-PAIR-0013",
+      "format": "pairwise",
+      "gold": "B",
+      "pred": "A",
+      "pass": false,
+      "trace_present": true,
+      "gene_candidates": 6,
+      "verified_genes": [
+        "MCM7",
+        "MCM2",
+        "MCM3AP",
+        "MCM3"
+      ],
+      "unverified_genes": [
+        "RAS",
+        "ROS"
+      ],
+      "gene_score": 0.6667,
+      "pathway_score": 0.0,
+      "consistent": true,
+      "faithfulness": 0.8095
+    },
+    {
+      "id": "LB-SEN-PAIR-0022_00016",
+      "lb_id": "LB-SEN-PAIR-0022",
+      "format": "pairwise",
+      "gold": "A",
+      "pred": "A",
+      "pass": true,
+      "trace_present": true,
+      "gene_candidates": 6,
+      "verified_genes": [
+        "PINK1",
+        "FLT1"
+      ],
+      "unverified_genes": [
+        "MDL72527",
+        "VEGFR3",
+        "SASP",
+        "VEGF"
+      ],
+      "gene_score": 0.3333,
+      "pathway_score": 0.0,
+      "consistent": true,
+      "faithfulness": 0.619
+    },
+    {
+      "id": "LB-SEN-PAIR-0026_00017",
+      "lb_id": "LB-SEN-PAIR-0026",
+      "format": "pairwise",
+      "gold": "B",
+      "pred": "A",
+      "pass": false,
+      "trace_present": true,
+      "gene_candidates": 6,
+      "verified_genes": [
+        "PTBP1",
+        "ETS1",
+        "ARG2"
+      ],
+      "unverified_genes": [
+        "RAS",
+        "UTR",
+        "SASP"
+      ],
+      "gene_score": 0.5,
+      "pathway_score": 0.0,
+      "consistent": true,
+      "faithfulness": 0.7143
+    },
+    {
+      "id": "LB-SEN-PAIR-0037_00018",
+      "lb_id": "LB-SEN-PAIR-0037",
+      "format": "pairwise",
+      "gold": "A",
+      "pred": "B",
+      "pass": false,
+      "trace_present": true,
+      "gene_candidates": 5,
+      "verified_genes": [
+        "PTBP1",
+        "ITPR2",
+        "WWP1"
+      ],
+      "unverified_genes": [
+        "RAS",
+        "E3"
+      ],
+      "gene_score": 0.6,
+      "pathway_score": 0.0,
+      "consistent": true,
+      "faithfulness": 0.7714
+    },
+    {
+      "id": "LB-SEN-PAIR-0042_00019",
+      "lb_id": "LB-SEN-PAIR-0042",
+      "format": "pairwise",
+      "gold": "A",
+      "pred": "B",
+      "pass": false,
+      "trace_present": true,
+      "gene_candidates": 4,
+      "verified_genes": [
+        "NF2",
+        "DGCR8"
+      ],
+      "unverified_genes": [
+        "TIG",
+        "RAF"
+      ],
+      "gene_score": 0.5,
+      "pathway_score": 0.0,
+      "consistent": true,
+      "faithfulness": 0.7143
+    },
+    {
+      "id": "LB-SEN-SIG-0009_00020",
+      "lb_id": "LB-SEN-SIG-0009",
+      "format": "binary",
+      "gold": "B",
+      "pred": "B",
+      "pass": true,
+      "trace_present": true,
+      "gene_candidates": 1,
+      "verified_genes": [
+        "NR1H2"
+      ],
+      "unverified_genes": [],
+      "gene_score": 1.0,
+      "pathway_score": 0.0,
+      "consistent": true,
+      "faithfulness": 1.0
+    },
+    {
+      "id": "LB-SEN-SIG-0010_00021",
+      "lb_id": "LB-SEN-SIG-0010",
+      "format": "binary",
+      "gold": "B",
+      "pred": "B",
+      "pass": true,
+      "trace_present": true,
+      "gene_candidates": 3,
+      "verified_genes": [
+        "SUV39H1"
+      ],
+      "unverified_genes": [
+        "HDF161",
+        "H2O2"
+      ],
+      "gene_score": 0.3333,
+      "pathway_score": 0.0,
+      "consistent": true,
+      "faithfulness": 0.619
+    },
+    {
+      "id": "LB-SEN-SIG-0011_00022",
+      "lb_id": "LB-SEN-SIG-0011",
+      "format": "binary",
+      "gold": "B",
+      "pred": "B",
+      "pass": true,
+      "trace_present": true,
+      "gene_candidates": 5,
+      "verified_genes": [
+        "ENTPD7",
+        "CDKN1A"
+      ],
+      "unverified_genes": [
+        "BJ",
+        "SASP",
+        "NF"
+      ],
+      "gene_score": 0.4,
+      "pathway_score": 0.0,
+      "consistent": true,
+      "faithfulness": 0.6571
+    },
+    {
+      "id": "LB-SEN-SIG-0012_00023",
+      "lb_id": "LB-SEN-SIG-0012",
+      "format": "binary",
+      "gold": "A",
+      "pred": "B",
+      "pass": false,
+      "trace_present": true,
+      "gene_candidates": 4,
+      "verified_genes": [
+        "CALR"
+      ],
+      "unverified_genes": [
+        "IR",
+        "E3",
+        "ER"
+      ],
+      "gene_score": 0.25,
+      "pathway_score": 0.0,
+      "consistent": true,
+      "faithfulness": 0.5714
+    },
+    {
+      "id": "LB-SEN-SIG-0025_00025",
+      "lb_id": "LB-SEN-SIG-0025",
+      "format": "binary",
+      "gold": "B",
+      "pred": "A",
+      "pass": false,
+      "trace_present": true,
+      "gene_candidates": 5,
+      "verified_genes": [
+        "MAPK1"
+      ],
+      "unverified_genes": [
+        "TIG",
+        "RAF",
+        "ERK2",
+        "MAPK"
+      ],
+      "gene_score": 0.2,
+      "pathway_score": 0.0,
+      "consistent": true,
+      "faithfulness": 0.5429
+    },
+    {
+      "id": "LB-SEN-SIG-0029_00026",
+      "lb_id": "LB-SEN-SIG-0029",
+      "format": "binary",
+      "gold": "B",
+      "pred": "B",
+      "pass": true,
+      "trace_present": true,
+      "gene_candidates": 5,
+      "verified_genes": [
+        "HDAC1",
+        "HDAC2",
+        "IL6"
+      ],
+      "unverified_genes": [
+        "MDL72527",
+        "SASP"
+      ],
+      "gene_score": 0.6,
+      "pathway_score": 0.0,
+      "consistent": true,
+      "faithfulness": 0.7714
+    },
+    {
+      "id": "LB-SEN-SIG-0045_00027",
+      "lb_id": "LB-SEN-SIG-0045",
+      "format": "binary",
+      "gold": "A",
+      "pred": "B",
+      "pass": false,
+      "trace_present": true,
+      "gene_candidates": 7,
+      "verified_genes": [
+        "MIR31HG",
+        "SMAD3",
+        "EZH2",
+        "SERPINB2"
+      ],
+      "unverified_genes": [
+        "BJ",
+        "SASP",
+        "TGF"
+      ],
+      "gene_score": 0.5714,
+      "pathway_score": 0.0,
+      "consistent": true,
+      "faithfulness": 0.7551
+    },
+    {
+      "id": "LB-SEN-SIG-0058_00028",
+      "lb_id": "LB-SEN-SIG-0058",
+      "format": "binary",
+      "gold": "B",
+      "pred": "B",
+      "pass": true,
+      "trace_present": true,
+      "gene_candidates": 3,
+      "verified_genes": [
+        "SIK1"
+      ],
+      "unverified_genes": [
+        "BJ",
+        "MAPK"
+      ],
+      "gene_score": 0.3333,
+      "pathway_score": 0.0,
+      "consistent": true,
+      "faithfulness": 0.619
+    },
+    {
+      "id": "LB-SEN-SIG-0061_00029",
+      "lb_id": "LB-SEN-SIG-0061",
+      "format": "binary",
+      "gold": "B",
+      "pred": "B",
+      "pass": true,
+      "trace_present": true,
+      "gene_candidates": 4,
+      "verified_genes": [
+        "SIN3B",
+        "SIN3A"
+      ],
+      "unverified_genes": [
+        "CCCP",
+        "ROS"
+      ],
+      "gene_score": 0.5,
+      "pathway_score": 0.0,
+      "consistent": true,
+      "faithfulness": 0.7143
+    }
+  ]
+}
