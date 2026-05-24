@@ -26,6 +26,7 @@ from ..inspect_scorers import longebench_scorer
 from ..inspect_solvers import (
     litellm_solver,
     majority_baseline_solver,
+    population_prior_baseline_solver,
     random_baseline_solver,
 )
 
@@ -218,6 +219,17 @@ def parquet_task(
     elif baseline_type and strategy == "majority":
         slvr = majority_baseline_solver(
             fmt_majority=_compute_fmt_majority(path, samples),
+        )
+    elif baseline_type and strategy == "population_prior":
+        repo_root = _MODELS_YAML.parent.parent
+        csv_rel = model_cfg["csv_path"]
+        csv_abs = csv_rel if Path(csv_rel).is_absolute() else str(repo_root / csv_rel)
+        slvr = population_prior_baseline_solver(
+            csv_path=csv_abs,
+            year_col=model_cfg.get("year_col", "POPESTIMATE2025"),
+            age_min=int(model_cfg.get("age_min", 20)),
+            age_max=int(model_cfg.get("age_max", 90)),
+            seed=seed,
         )
     else:
         slvr = litellm_solver(

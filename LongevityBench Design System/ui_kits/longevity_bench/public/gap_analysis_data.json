@@ -1,88 +1,51 @@
 {
-  "generated_at": "2026-05-24T12:09:17.400375+00:00",
+  "generated_at": "2026-05-24T11:39:48.290297+00:00",
   "dataset": {
     "train": {
-      "n": 467,
+      "n": 239,
       "formats": {
-        "binary": 163,
-        "mcq": 143,
+        "binary": 83,
         "pairwise": 81,
-        "regression": 80
+        "mcq": 75
       },
       "accessions": 15,
       "label_dist": {
         "mcq": {
-          "B": 48,
-          "A": 48,
-          "C": 38,
-          "D": 9
+          "A": 27,
+          "B": 26,
+          "C": 22
         },
         "pairwise": {
           "B": 43,
           "A": 38
         },
         "binary": {
-          "A": 82,
-          "B": 81
-        },
-        "regression": {
-          "50": 9,
-          "80": 8,
-          "60": 8,
-          "55": 7,
-          "36": 5,
-          "65": 5,
-          "38": 3,
-          "54": 3,
-          "35": 3,
-          "52": 2,
-          "51": 2,
-          "37": 2,
-          "34": 2,
-          "64": 2,
-          "70": 2,
-          "39": 2,
-          "53": 2,
-          "59": 2,
-          "75": 1,
-          "63": 1,
-          "87": 1,
-          "45": 1,
-          "62": 1,
-          "32": 1,
-          "58": 1,
-          "72": 1,
-          "33": 1,
-          "68": 1,
-          "56": 1
+          "A": 44,
+          "B": 39
         }
       }
     },
     "test": {
-      "n": 18,
+      "n": 59,
       "formats": {
-        "binary": 6,
-        "mcq": 6,
-        "pairwise": 3,
-        "regression": 3
+        "mcq": 24,
+        "pairwise": 18,
+        "binary": 17
       },
-      "accessions": 9,
+      "accessions": 28,
       "label_dist": {
+        "mcq": {
+          "C": 11,
+          "B": 7,
+          "A": 6
+        },
         "pairwise": {
-          "A": 2,
-          "B": 1
+          "A": 9,
+          "B": 9
         },
         "binary": {
-          "B": 6
-        },
-        "mcq": {
-          "C": 3,
-          "B": 3
-        },
-        "regression": {
-          "53": 1,
-          "60": 1,
-          "50": 1
+          "B": 11,
+          "A": 6
         }
       }
     }
@@ -92,172 +55,190 @@
     "longevity_llm_thinking": "L-LLM (think)",
     "claude_sonnet": "Claude Sonnet",
     "majority_baseline": "Majority",
-    "random_baseline": "Random"
+    "random_baseline": "Random",
+    "population_prior_baseline": "Population Prior Prediction"
   },
   "model_order": [
     "longevity_llm",
     "longevity_llm_thinking",
     "claude_sonnet",
     "majority_baseline",
-    "random_baseline"
+    "random_baseline",
+    "population_prior_baseline"
   ],
   "metrics": {
-    "majority_baseline": {
+    "population_prior_baseline": {
       "binary": {
-        "n": 6,
-        "accuracy": 1.0,
-        "balanced_accuracy": 1.0,
+        "n": 20,
+        "accuracy": 0.5,
+        "balanced_accuracy": 0.5,
         "ci_accuracy": [
-          1.0,
-          1.0
+          0.2988,
+          0.7
         ],
         "class_accuracy": {
-          "B": 1.0
+          "A": 0.5,
+          "B": 0.5
         },
         "gold_distribution": {
-          "A": 0,
-          "B": 6
+          "A": 12,
+          "B": 8
         },
         "prediction_distribution": {
-          "A": 0,
-          "B": 6
+          "A": 10,
+          "B": 10
         },
         "prediction_fraction": {
-          "A": 0.0,
-          "B": 1.0
+          "A": 0.5,
+          "B": 0.5
         },
-        "a_bias": 0.0
+        "a_bias": -0.1
       },
       "mcq": {
-        "n": 6,
+        "n": 17,
         "labels": [
+          "A",
           "B",
-          "C"
+          "C",
+          "D"
         ],
-        "accuracy": 0.6667,
-        "macro_f1": 0.6667,
-        "balanced_accuracy": 0.6667,
+        "accuracy": 0.4118,
+        "macro_f1": 0.2396,
+        "balanced_accuracy": 0.2639,
         "ci_accuracy": [
-          0.3333,
-          1.0
+          0.1765,
+          0.6471
         ],
         "ci_macro_f1": [
-          0.25,
-          1.0
+          0.1079,
+          0.355
         ],
         "confusion_matrix": {
           "labels": [
+            "A",
             "B",
-            "C"
+            "C",
+            "D"
           ],
           "matrix": [
             [
               2,
-              1
+              0,
+              2,
+              0
             ],
             [
+              3,
+              0,
+              0,
+              0
+            ],
+            [
+              3,
               1,
-              2
+              5,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0
             ]
           ]
         }
       },
       "regression": {
-        "n": 0,
-        "mae": null
-      },
-      "pairwise": {
-        "n": 3,
-        "accuracy": 0.6667,
-        "balanced_accuracy": 0.5,
-        "ci_accuracy": [
-          0.0,
-          1.0
+        "n": 20,
+        "mae": 25.45,
+        "median_ae": 28.5,
+        "spearman_r": -0.3782,
+        "spearman_p": 0.1001,
+        "sign_accuracy": 1.0,
+        "ci_mae": [
+          19.45,
+          31.3513
         ],
-        "class_accuracy": {
-          "A": 1.0,
-          "B": 0.0
-        },
-        "gold_distribution": {
-          "A": 2,
-          "B": 1
-        },
-        "prediction_distribution": {
-          "A": 3,
-          "B": 0
-        },
-        "prediction_fraction": {
-          "A": 1.0,
-          "B": 0.0
-        },
-        "a_bias": 0.3333
+        "parse_failures": 0
       }
     },
     "random_baseline": {
       "binary": {
-        "n": 6,
-        "accuracy": 0.3333,
-        "balanced_accuracy": 0.3333,
+        "n": 47,
+        "accuracy": 0.4468,
+        "balanced_accuracy": 0.4542,
         "ci_accuracy": [
-          0.0,
-          0.6667
+          0.2979,
+          0.5957
         ],
         "class_accuracy": {
-          "B": 0.3333
+          "A": 0.5238,
+          "B": 0.3846
         },
         "gold_distribution": {
-          "A": 0,
-          "B": 6
+          "A": 21,
+          "B": 26
         },
         "prediction_distribution": {
-          "A": 4,
-          "B": 2
+          "A": 27,
+          "B": 20
         },
         "prediction_fraction": {
-          "A": 0.6667,
-          "B": 0.3333
+          "A": 0.5745,
+          "B": 0.4255
         },
-        "a_bias": 0.6667
+        "a_bias": 0.1277
       },
       "mcq": {
-        "n": 6,
+        "n": 49,
         "labels": [
           "A",
           "B",
-          "C"
+          "C",
+          "D"
         ],
-        "accuracy": 0.3333,
-        "macro_f1": 0.1905,
-        "balanced_accuracy": 0.3333,
+        "accuracy": 0.3673,
+        "macro_f1": 0.2279,
+        "balanced_accuracy": 0.2679,
         "ci_accuracy": [
-          0.0,
-          0.6667
+          0.2449,
+          0.5102
         ],
         "ci_macro_f1": [
-          0.0,
-          0.303
+          0.1521,
+          0.296
         ],
         "confusion_matrix": {
           "labels": [
             "A",
             "B",
-            "C"
+            "C",
+            "D"
           ],
           "matrix": [
             [
-              0,
-              0,
+              9,
+              1,
+              4,
               0
             ],
             [
-              1,
+              8,
               0,
-              2
+              4,
+              0
             ],
             [
-              1,
+              9,
+              3,
+              9,
+              0
+            ],
+            [
               0,
-              2
+              1,
+              1,
+              0
             ]
           ]
         }
@@ -267,75 +248,404 @@
         "mae": null
       },
       "pairwise": {
-        "n": 3,
+        "n": 18,
         "accuracy": 0.6667,
-        "balanced_accuracy": 0.5,
+        "balanced_accuracy": 0.6667,
         "ci_accuracy": [
-          0.0,
-          1.0
+          0.4444,
+          0.8889
         ],
         "class_accuracy": {
-          "A": 1.0,
-          "B": 0.0
+          "A": 0.6667,
+          "B": 0.6667
         },
         "gold_distribution": {
-          "A": 2,
-          "B": 1
+          "A": 9,
+          "B": 9
         },
         "prediction_distribution": {
-          "A": 3,
-          "B": 0
+          "A": 9,
+          "B": 9
         },
         "prediction_fraction": {
-          "A": 1.0,
-          "B": 0.0
+          "A": 0.5,
+          "B": 0.5
         },
-        "a_bias": 0.3333
+        "a_bias": 0.0
+      }
+    },
+    "majority_baseline": {
+      "binary": {
+        "n": 47,
+        "accuracy": 0.3617,
+        "balanced_accuracy": 0.3681,
+        "ci_accuracy": [
+          0.2128,
+          0.5106
+        ],
+        "class_accuracy": {
+          "A": 0.4286,
+          "B": 0.3077
+        },
+        "gold_distribution": {
+          "A": 21,
+          "B": 26
+        },
+        "prediction_distribution": {
+          "A": 27,
+          "B": 20
+        },
+        "prediction_fraction": {
+          "A": 0.5745,
+          "B": 0.4255
+        },
+        "a_bias": 0.1277
+      },
+      "mcq": {
+        "n": 49,
+        "labels": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "accuracy": 0.2041,
+        "macro_f1": 0.1479,
+        "balanced_accuracy": 0.1815,
+        "ci_accuracy": [
+          0.102,
+          0.3265
+        ],
+        "ci_macro_f1": [
+          0.0699,
+          0.2279
+        ],
+        "confusion_matrix": {
+          "labels": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
+          "matrix": [
+            [
+              6,
+              4,
+              4,
+              0
+            ],
+            [
+              7,
+              3,
+              2,
+              0
+            ],
+            [
+              11,
+              9,
+              1,
+              0
+            ],
+            [
+              0,
+              1,
+              1,
+              0
+            ]
+          ]
+        }
+      },
+      "regression": {
+        "n": 0,
+        "mae": null
+      },
+      "pairwise": {
+        "n": 18,
+        "accuracy": 0.5,
+        "balanced_accuracy": 0.5,
+        "ci_accuracy": [
+          0.2778,
+          0.7222
+        ],
+        "class_accuracy": {
+          "A": 0.0,
+          "B": 1.0
+        },
+        "gold_distribution": {
+          "A": 9,
+          "B": 9
+        },
+        "prediction_distribution": {
+          "A": 0,
+          "B": 18
+        },
+        "prediction_fraction": {
+          "A": 0.0,
+          "B": 1.0
+        },
+        "a_bias": -0.5
       }
     },
     "claude_sonnet": {
       "binary": {
-        "n": 6,
-        "accuracy": 0.6667,
-        "balanced_accuracy": 0.6667,
+        "n": 47,
+        "accuracy": 0.5745,
+        "balanced_accuracy": 0.5513,
         "ci_accuracy": [
-          0.3333,
-          1.0
+          0.4255,
+          0.7234
         ],
         "class_accuracy": {
+          "A": 0.3333,
+          "B": 0.7692
+        },
+        "gold_distribution": {
+          "A": 21,
+          "B": 26
+        },
+        "prediction_distribution": {
+          "A": 13,
+          "B": 34
+        },
+        "prediction_fraction": {
+          "A": 0.2766,
+          "B": 0.7234
+        },
+        "a_bias": -0.1702
+      },
+      "mcq": {
+        "n": 49,
+        "labels": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "accuracy": 0.3265,
+        "macro_f1": 0.2341,
+        "balanced_accuracy": 0.2738,
+        "ci_accuracy": [
+          0.2041,
+          0.449
+        ],
+        "ci_macro_f1": [
+          0.1395,
+          0.3236
+        ],
+        "confusion_matrix": {
+          "labels": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
+          "matrix": [
+            [
+              2,
+              6,
+              6,
+              0
+            ],
+            [
+              3,
+              8,
+              1,
+              0
+            ],
+            [
+              3,
+              12,
+              6,
+              0
+            ],
+            [
+              0,
+              0,
+              2,
+              0
+            ]
+          ]
+        }
+      },
+      "regression": {
+        "n": 27,
+        "mae": 22.182,
+        "median_ae": 19.0,
+        "spearman_r": -0.1446,
+        "spearman_p": 0.4717,
+        "sign_accuracy": 1.0,
+        "ci_mae": [
+          15.8935,
+          29.2932
+        ],
+        "parse_failures": 0
+      },
+      "pairwise": {
+        "n": 18,
+        "accuracy": 0.7778,
+        "balanced_accuracy": 0.7778,
+        "ci_accuracy": [
+          0.5556,
+          0.9444
+        ],
+        "class_accuracy": {
+          "A": 0.8889,
           "B": 0.6667
         },
         "gold_distribution": {
-          "A": 0,
-          "B": 6
+          "A": 9,
+          "B": 9
         },
         "prediction_distribution": {
-          "A": 2,
-          "B": 4
+          "A": 11,
+          "B": 7
         },
         "prediction_fraction": {
-          "A": 0.3333,
-          "B": 0.6667
+          "A": 0.6111,
+          "B": 0.3889
         },
-        "a_bias": 0.3333
+        "a_bias": 0.1111
+      }
+    },
+    "longevity_llm": {
+      "binary": {
+        "n": 47,
+        "accuracy": 0.5532,
+        "balanced_accuracy": 0.5641,
+        "ci_accuracy": [
+          0.4043,
+          0.7021
+        ],
+        "class_accuracy": {
+          "A": 0.6667,
+          "B": 0.4615
+        },
+        "gold_distribution": {
+          "A": 21,
+          "B": 26
+        },
+        "prediction_distribution": {
+          "A": 28,
+          "B": 19
+        },
+        "prediction_fraction": {
+          "A": 0.5957,
+          "B": 0.4043
+        },
+        "a_bias": 0.1489
       },
       "mcq": {
-        "n": 6,
+        "n": 49,
+        "labels": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "accuracy": 0.3878,
+        "macro_f1": 0.2728,
+        "balanced_accuracy": 0.2798,
+        "ci_accuracy": [
+          0.2653,
+          0.5107
+        ],
+        "ci_macro_f1": [
+          0.169,
+          0.3738
+        ],
+        "confusion_matrix": {
+          "labels": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
+          "matrix": [
+            [
+              3,
+              3,
+              8,
+              0
+            ],
+            [
+              1,
+              4,
+              7,
+              0
+            ],
+            [
+              1,
+              8,
+              12,
+              0
+            ],
+            [
+              0,
+              1,
+              1,
+              0
+            ]
+          ]
+        }
+      },
+      "regression": {
+        "n": 27,
+        "mae": 12.0741,
+        "median_ae": 12.0,
+        "spearman_r": 0.0747,
+        "spearman_p": 0.711,
+        "sign_accuracy": 1.0,
+        "ci_mae": [
+          9.7398,
+          14.5204
+        ],
+        "parse_failures": 0
+      },
+      "pairwise": {
+        "n": 18,
+        "accuracy": 0.5556,
+        "balanced_accuracy": 0.5556,
+        "ci_accuracy": [
+          0.3333,
+          0.7778
+        ],
+        "class_accuracy": {
+          "A": 0.6667,
+          "B": 0.4444
+        },
+        "gold_distribution": {
+          "A": 9,
+          "B": 9
+        },
+        "prediction_distribution": {
+          "A": 11,
+          "B": 7
+        },
+        "prediction_fraction": {
+          "A": 0.6111,
+          "B": 0.3889
+        },
+        "a_bias": 0.1111
+      }
+    },
+    "longevity_llm_thinking": {
+      "mcq": {
+        "n": 10,
         "labels": [
           "A",
           "B",
           "C"
         ],
-        "accuracy": 0.3333,
-        "macro_f1": 0.1905,
-        "balanced_accuracy": 0.3333,
+        "accuracy": 0.1,
+        "macro_f1": 0.0667,
+        "balanced_accuracy": 0.1111,
         "ci_accuracy": [
           0.0,
-          0.6667
+          0.3
         ],
         "ci_macro_f1": [
           0.0,
-          0.303
+          0.1818
         ],
         "confusion_matrix": {
           "labels": [
@@ -346,1113 +656,74 @@
           "matrix": [
             [
               0,
-              0,
-              0
-            ],
-            [
-              0,
-              2,
-              1
-            ],
-            [
               1,
-              2,
-              0
-            ]
-          ]
-        }
-      },
-      "regression": {
-        "n": 3,
-        "mae": 6.0,
-        "median_ae": 6.0,
-        "spearman_r": -0.866,
-        "spearman_p": 0.3333,
-        "sign_accuracy": 1.0,
-        "ci_mae": [
-          3.0,
-          9.0
-        ],
-        "parse_failures": 0
-      },
-      "pairwise": {
-        "n": 3,
-        "accuracy": 0.6667,
-        "balanced_accuracy": 0.5,
-        "ci_accuracy": [
-          0.0,
-          1.0
-        ],
-        "class_accuracy": {
-          "A": 1.0,
-          "B": 0.0
-        },
-        "gold_distribution": {
-          "A": 2,
-          "B": 1
-        },
-        "prediction_distribution": {
-          "A": 3,
-          "B": 0
-        },
-        "prediction_fraction": {
-          "A": 1.0,
-          "B": 0.0
-        },
-        "a_bias": 0.3333
-      }
-    },
-    "longevity_llm_thinking": {
-      "binary": {
-        "n": 6,
-        "accuracy": 0.6667,
-        "balanced_accuracy": 0.6667,
-        "ci_accuracy": [
-          0.3333,
-          1.0
-        ],
-        "class_accuracy": {
-          "B": 0.6667
-        },
-        "gold_distribution": {
-          "A": 0,
-          "B": 6
-        },
-        "prediction_distribution": {
-          "A": 0,
-          "B": 4
-        },
-        "prediction_fraction": {
-          "A": 0.0,
-          "B": 0.6667
-        },
-        "a_bias": 0.0
-      },
-      "mcq": {
-        "n": 6,
-        "labels": [
-          "B",
-          "C"
-        ],
-        "accuracy": 0.3333,
-        "macro_f1": 0.25,
-        "balanced_accuracy": 0.3333,
-        "ci_accuracy": [
-          0.0,
-          0.6667
-        ],
-        "ci_macro_f1": [
-          0.0,
-          0.4
-        ],
-        "confusion_matrix": {
-          "labels": [
-            "B",
-            "C"
-          ],
-          "matrix": [
+              3
+            ],
             [
+              0,
               0,
               3
             ],
             [
               1,
-              2
+              1,
+              1
             ]
           ]
         }
       },
-      "regression": {
-        "n": 3,
-        "mae": 3.6667,
-        "median_ae": 4.0,
-        "spearman_r": 1.0,
-        "spearman_p": 0.0,
-        "sign_accuracy": 1.0,
-        "ci_mae": [
-          1.0,
-          6.0
-        ],
-        "parse_failures": 0
-      },
       "pairwise": {
-        "n": 3,
-        "accuracy": 0.0,
-        "balanced_accuracy": 0.0,
-        "ci_accuracy": [
-          0.0,
-          0.0
-        ],
-        "class_accuracy": {
-          "A": 0.0,
-          "B": 0.0
-        },
-        "gold_distribution": {
-          "A": 2,
-          "B": 1
-        },
-        "prediction_distribution": {
-          "A": 1,
-          "B": 2
-        },
-        "prediction_fraction": {
-          "A": 0.3333,
-          "B": 0.6667
-        },
-        "a_bias": -0.3334
-      }
-    },
-    "longevity_llm": {
-      "binary": {
-        "n": 6,
+        "n": 10,
         "accuracy": 0.5,
         "balanced_accuracy": 0.5,
         "ci_accuracy": [
-          0.1667,
-          0.8333
+          0.2,
+          0.8
         ],
         "class_accuracy": {
+          "A": 0.5,
           "B": 0.5
         },
         "gold_distribution": {
-          "A": 0,
-          "B": 6
+          "A": 6,
+          "B": 4
         },
         "prediction_distribution": {
-          "A": 3,
-          "B": 3
+          "A": 5,
+          "B": 5
         },
         "prediction_fraction": {
           "A": 0.5,
           "B": 0.5
         },
-        "a_bias": 0.5
+        "a_bias": -0.1
       },
-      "mcq": {
-        "n": 6,
-        "labels": [
-          "B",
-          "C"
-        ],
-        "accuracy": 0.5,
-        "macro_f1": 0.4857,
-        "balanced_accuracy": 0.5,
+      "binary": {
+        "n": 10,
+        "accuracy": 0.7,
+        "balanced_accuracy": 0.4375,
         "ci_accuracy": [
-          0.1667,
-          0.8333
-        ],
-        "ci_macro_f1": [
-          0.1429,
-          0.8286
-        ],
-        "confusion_matrix": {
-          "labels": [
-            "B",
-            "C"
-          ],
-          "matrix": [
-            [
-              1,
-              2
-            ],
-            [
-              1,
-              2
-            ]
-          ]
-        }
-      },
-      "regression": {
-        "n": 3,
-        "mae": 2.3333,
-        "median_ae": 1.0,
-        "spearman_r": 0.866,
-        "spearman_p": 0.3333,
-        "sign_accuracy": 1.0,
-        "ci_mae": [
-          0.0,
-          6.0
-        ],
-        "parse_failures": 0
-      },
-      "pairwise": {
-        "n": 3,
-        "accuracy": 0.6667,
-        "balanced_accuracy": 0.75,
-        "ci_accuracy": [
-          0.0,
+          0.4,
           1.0
         ],
         "class_accuracy": {
-          "A": 0.5,
-          "B": 1.0
+          "A": 0.0,
+          "B": 0.875
         },
         "gold_distribution": {
           "A": 2,
-          "B": 1
+          "B": 8
         },
         "prediction_distribution": {
           "A": 1,
-          "B": 2
+          "B": 9
         },
         "prediction_fraction": {
-          "A": 0.3333,
-          "B": 0.6667
+          "A": 0.1,
+          "B": 0.9
         },
-        "a_bias": -0.3334
+        "a_bias": -0.1
       }
-    }
-  },
-  "tasks": {
-    "Lipidomics": {
-      "metrics": {
-        "majority_baseline": {
-          "binary": {
-            "n": 3,
-            "accuracy": 1.0,
-            "balanced_accuracy": 1.0,
-            "ci_accuracy": [
-              1.0,
-              1.0
-            ],
-            "class_accuracy": {
-              "B": 1.0
-            },
-            "gold_distribution": {
-              "A": 0,
-              "B": 3
-            },
-            "prediction_distribution": {
-              "A": 0,
-              "B": 3
-            },
-            "prediction_fraction": {
-              "A": 0.0,
-              "B": 1.0
-            },
-            "a_bias": 0.0
-          },
-          "mcq": {
-            "n": 3,
-            "labels": [
-              "B",
-              "C"
-            ],
-            "accuracy": 0.6667,
-            "macro_f1": 0.4,
-            "balanced_accuracy": 0.5,
-            "ci_accuracy": [
-              0.0,
-              1.0
-            ],
-            "ci_macro_f1": [
-              0.0,
-              0.5
-            ],
-            "confusion_matrix": {
-              "labels": [
-                "B",
-                "C"
-              ],
-              "matrix": [
-                [
-                  2,
-                  0
-                ],
-                [
-                  1,
-                  0
-                ]
-              ]
-            }
-          },
-          "regression": {
-            "n": 0,
-            "mae": null
-          }
-        },
-        "random_baseline": {
-          "binary": {
-            "n": 3,
-            "accuracy": 0.3333,
-            "balanced_accuracy": 0.3333,
-            "ci_accuracy": [
-              0.0,
-              1.0
-            ],
-            "class_accuracy": {
-              "B": 0.3333
-            },
-            "gold_distribution": {
-              "A": 0,
-              "B": 3
-            },
-            "prediction_distribution": {
-              "A": 2,
-              "B": 1
-            },
-            "prediction_fraction": {
-              "A": 0.6667,
-              "B": 0.3333
-            },
-            "a_bias": 0.6667
-          },
-          "mcq": {
-            "n": 3,
-            "labels": [
-              "A",
-              "B",
-              "C"
-            ],
-            "accuracy": 0.3333,
-            "macro_f1": 0.2222,
-            "balanced_accuracy": 0.5,
-            "ci_accuracy": [
-              0.0,
-              1.0
-            ],
-            "ci_macro_f1": [
-              0.0,
-              0.3333
-            ],
-            "confusion_matrix": {
-              "labels": [
-                "A",
-                "B",
-                "C"
-              ],
-              "matrix": [
-                [
-                  0,
-                  0,
-                  0
-                ],
-                [
-                  1,
-                  0,
-                  1
-                ],
-                [
-                  0,
-                  0,
-                  1
-                ]
-              ]
-            }
-          },
-          "regression": {
-            "n": 0,
-            "mae": null
-          }
-        },
-        "claude_sonnet": {
-          "binary": {
-            "n": 3,
-            "accuracy": 0.3333,
-            "balanced_accuracy": 0.3333,
-            "ci_accuracy": [
-              0.0,
-              1.0
-            ],
-            "class_accuracy": {
-              "B": 0.3333
-            },
-            "gold_distribution": {
-              "A": 0,
-              "B": 3
-            },
-            "prediction_distribution": {
-              "A": 2,
-              "B": 1
-            },
-            "prediction_fraction": {
-              "A": 0.6667,
-              "B": 0.3333
-            },
-            "a_bias": 0.6667
-          },
-          "mcq": {
-            "n": 3,
-            "labels": [
-              "B",
-              "C"
-            ],
-            "accuracy": 0.3333,
-            "macro_f1": 0.25,
-            "balanced_accuracy": 0.25,
-            "ci_accuracy": [
-              0.0,
-              1.0
-            ],
-            "ci_macro_f1": [
-              0.0,
-              0.5
-            ],
-            "confusion_matrix": {
-              "labels": [
-                "B",
-                "C"
-              ],
-              "matrix": [
-                [
-                  1,
-                  1
-                ],
-                [
-                  1,
-                  0
-                ]
-              ]
-            }
-          },
-          "regression": {
-            "n": 3,
-            "mae": 6.0,
-            "median_ae": 6.0,
-            "spearman_r": -0.866,
-            "spearman_p": 0.3333,
-            "sign_accuracy": 1.0,
-            "ci_mae": [
-              3.0,
-              9.0
-            ],
-            "parse_failures": 0
-          }
-        },
-        "longevity_llm_thinking": {
-          "binary": {
-            "n": 3,
-            "accuracy": 0.3333,
-            "balanced_accuracy": 0.3333,
-            "ci_accuracy": [
-              0.0,
-              1.0
-            ],
-            "class_accuracy": {
-              "B": 0.3333
-            },
-            "gold_distribution": {
-              "A": 0,
-              "B": 3
-            },
-            "prediction_distribution": {
-              "A": 0,
-              "B": 1
-            },
-            "prediction_fraction": {
-              "A": 0.0,
-              "B": 0.3333
-            },
-            "a_bias": 0.0
-          },
-          "mcq": {
-            "n": 3,
-            "labels": [
-              "B",
-              "C"
-            ],
-            "accuracy": 0.3333,
-            "macro_f1": 0.25,
-            "balanced_accuracy": 0.5,
-            "ci_accuracy": [
-              0.0,
-              1.0
-            ],
-            "ci_macro_f1": [
-              0.0,
-              0.5
-            ],
-            "confusion_matrix": {
-              "labels": [
-                "B",
-                "C"
-              ],
-              "matrix": [
-                [
-                  0,
-                  2
-                ],
-                [
-                  0,
-                  1
-                ]
-              ]
-            }
-          },
-          "regression": {
-            "n": 3,
-            "mae": 3.6667,
-            "median_ae": 4.0,
-            "spearman_r": 1.0,
-            "spearman_p": 0.0,
-            "sign_accuracy": 1.0,
-            "ci_mae": [
-              1.0,
-              6.0
-            ],
-            "parse_failures": 0
-          }
-        },
-        "longevity_llm": {
-          "binary": {
-            "n": 3,
-            "accuracy": 0.0,
-            "balanced_accuracy": 0.0,
-            "ci_accuracy": [
-              0.0,
-              0.0
-            ],
-            "class_accuracy": {
-              "B": 0.0
-            },
-            "gold_distribution": {
-              "A": 0,
-              "B": 3
-            },
-            "prediction_distribution": {
-              "A": 3,
-              "B": 0
-            },
-            "prediction_fraction": {
-              "A": 1.0,
-              "B": 0.0
-            },
-            "a_bias": 1.0
-          },
-          "mcq": {
-            "n": 3,
-            "labels": [
-              "B",
-              "C"
-            ],
-            "accuracy": 0.3333,
-            "macro_f1": 0.25,
-            "balanced_accuracy": 0.25,
-            "ci_accuracy": [
-              0.0,
-              1.0
-            ],
-            "ci_macro_f1": [
-              0.0,
-              0.5
-            ],
-            "confusion_matrix": {
-              "labels": [
-                "B",
-                "C"
-              ],
-              "matrix": [
-                [
-                  1,
-                  1
-                ],
-                [
-                  1,
-                  0
-                ]
-              ]
-            }
-          },
-          "regression": {
-            "n": 3,
-            "mae": 2.3333,
-            "median_ae": 1.0,
-            "spearman_r": 0.866,
-            "spearman_p": 0.3333,
-            "sign_accuracy": 1.0,
-            "ci_mae": [
-              0.0,
-              6.0
-            ],
-            "parse_failures": 0
-          }
-        }
-      },
-      "model_display": {
-        "longevity_llm": "L-LLM",
-        "longevity_llm_thinking": "L-LLM (think)",
-        "claude_sonnet": "Claude Sonnet",
-        "majority_baseline": "Majority",
-        "random_baseline": "Random"
-      },
-      "model_order": [
-        "longevity_llm",
-        "longevity_llm_thinking",
-        "claude_sonnet",
-        "majority_baseline",
-        "random_baseline"
-      ]
-    },
-    "Senescence Perturbation": {
-      "metrics": {
-        "majority_baseline": {
-          "mcq": {
-            "n": 3,
-            "labels": [
-              "B",
-              "C"
-            ],
-            "accuracy": 0.6667,
-            "macro_f1": 0.4,
-            "balanced_accuracy": 0.5,
-            "ci_accuracy": [
-              0.0,
-              1.0
-            ],
-            "ci_macro_f1": [
-              0.0,
-              0.5
-            ],
-            "confusion_matrix": {
-              "labels": [
-                "B",
-                "C"
-              ],
-              "matrix": [
-                [
-                  0,
-                  1
-                ],
-                [
-                  0,
-                  2
-                ]
-              ]
-            }
-          },
-          "pairwise": {
-            "n": 3,
-            "accuracy": 0.6667,
-            "balanced_accuracy": 0.5,
-            "ci_accuracy": [
-              0.0,
-              1.0
-            ],
-            "class_accuracy": {
-              "A": 1.0,
-              "B": 0.0
-            },
-            "gold_distribution": {
-              "A": 2,
-              "B": 1
-            },
-            "prediction_distribution": {
-              "A": 3,
-              "B": 0
-            },
-            "prediction_fraction": {
-              "A": 1.0,
-              "B": 0.0
-            },
-            "a_bias": 0.3333
-          },
-          "binary": {
-            "n": 3,
-            "accuracy": 1.0,
-            "balanced_accuracy": 1.0,
-            "ci_accuracy": [
-              1.0,
-              1.0
-            ],
-            "class_accuracy": {
-              "B": 1.0
-            },
-            "gold_distribution": {
-              "A": 0,
-              "B": 3
-            },
-            "prediction_distribution": {
-              "A": 0,
-              "B": 3
-            },
-            "prediction_fraction": {
-              "A": 0.0,
-              "B": 1.0
-            },
-            "a_bias": 0.0
-          }
-        },
-        "random_baseline": {
-          "mcq": {
-            "n": 3,
-            "labels": [
-              "A",
-              "B",
-              "C"
-            ],
-            "accuracy": 0.3333,
-            "macro_f1": 0.1667,
-            "balanced_accuracy": 0.25,
-            "ci_accuracy": [
-              0.0,
-              1.0
-            ],
-            "ci_macro_f1": [
-              0.0,
-              0.3333
-            ],
-            "confusion_matrix": {
-              "labels": [
-                "A",
-                "B",
-                "C"
-              ],
-              "matrix": [
-                [
-                  0,
-                  0,
-                  0
-                ],
-                [
-                  0,
-                  0,
-                  1
-                ],
-                [
-                  1,
-                  0,
-                  1
-                ]
-              ]
-            }
-          },
-          "pairwise": {
-            "n": 3,
-            "accuracy": 0.6667,
-            "balanced_accuracy": 0.5,
-            "ci_accuracy": [
-              0.0,
-              1.0
-            ],
-            "class_accuracy": {
-              "A": 1.0,
-              "B": 0.0
-            },
-            "gold_distribution": {
-              "A": 2,
-              "B": 1
-            },
-            "prediction_distribution": {
-              "A": 3,
-              "B": 0
-            },
-            "prediction_fraction": {
-              "A": 1.0,
-              "B": 0.0
-            },
-            "a_bias": 0.3333
-          },
-          "binary": {
-            "n": 3,
-            "accuracy": 0.3333,
-            "balanced_accuracy": 0.3333,
-            "ci_accuracy": [
-              0.0,
-              1.0
-            ],
-            "class_accuracy": {
-              "B": 0.3333
-            },
-            "gold_distribution": {
-              "A": 0,
-              "B": 3
-            },
-            "prediction_distribution": {
-              "A": 2,
-              "B": 1
-            },
-            "prediction_fraction": {
-              "A": 0.6667,
-              "B": 0.3333
-            },
-            "a_bias": 0.6667
-          }
-        },
-        "claude_sonnet": {
-          "mcq": {
-            "n": 3,
-            "labels": [
-              "A",
-              "B",
-              "C"
-            ],
-            "accuracy": 0.3333,
-            "macro_f1": 0.2222,
-            "balanced_accuracy": 0.5,
-            "ci_accuracy": [
-              0.0,
-              1.0
-            ],
-            "ci_macro_f1": [
-              0.0,
-              0.3333
-            ],
-            "confusion_matrix": {
-              "labels": [
-                "A",
-                "B",
-                "C"
-              ],
-              "matrix": [
-                [
-                  0,
-                  0,
-                  0
-                ],
-                [
-                  0,
-                  1,
-                  0
-                ],
-                [
-                  1,
-                  1,
-                  0
-                ]
-              ]
-            }
-          },
-          "pairwise": {
-            "n": 3,
-            "accuracy": 0.6667,
-            "balanced_accuracy": 0.5,
-            "ci_accuracy": [
-              0.0,
-              1.0
-            ],
-            "class_accuracy": {
-              "A": 1.0,
-              "B": 0.0
-            },
-            "gold_distribution": {
-              "A": 2,
-              "B": 1
-            },
-            "prediction_distribution": {
-              "A": 3,
-              "B": 0
-            },
-            "prediction_fraction": {
-              "A": 1.0,
-              "B": 0.0
-            },
-            "a_bias": 0.3333
-          },
-          "binary": {
-            "n": 3,
-            "accuracy": 1.0,
-            "balanced_accuracy": 1.0,
-            "ci_accuracy": [
-              1.0,
-              1.0
-            ],
-            "class_accuracy": {
-              "B": 1.0
-            },
-            "gold_distribution": {
-              "A": 0,
-              "B": 3
-            },
-            "prediction_distribution": {
-              "A": 0,
-              "B": 3
-            },
-            "prediction_fraction": {
-              "A": 0.0,
-              "B": 1.0
-            },
-            "a_bias": 0.0
-          }
-        },
-        "longevity_llm_thinking": {
-          "mcq": {
-            "n": 3,
-            "labels": [
-              "B",
-              "C"
-            ],
-            "accuracy": 0.3333,
-            "macro_f1": 0.25,
-            "balanced_accuracy": 0.25,
-            "ci_accuracy": [
-              0.0,
-              1.0
-            ],
-            "ci_macro_f1": [
-              0.0,
-              0.5
-            ],
-            "confusion_matrix": {
-              "labels": [
-                "B",
-                "C"
-              ],
-              "matrix": [
-                [
-                  0,
-                  1
-                ],
-                [
-                  1,
-                  1
-                ]
-              ]
-            }
-          },
-          "pairwise": {
-            "n": 3,
-            "accuracy": 0.0,
-            "balanced_accuracy": 0.0,
-            "ci_accuracy": [
-              0.0,
-              0.0
-            ],
-            "class_accuracy": {
-              "A": 0.0,
-              "B": 0.0
-            },
-            "gold_distribution": {
-              "A": 2,
-              "B": 1
-            },
-            "prediction_distribution": {
-              "A": 1,
-              "B": 2
-            },
-            "prediction_fraction": {
-              "A": 0.3333,
-              "B": 0.6667
-            },
-            "a_bias": -0.3334
-          },
-          "binary": {
-            "n": 3,
-            "accuracy": 1.0,
-            "balanced_accuracy": 1.0,
-            "ci_accuracy": [
-              1.0,
-              1.0
-            ],
-            "class_accuracy": {
-              "B": 1.0
-            },
-            "gold_distribution": {
-              "A": 0,
-              "B": 3
-            },
-            "prediction_distribution": {
-              "A": 0,
-              "B": 3
-            },
-            "prediction_fraction": {
-              "A": 0.0,
-              "B": 1.0
-            },
-            "a_bias": 0.0
-          }
-        },
-        "longevity_llm": {
-          "mcq": {
-            "n": 3,
-            "labels": [
-              "B",
-              "C"
-            ],
-            "accuracy": 0.6667,
-            "macro_f1": 0.4,
-            "balanced_accuracy": 0.5,
-            "ci_accuracy": [
-              0.0,
-              1.0
-            ],
-            "ci_macro_f1": [
-              0.0,
-              0.5
-            ],
-            "confusion_matrix": {
-              "labels": [
-                "B",
-                "C"
-              ],
-              "matrix": [
-                [
-                  0,
-                  1
-                ],
-                [
-                  0,
-                  2
-                ]
-              ]
-            }
-          },
-          "pairwise": {
-            "n": 3,
-            "accuracy": 0.6667,
-            "balanced_accuracy": 0.75,
-            "ci_accuracy": [
-              0.0,
-              1.0
-            ],
-            "class_accuracy": {
-              "A": 0.5,
-              "B": 1.0
-            },
-            "gold_distribution": {
-              "A": 2,
-              "B": 1
-            },
-            "prediction_distribution": {
-              "A": 1,
-              "B": 2
-            },
-            "prediction_fraction": {
-              "A": 0.3333,
-              "B": 0.6667
-            },
-            "a_bias": -0.3334
-          },
-          "binary": {
-            "n": 3,
-            "accuracy": 1.0,
-            "balanced_accuracy": 1.0,
-            "ci_accuracy": [
-              1.0,
-              1.0
-            ],
-            "class_accuracy": {
-              "B": 1.0
-            },
-            "gold_distribution": {
-              "A": 0,
-              "B": 3
-            },
-            "prediction_distribution": {
-              "A": 0,
-              "B": 3
-            },
-            "prediction_fraction": {
-              "A": 0.0,
-              "B": 1.0
-            },
-            "a_bias": 0.0
-          }
-        }
-      },
-      "model_display": {
-        "longevity_llm": "L-LLM",
-        "longevity_llm_thinking": "L-LLM (think)",
-        "claude_sonnet": "Claude Sonnet",
-        "majority_baseline": "Majority",
-        "random_baseline": "Random"
-      },
-      "model_order": [
-        "longevity_llm",
-        "longevity_llm_thinking",
-        "claude_sonnet",
-        "majority_baseline",
-        "random_baseline"
-      ]
     }
   }
 }

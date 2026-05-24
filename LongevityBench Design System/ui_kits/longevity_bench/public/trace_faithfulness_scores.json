@@ -332,8 +332,8 @@
       "trace_present": true,
       "gene_candidates": 12,
       "verified_genes": [
-        "WI",
         "IR",
+        "WI",
         "BAFF",
         "TNF",
         "NF",
@@ -344,8 +344,8 @@
         "SASP"
       ],
       "unverified_genes": [
-        "BH3",
-        "BCL"
+        "BCL",
+        "BH3"
       ],
       "gene_score": 0.8333,
       "nli_consistency": 0.5,
@@ -386,11 +386,11 @@
       "gene_candidates": 9,
       "verified_genes": [
         "RAS",
+        "SASP",
         "WSTF",
         "INO80",
         "TP53",
         "TP73",
-        "SASP",
         "ID1",
         "IL6",
         "NF"
@@ -434,10 +434,10 @@
       "trace_present": true,
       "gene_candidates": 6,
       "verified_genes": [
+        "SASP",
         "PINK1",
         "FLT1",
         "VEGFR3",
-        "SASP",
         "VEGF"
       ],
       "unverified_genes": [
@@ -460,10 +460,10 @@
       "verified_genes": [
         "RAS",
         "PTBP1",
+        "SASP",
         "ETS1",
         "ARG2",
-        "UTR",
-        "SASP"
+        "UTR"
       ],
       "unverified_genes": [],
       "gene_score": 1.0,
@@ -503,8 +503,8 @@
       "trace_present": true,
       "gene_candidates": 4,
       "verified_genes": [
-        "TIG",
         "RAF",
+        "TIG",
         "NF2",
         "DGCR8"
       ],
@@ -564,9 +564,9 @@
       "gene_candidates": 5,
       "verified_genes": [
         "BJ",
-        "ENTPD7",
         "SASP",
         "NF",
+        "ENTPD7",
         "CDKN1A"
       ],
       "unverified_genes": [],
@@ -586,9 +586,9 @@
       "gene_candidates": 4,
       "verified_genes": [
         "IR",
+        "ER",
         "E3",
-        "CALR",
-        "ER"
+        "CALR"
       ],
       "unverified_genes": [],
       "gene_score": 1.0,
@@ -606,11 +606,11 @@
       "trace_present": true,
       "gene_candidates": 5,
       "verified_genes": [
-        "TIG",
         "RAF",
+        "MAPK",
+        "TIG",
         "MAPK1",
-        "ERK2",
-        "MAPK"
+        "ERK2"
       ],
       "unverified_genes": [],
       "gene_score": 1.0,
@@ -628,10 +628,10 @@
       "trace_present": true,
       "gene_candidates": 5,
       "verified_genes": [
-        "HDAC1",
-        "HDAC2",
         "IL6",
-        "SASP"
+        "SASP",
+        "HDAC1",
+        "HDAC2"
       ],
       "unverified_genes": [
         "MDL72527"
@@ -651,12 +651,12 @@
       "trace_present": true,
       "gene_candidates": 7,
       "verified_genes": [
-        "MIR31HG",
-        "SMAD3",
-        "EZH2",
         "BJ",
         "SERPINB2",
-        "SASP"
+        "SASP",
+        "MIR31HG",
+        "SMAD3",
+        "EZH2"
       ],
       "unverified_genes": [
         "TGF"
@@ -677,8 +677,8 @@
       "gene_candidates": 3,
       "verified_genes": [
         "BJ",
-        "SIK1",
-        "MAPK"
+        "MAPK",
+        "SIK1"
       ],
       "unverified_genes": [],
       "gene_score": 1.0,
@@ -696,9 +696,9 @@
       "trace_present": true,
       "gene_candidates": 4,
       "verified_genes": [
+        "ROS",
         "SIN3B",
-        "SIN3A",
-        "ROS"
+        "SIN3A"
       ],
       "unverified_genes": [
         "CCCP"

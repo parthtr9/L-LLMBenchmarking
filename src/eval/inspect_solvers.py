@@ -13,6 +13,11 @@ from typing import Any
 _ROOT = Path(__file__).resolve().parent.parent.parent
 _DEFAULT_CACHE = _ROOT / "outputs" / "prediction_cache.json"
 
+import re
+from pathlib import Path
+from typing import Any
+
+import pandas as pd
 from inspect_ai.model import ModelOutput, ModelUsage
 from inspect_ai.solver import Generate, TaskState, solver
 
@@ -174,6 +179,89 @@ def random_baseline_solver(seed: int = 42):
         choices = _FORMAT_RANDOM_CHOICES.get(fmt, ["A", "B"])
         answer = rng.choice(choices)
         state.output = ModelOutput.from_content(model="random_baseline", content=answer)
+        state.completed = True
+        return state
+
+    return solve
+
+
+_SEX_RE = re.compile(r"sex\s*:\s*(male|female)", re.IGNORECASE)
+_CENSUS_SEX_CODE = {"male": 1, "female": 2}
+
+
+def _load_census_weights(
+    csv_path: Path,
+    year_col: str,
+    age_min: int,
+    age_max: int,
+) -> dict[int, tuple[list[int], list[float]]]:
+    """Load Census nc-est CSV into per-sex (ages, weights) tables.
+
+    Keys: 0 (both), 1 (male), 2 (female). Drops AGE=999 (all-ages total row).
+    """
+    df = pd.read_csv(csv_path)
+    df = df[(df["AGE"] >= age_min) & (df["AGE"] <= age_max) & (df["AGE"] != 999)]
+    out: dict[int, tuple[list[int], list[float]]] = {}
+    for sex_code in (0, 1, 2):
+        sub = df[df["SEX"] == sex_code]
+        ages = sub["AGE"].astype(int).tolist()
+        weights = sub[year_col].astype(float).tolist()
+        out[sex_code] = (ages, weights)
+    return out
+
+
+@solver
+def population_prior_baseline_solver(
+    csv_path: str,
+    year_col: str = "POPESTIMATE2025",
+    age_min: int = 20,
+    age_max: int = 90,
+    seed: int = 42,
+):
+    """Sample age from US Census population distribution conditioned on sex.
+
+    Regression-format only. For other formats falls back to random label draw.
+    Sex parsed from the user message (`Sex: Male/Female`); falls back to
+    both-sex (SEX=0) prior when not present.
+
+    Args:
+        csv_path: Path to Census nc-est CSV (cols SEX, AGE, POPESTIMATE<year>).
+        year_col: Column to weight the sample by.
+        age_min: Lower clip on age (matches plausible cohort range).
+        age_max: Upper clip on age.
+        seed: RNG seed.
+    """
+    weights = _load_census_weights(Path(csv_path), year_col, age_min, age_max)
+    rng = random.Random(seed)
+    fallback_choices = _FORMAT_RANDOM_CHOICES
+
+    async def solve(state: TaskState, generate: Generate) -> TaskState:
+        fmt = str((state.metadata or {}).get("format", "")).lower()
+
+        if fmt != "regression":
+            choices = fallback_choices.get(fmt, ["A", "B"])
+            answer = rng.choice(choices)
+            state.output = ModelOutput.from_content(
+                model="population_prior_baseline", content=answer
+            )
+            state.completed = True
+            return state
+
+        sex_code = 0
+        for msg in state.messages:
+            text = msg.content if isinstance(msg.content, str) else _content_to_str(
+                msg.content
+            )
+            m = _SEX_RE.search(text)
+            if m:
+                sex_code = _CENSUS_SEX_CODE[m.group(1).lower()]
+                break
+
+        ages, w = weights.get(sex_code) or weights[0]
+        age = rng.choices(ages, weights=w, k=1)[0]
+        state.output = ModelOutput.from_content(
+            model="population_prior_baseline", content=str(int(age))
+        )
         state.completed = True
         return state
 
