@@ -150,7 +150,7 @@ def generate_mcq_prompt(row: pd.Series, lipid_cols: list[str],
     answer = AGE_BRACKET_TO_LETTER[bracket]
 
     question = (
-        "You are presented with a plasma lipidomics profile from a human donor where each value is natural log transformed portion of the participant's total signal."
+        "You are presented with a plasma lipidomics profile from a human donor where each value is natural log transformed proportion of the participant's total signal."
         "Given the following lipid species abundances, predict which age "
         "bracket the donor belongs to."
     )
@@ -203,7 +203,7 @@ def generate_regression_prompt(row: pd.Series, lipid_cols: list[str],
     answer = str(int(row["age"]))
 
     question = (
-        "You are presented with a plasma lipidomics profile from a human donor where each value is natural log transformed portion of the participant's total signal,"
+        "You are presented with a plasma lipidomics profile from a human donor where each value is natural log transformed proportion of the participant's total signal,"
         "together with the donor's diabetes status. Given this information, "
         "predict the donor's age in years. Respond with only a numeric value "
         "rounded to the nearest integer."
@@ -250,7 +250,7 @@ def generate_binary_prompt(row: pd.Series, lipid_cols: list[str],
     answer = DIABETES_TO_LETTER[row["diabetes"]]
 
     question = (
-        "You are presented with a plasma lipidomics profile from a human donor where each value is natural log transformed portion of the participant's total signal,"
+        "You are presented with a plasma lipidomics profile from a human donor where each value is natural log transformed proportion of the participant's total signal,"
         "together with the donor's age in years. Given this information, "
         "predict whether the donor has been diagnosed with diabetes."
     )
