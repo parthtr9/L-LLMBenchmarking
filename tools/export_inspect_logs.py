@@ -190,22 +190,6 @@ def _gather(log_dir: Path) -> dict[str, Any]:
             tasks[lb_id] = {"id": lb_id, "name": lb_id, "format": None,
                             "n": 0, "metric": None}
 
-        # Per-format mean scores — used by Compare view for whisker plots.
-        fmt_buckets: dict[str, list[float]] = {}
-        for s in (log.samples or []):
-            fmt = str((s.metadata or {}).get("format", "") or "")
-            if not fmt:
-                continue
-            if s.scores:
-                first = next(iter(s.scores.values()))
-                if isinstance(first.value, (int, float)) and first.value is not None:
-                    fmt_buckets.setdefault(fmt, []).append(float(first.value))
-        per_fmt_scores = {
-            f"{fmt}_mean": round(sum(v) / len(v), 4)
-            for fmt, v in fmt_buckets.items() if v
-        }
-        agg_scores = {**_extract_score(log), **per_fmt_scores}
-
         runs.append({
             "id": log.eval.eval_id,
             "model": model_id,
@@ -216,7 +200,7 @@ def _gather(log_dir: Path) -> dict[str, Any]:
             "errors": 0,
             "started": log.eval.created or "",
             "duration_s": None,
-            "scores": agg_scores,
+            "scores": _extract_score(log),
             "ci_95": None,
         })
 

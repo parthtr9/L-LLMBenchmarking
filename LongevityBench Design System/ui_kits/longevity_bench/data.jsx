@@ -71,7 +71,6 @@ async function loadDashboardData() {
         durationS: r.duration_s || 0,
         think: false,
         spark: Array(7).fill(scores.mean ?? 0).concat([scores.mean ?? 0]),
-        scores: r.scores || {},
       };
     });
 

@@ -31,17 +31,17 @@ const Sidebar = ({ view, setView, runsCount, liveCount }) => {
       </div>
 
       <div className="nav-section">
-        <p className="heading">Data &amp; Prompts</p>
-        {item('lipidomics', 'flask', 'Lipidomics',  '285')}
-        {item('senescence', 'flask', 'Senescence',  '298')}
-      </div>
-
-      <div className="nav-section">
         <p className="heading">Results</p>
         {item('compare', 'chart',  'Compare models')}
         {item('gap',     'chart',  'Gap analysis')}
         {item('matrix',  'table',  'Eval matrix')}
         {item('answers', 'table',  'Answers')}
+      </div>
+
+      <div className="nav-section">
+        <p className="heading">Data &amp; Prompts</p>
+        {item('lipidomics', 'flask', 'Lipidomics',  '285')}
+        {item('senescence', 'flask', 'Senescence',  '298')}
       </div>
 
       <div className="nav-section">

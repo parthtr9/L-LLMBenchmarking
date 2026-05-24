@@ -50,10 +50,7 @@ function TaskSwitcher({ tasks, active, onSelect }) {
 }
 
 function App() {
-  const [view, setView] = React.useState(() => {
-    const h = window.location.hash.slice(1);
-    return h || 'home';
-  });
+  const [view, setView] = React.useState('home');
   const [runs, setRuns] = React.useState(SEED_RUNS);
   const [records, setRecords] = React.useState(SEED_RECORDS);
   const [activeTask, setActiveTask] = React.useState(null);
@@ -62,22 +59,6 @@ function App() {
   const [showModal, setShowModal] = React.useState(false);
   const [toast, setToast] = React.useState(null);
   const liveCount = runs.filter(r => r.status === 'running').length;
-
-  // Hash-based routing — back/forward button support
-  const navigate = React.useCallback((v) => {
-    setView(v);
-    setOpenRun(null);
-    if (v !== 'run-detail') window.location.hash = v;
-  }, []);
-
-  React.useEffect(() => {
-    const onPop = () => {
-      const h = window.location.hash.slice(1);
-      if (h) { setView(h); setOpenRun(null); }
-    };
-    window.addEventListener('popstate', onPop);
-    return () => window.removeEventListener('popstate', onPop);
-  }, []);
 
   React.useEffect(() => {
     loadDashboardData().then(data => {
@@ -111,11 +92,12 @@ function App() {
 
   const handleOpenRun = (run) => {
     setOpenRun(run);
-    setView('run-detail'); // no hash for drill-down — back returns to runs
+    setView('run-detail');
   };
 
   const handleBackToRuns = () => {
-    navigate('runs');
+    setOpenRun(null);
+    setView('runs');
   };
 
   const handleStartRun = (cfg) => {
@@ -136,7 +118,7 @@ function App() {
     };
     setRuns([newRun, ...runs]);
     setShowModal(false);
-    navigate('runs');
+    setView('runs');
     setToast({ msg: `Run started · ${cfg.lbId} · ${cfg.model}`, kind: 'pass' });
     setTimeout(() => setToast(null), 3200);
   };
@@ -169,7 +151,7 @@ function App() {
   // Body
   let content;
   if (view === 'home') {
-    content = <HomeView runs={runs} records={visibleRecords} setView={navigate} />;
+    content = <HomeView runs={runs} records={visibleRecords} setView={setView} />;
   } else if (view === 'run-detail' && openRun) {
     content = <RunDetail run={openRun} records={visibleRecords} onOpenRecord={setOpenRecord} />;
   } else if (view === 'trust') {
@@ -200,7 +182,7 @@ function App() {
 
   return (
     <div className="app">
-      <Sidebar view={view} setView={navigate} runsCount={runs.length} liveCount={liveCount} />
+      <Sidebar view={view} setView={(v) => { setView(v); setOpenRun(null); }} runsCount={runs.length} liveCount={liveCount} />
       <div className="main">
         <TopBar
           crumbs={crumbs}
