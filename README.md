@@ -1,178 +1,297 @@
-# L-LLMBenchmarking
+# LongevityBench-X
 
-Caltech Longevity Hackathon Track 01 — LongevityLLM Benchmarking.
-Evaluates L-LLM (Insilico Medicine's fine-tuned Qwen3.5-9B) against Claude Sonnet 4.5 and baselines on two novel benchmark tasks:
+**Caltech Longevity Hackathon — Track 01: LongevityLLM Benchmarking**
+Sponsored by Insilico Medicine · Prize: $1,000 + co-authorship
 
-- **Task A — Senescence Perturbation** (298 prompts): Gene-level differential expression prediction across senescence perturbation experiments
-- **Task B — Lipidomics** (285 prompts): Age bracket, numeric age, and diabetes prediction from plasma lipid profiles
-
-Includes a V4 trace faithfulness scorer that verifies biological claims in L-LLM's chain-of-thought traces against mygene.info.
-
-**Stack:** Inspect AI · LiteLLM · BioThings mygene.info · static React dashboard (no build step)
+Evaluates L-LLM (Insilico Medicine's fine-tuned Qwen3.5-9B) against Claude Sonnet 4.6 and baselines across two novel biology benchmark tasks. Includes an automated reasoning-trace faithfulness scorer and a static React dashboard for interactive result exploration.
 
 ---
 
-## Setup
+## What we built
+
+| Task | Prompts | Formats | Domain |
+|------|---------|---------|--------|
+| **Task A — Senescence Perturbation** | 298 | MCQ · Binary · Pairwise | Transcriptomics |
+| **Task B — Lipidomics** | 285 | MCQ · Binary · Regression | Lipidomics |
+
+**Six models evaluated:**
+
+| Key | Model | Notes |
+|-----|-------|-------|
+| `longevity_llm` | Qwen3.5-9B (L-LLM) | Insilico Medicine fine-tune, thinking off |
+| `longevity_llm_thinking` | Qwen3.5-9B (L-LLM) | Thinking on, max 3000 tokens |
+| `claude_sonnet` | Claude Sonnet 4.6 | Via Anthropic API |
+| `majority_baseline` | Majority label | Computed from training distribution |
+| `random_baseline` | Random label | Uniform draw over valid label set |
+| `population_prior_baseline` | Census-weighted age | US Census 2025 age distribution (Task B regression) |
+
+**Stack:** Python 3.11 · Inspect AI · LiteLLM · mygene.info · Static React (no build step)
+
+---
+
+## Quick start
+
+### 1. Install
 
 ```bash
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
-cp .env.example .env
-# Fill in .env
 ```
 
-### Required env vars
+### 2. Configure API keys
 
-| Var | Required | Notes |
-|-----|----------|-------|
-| `HF_TOKEN` | Yes | Classic read token from huggingface.co/settings/tokens |
-| `HF_ENDPOINT_URL` | Yes for L-LLM | vLLM-compatible endpoint from organizers (OpenAI-compat format) |
-| `ANTHROPIC_API_KEY` | Yes for claude_sonnet | Anthropic Console key |
+```bash
+cp .env.example .env
+# Edit .env and fill in your keys
+```
+
+| Variable | Required for | Where to get |
+|----------|-------------|--------------|
+| `HF_TOKEN` | L-LLM | huggingface.co/settings/tokens (classic read token) |
+| `HF_ENDPOINT_URL` | L-LLM | vLLM-compatible endpoint from hackathon organizers |
+| `ANTHROPIC_API_KEY` | Claude Sonnet | console.anthropic.com |
 
 Never commit `.env`.
 
----
-
-## Full pipeline (run in order)
-
-### 1. Run eval
+### 3. Run the pipeline
 
 ```bash
-# Task A — all 4 models on test set
-.venv/bin/python -m src.eval.run_inspect \
-  --parquet data/task_a_senescence/processed/task_a_senescence_test.parquet \
-  --models longevity_llm,claude_sonnet,majority_baseline,random_baseline
-
-# Task A — L-LLM with thinking traces (30-sample subset, 10 per format)
-.venv/bin/python -m src.eval.run_inspect \
-  --parquet data/task_a_senescence/processed/task_a_senescence_test_30.parquet \
-  --models longevity_llm_thinking \
-  --max-tokens 3000
-
-# Task B — all 4 models on test set
-.venv/bin/python -m src.eval.run_inspect \
-  --parquet data/task_b_lipidomics/task_b_lipidomics_test.parquet \
-  --models longevity_llm,claude_sonnet,majority_baseline,random_baseline
+caffeinate -i .venv/bin/python pipeline.py
 ```
 
-Logs written to `outputs/inspect/<model_name>/`.
+`caffeinate -i` prevents laptop sleep during long evals. The pipeline walks you through every step interactively.
 
-### 2. Export logs → dashboard JSON
+---
+
+## Pipeline walkthrough
+
+Running `pipeline.py` presents 7 interactive steps. Steps 4, 5, and 5.5 run automatically without prompts.
+
+```
+Step 1  Choose models to evaluate
+Step 2  Choose dataset (test / train / single task)
+Step 3  Run evaluation (Inspect AI)      ← API calls happen here
+Step 4  Cache predictions                ← auto
+Step 5  Export logs → data.json          ← auto
+Step 5.5 Export task browser JSON        ← auto
+Step 6  Gap analysis
+Step 6.5 Trace faithfulness scoring
+Step 7  Serve dashboard
+```
+
+### Step 1 — Choose models
+
+Pick by number or comma-separated list. Default: `longevity_llm,majority_baseline,random_baseline`.
+
+### Step 2 — Choose dataset
+
+```
+0  → all test sets   (Task A test 59 + Task B test 57)
+t  → all train sets  (Task A train 225 + Task B train 228)
+1  → task_a_senescence only
+2  → task_b_lipidomics only
+```
+
+For single task you can also filter by format (mcq/binary/pairwise/regression) and set a sample limit.
+
+### Step 3 — Evaluation
+
+Runs Inspect AI with the selected models against the selected parquet(s). Logs saved to `outputs/inspect/<model_name>/`. For a full run (6 models × 2 tasks × ~250 samples each), expect 30–90 minutes depending on endpoint speed.
+
+### Step 4 — Cache predictions (auto)
+
+Reads all `.eval` logs and writes `outputs/prediction_cache.json` keyed `model_name::lb_id`. Re-runs skip cached samples — no duplicate API calls.
+
+### Step 5 — Export logs (auto)
+
+Converts `.eval` binary logs to `public/data.json`. This feeds all dashboard views.
+
+### Step 5.5 — Export task browser JSON (auto)
+
+Writes `public/task_a_data.json` and `public/task_b_data.json` for the Senescence and Lipidomics prompt-browser pages.
+
+### Step 6 — Gap analysis
+
+Reads `public/data.json`. Writes:
+- `outputs/gap_analysis_report.md` — human-readable findings
+- `public/gap_analysis_data.json` — structured JSON for dashboard Gap Analysis view
+
+### Step 6.5 — Trace faithfulness scoring
+
+Two sub-steps (each asks for confirmation):
+
+1. **V5 scorer** — keyword matching + mygene.info gene verification. Fast, no API cost.
+2. **Claude oracle** — Claude Sonnet verifies biological claims in traces. Costs API credits.
+
+Writes `public/trace_faithfulness_scores.json` for the Trust & Reasoning dashboard page.
+
+### Step 7 — Serve dashboard
+
+```
+http://localhost:8765/
+```
+
+Must serve from `LongevityBench Design System/ui_kits/longevity_bench/` — CSS tokens and JSON files resolve relative to that directory.
+
+---
+
+## Run evals manually (without pipeline)
 
 ```bash
+# Task A — all 6 models, test set
+.venv/bin/python -m src.eval.run_inspect \
+  --parquet data/task_a_senescence/processed/task_a_senescence_test.parquet \
+  --models longevity_llm,longevity_llm_thinking,claude_sonnet,majority_baseline,random_baseline,population_prior_baseline
+
+# Task B — test set
+.venv/bin/python -m src.eval.run_inspect \
+  --parquet data/task_b_lipidomics/task_b_lipidomics_test.parquet \
+  --models longevity_llm,claude_sonnet,majority_baseline,random_baseline,population_prior_baseline
+
+# Single format, sample limit
+.venv/bin/python -m src.eval.run_inspect \
+  --parquet data/task_a_senescence/processed/task_a_senescence_test.parquet \
+  --models longevity_llm \
+  --fmt-filter mcq \
+  --limit 10
+```
+
+`--max-tokens` defaults to 500; override for thinking models with `--max-tokens 3000` (or it's read automatically from `config/models.yaml`).
+
+---
+
+## Run individual pipeline steps manually
+
+```bash
+# Export .eval logs → data.json
 .venv/bin/python -m tools.export_inspect_logs \
   --log-dir outputs/inspect \
   --out "LongevityBench Design System/ui_kits/longevity_bench/public/data.json"
-```
 
-### 3. Run gap analysis
+# Export task browser JSONs
+.venv/bin/python -m tools.export_task_data
 
-```bash
+# Cache predictions
+.venv/bin/python tools/cache_predictions.py
+
+# Gap analysis
 .venv/bin/python -m src.analysis.gap_analysis
-```
 
-Reads `public/data.json`. Writes:
-- `outputs/gap_analysis_report.md` — human-readable markdown
-- `public/gap_analysis_data.json` — structured JSON consumed by dashboard Gap Analysis view
-
-### 4. Score thinking traces (faithfulness)
-
-```bash
+# Trace faithfulness scorer
 .venv/bin/python -m src.trace_scorer.trace_scorer
-```
 
-Reads `public/data.json`, verifies gene symbols via mygene.info API (cached in `outputs/mygene_cache.json`), applies keyword consistency checker.
-Writes `outputs/trace_faithfulness_scores.json` and `public/trace_faithfulness_scores.json`.
-
-### 5. Export task data for dashboard library views
-
-```bash
-python3 << 'EOF'
-import pandas as pd, json
-from pathlib import Path
-
-PUBLIC = Path("LongevityBench Design System/ui_kits/longevity_bench/public")
-
-def extract_row(row, split):
-    msgs = row['messages']
-    if isinstance(msgs, str): msgs = json.loads(msgs)
-    user_msg = next((m['content'] for m in msgs if m['role'] == 'user'), '')
-    gold = next((m['content'] for m in msgs if m['role'] == 'assistant'), '')
-    meta = row.get('metadata') or '{}'
-    if isinstance(meta, str):
-        try: meta = json.loads(meta)
-        except: meta = {}
-    return {
-        'lb_id': row['lb_id'], 'format': row['format'], 'pool': row['pool'],
-        'display_group': row.get('display_group', ''), 'domain': row['domain'],
-        'metric': row['metric'], 'split': split,
-        'question': user_msg[:1000], 'gold': gold,
-        'follow_up': (meta.get('follow_up','') or '')[:400] if isinstance(meta,dict) else '',
-    }
-
-for task, paths in [
-    ('task_a', {'train': 'data/task_a_senescence/processed/task_a_senescence_train.parquet',
-                'test':  'data/task_a_senescence/processed/task_a_senescence_test.parquet'}),
-    ('task_b', {'train': 'data/task_b_lipidomics/task_b_lipidomics_train.parquet',
-                'test':  'data/task_b_lipidomics/task_b_lipidomics_test.parquet'}),
-]:
-    rows = []
-    for split, path in paths.items():
-        df = pd.read_parquet(path)
-        rows.extend(extract_row(r, split) for _, r in df.iterrows())
-    (PUBLIC / f'{task}_data.json').write_text(json.dumps({'task': task, 'rows': rows}, indent=2))
-    print(f"{task}: {len(rows)} rows")
-EOF
-```
-
-### 6. Serve dashboard
-
-```bash
+# Serve dashboard
 cd "LongevityBench Design System/ui_kits/longevity_bench"
 python3 -m http.server 8765
-# open http://localhost:8765/
 ```
-
-Must serve from this directory — CSS tokens and JSON files resolve relative to it.
 
 ---
 
-## Current benchmark results
+## Dashboard pages
 
-All results on the test split. Per-task headline metric matches the spec in each task's table below.
+Open `http://localhost:8765/` after running Step 7. All views pull from static JSON — no backend.
 
-### Task A — Senescence Perturbation (n=104 evaluated)
+| Page | What it shows | Data source |
+|------|--------------|-------------|
+| **Eval Matrix** | Per-sample × per-model pass/fail heatmap | `data.json` |
+| **Compare** | Grouped bar chart, model cards with score rings, per-format breakdown | `data.json` |
+| **Answers** | Full sample table — gold answer vs each model's prediction | `data.json` |
+| **Gap Analysis** | Leaderboard, head-to-head selector, confusion matrices, distribution bars | `gap_analysis_data.json` |
+| **Live Runs** | Completed run list, click to drill into sample log | `data.json` |
+| **Trust & Reasoning** | Trace faithfulness, gene verification, keyword consistency | `trace_faithfulness_scores.json` |
+| **Tasks** | Task groups, model summary table | `data.json` |
+| **Models** | Per-model cards: format scores, correct/total, avg latency | `data.json` |
+| **Senescence** | Task A prompt browser: train/test split, format filter, search | `task_a_data.json` |
+| **Lipidomics** | Task B prompt browser: train/test split, format filter, search | `task_b_data.json` |
 
-| Model | MCQ (accuracy) | Binary (accuracy) | Pairwise (balanced accuracy) | Regression (MAE) |
-|-------|--------------|-----------------|----------------|-----------------|
-| L-LLM | 0.367 | 0.500 | 0.556 | 10.571 |
-| Claude Sonnet 4.5 | 0.258 | 0.500 | **0.778** | 25.787 |
-| Majority baseline | 0.171 | 0.500 | 0.500 | — |
-| Random baseline | 0.258 | 0.389 | 0.667 | — |
+---
 
-L-LLM leads on MCQ and regression (lower MAE); Claude leads on pairwise. Regression column is from the previous Log2FC variant (since replaced by Binary significance) — re-run with the current parquet to refresh.
+## Benchmark tasks
+
+### Task A — Senescence Perturbation
+
+Derived from the Senescent Fibroblast Transcriptome Compendium (119 studies, 1,069 comparisons) filtered through CellAge v3. All questions involve predicting the transcriptomic effect of a perturbation (knockdown/overexpression/drug) on top of a senescent baseline.
+
+| Format | N | Task | Gold | Metric |
+|--------|---|------|------|--------|
+| MCQ | 99 | Given experiment metadata, predict direction of expression change | A/B/C | `accuracy` (33/33/33 balanced) |
+| Binary | 100 | Predict whether perturbation produces significant change (\|LogFC\| > 1.0, p < 0.05) | A/B | `accuracy` (50/50 balanced) |
+| Pairwise | 99 | Given two genes from same experiment, predict which shows larger \|LogFC\| | A/B | `balanced_accuracy` |
+
+**Train/test split:** by GEO accession — 225 train / 59 test. All prompts from one study go to the same split. Zero treatment leakage.
+
+**lb_id prefixes:** `LB-SEN-MCQ`, `LB-SEN-PAIR`, `LB-SEN-SIG`
+
+**Regenerate prompts:**
+
+Download `Total_Data.csv` from [Cellular Senescence downloads](https://research.ncl.ac.uk/cellularsenescence/downloadingdata/) and `cellage3.tsv` from [genomics.senescence.info](https://genomics.senescence.info/cells/) into `data/task_a_senescence/raw/`.
+
+```bash
+cd data/task_a_senescence
+python senescence_benchmark_pipeline.py \
+  --dataset raw/Total_Data.csv \
+  --cellage raw/cellage3.tsv \
+  --output-dir processed
+```
+
+---
 
 ### Task B — Lipidomics
 
-Eval not yet run end-to-end on the current parquet. Headline metrics when run: MCQ → off-by-one accuracy, Regression → MAE, Binary → accuracy.
+Derived from MTBLS4461 plasma lipidomics (DI-MS alternating polarity). 1,864 donors × ~497 lipid features after gender balancing and diabetes-NaN removal.
 
-### Trace faithfulness (L-LLM thinking, n=29 traces)
+| Format | N | Task | Gold | Metric |
+|--------|---|------|------|--------|
+| MCQ | 85 | Predict age bracket from lipid profile | A=20–39 / B=40–59 / C=60–79 / D=80+ | `off_by_one_accuracy` (ordinal: 1.0 exact, 0.5 adjacent) |
+| Regression | 100 | Predict numeric age in years (lipid profile + diabetes status) | integer years | `mae` |
+| Binary | 100 | Predict diabetes status (lipid profile + age) | A=Yes / B=No | `accuracy` |
 
-| Metric | Value |
-|--------|-------|
-| Formula | `0.60 × gene_score + 0.40 × keyword_consistency` |
-| Avg faithfulness | 0.716 |
-| Gene score (mygene.info) | 0.895 (89.5% of cited genes verified) |
-| Keyword consistency | 0.448 (24.1% directionally consistent) |
-| Spearman ρ (faithfulness vs correctness) | 0.034 (p=0.861, n=29 — not yet significant) |
+**Train/test split:** stratified by format, grouped by `individual_id` — 228 train / 57 test. No donor appears in both splits.
 
-Keyword consistency is low because biological traces discuss mechanisms rather than stating direction explicitly. Increase n for statistical power.
+**lb_id prefixes:** `LB-LIP-MCQ`, `LB-LIP-REG`, `LB-LIP-DIAB`
+
+**Regenerate prompts:**
+
+Download from [EBI MetaboLights MTBLS4461](https://www.ebi.ac.uk/metabolights/editor/MTBLS4461/samples) into `data/task_b_lipidomics/raw/`.
+
+```bash
+cd data/task_b_lipidomics
+
+python combine_lipidomics.py \
+  --maf    raw/m_MTBLS4461_DI-MS_alternating__metabolite_profiling_v2_maf.tsv \
+  --sample raw/s_MTBLS4461.txt \
+  --out    combined_lipidomics.tsv
+
+python balance_gender.py
+
+python lipidomics_pipeline.py \
+  --input balanced_lipidomics.tsv \
+  --output-dir . \
+  --target-per-task 100
+```
+
+---
+
+## Trace faithfulness scorer
+
+Scores L-LLM thinking traces for biological grounding. Applied to `longevity_llm_thinking` outputs only.
+
+**Formula:**
+```
+faithfulness = 0.60 × gene_score + 0.40 × keyword_consistency
+```
+
+**Gene score** — extracts gene symbols from trace (regex, multi-species), verifies via mygene.info API. Cached in `outputs/mygene_cache.json`.
+
+**Keyword consistency** — detects whether trace direction language (up/down + negation detection) matches the predicted label. Returns 0.5 for pairwise/regression (no directional semantics).
+
+Replaces V3 (DeBERTa NLI) which gave 3.4% consistency because biological traces exceed the 1024-token DeBERTa limit. V4/V5 keyword matching on the full trace gives ~24% consistency on the same data.
 
 ---
 
 ## Model registry
 
-Models defined in [config/models.yaml](config/models.yaml). Add providers without touching Python.
+All models defined in `config/models.yaml`. Add a new provider without touching Python — just add an entry and reference the API key env var.
 
 ```yaml
 models:
@@ -191,6 +310,7 @@ models:
     extra_body:
       chat_template_kwargs: {enable_thinking: true}
     max_concurrency: 4
+    max_tokens: 3000
 
   claude_sonnet:
     litellm_model: "anthropic/claude-sonnet-4-6"
@@ -204,155 +324,44 @@ models:
   majority_baseline:
     type: baseline
     strategy: majority
+
+  population_prior_baseline:
+    type: baseline
+    strategy: population_prior
+    csv_path: "data/task_b_lipidomics/nc-est2025-agesex-res.csv"
+    year_col: "POPESTIMATE2025"
+    age_min: 20
+    age_max: 90
 ```
 
 ---
 
-## Dashboard views
+## Prompt format (JSONL / ChatML)
 
-| View | What it shows | Data source |
-|------|--------------|-------------|
-| Eval matrix | Per-sample × per-model pass/fail heatmap | `public/data.json` |
-| Compare models | Grouped bar chart + model cards with score rings, per-format breakdown | `public/data.json` |
-| Gap analysis | Leaderboard, head-to-head selector, per-format tables, confusion matrices | `public/gap_analysis_data.json` |
-| Answers | Full sample table with gold vs each model's prediction, format filter | `public/data.json` |
-| Live runs | Completed run list with actual correct/total from real records; click for sample log | `public/data.json` |
-| Trust & reasoning | Trace faithfulness, gene verification, keyword consistency with interactive detail | `public/trace_faithfulness_scores.json` |
-| Tasks | Task groups derived from loaded records, model summary table | `public/data.json` |
-| Models | Per-model cards with real format scores, correct/total, avg latency | `public/data.json` |
-| Senescence | Task A prompt browser: train/test split, format filter, search, expandable rows | `public/task_a_data.json` |
-| Lipidomics | Task B prompt browser: train/test split, format filter, search, expandable rows | `public/task_b_data.json` |
+All benchmark prompts are stored as parquet with a `messages` column. JSONL export = one row per line in OpenAI ChatML format. Compatible with any OpenAI-API-compatible endpoint.
 
-Task switcher (top bar) lets you filter all Evaluate views to a single task group. Hidden on Senescence/Lipidomics library pages.
-
----
-
-## Architecture
-
-```
-Task A parquet  ─┐
-Task B parquet  ─┤
-                 ↓
-         run_inspect.py
-              ├── parquet_task (@task)        reads parquet, builds ChatML samples
-              ├── litellm_solver              calls L-LLM / Claude / baselines via LiteLLM
-              └── longebench_scorer           metric-aware: accuracy / balanced_accuracy / off_by_one_accuracy / mae
-                 ↓
-         outputs/inspect/<model_name>/*.eval  (Inspect AI binary logs)
-                 ↓
-         tools/export_inspect_logs.py
-                 ↓
-         public/data.json                     {runs, samples, models, tasks}
-                 ↓
-         ┌───────────────────────────────────────┐
-         │  src/analysis/gap_analysis.py         │
-         │  → public/gap_analysis_data.json      │
-         └───────────────────────────────────────┘
-         ┌───────────────────────────────────────┐
-         │  src/trace_scorer/trace_scorer.py     │
-         │     entity_extractor.py               │
-         │     verifiers/mygene_verifier.py      │  → mygene.info API
-         │     consistency_checker.py            │  → keyword matching V4
-         │  → public/trace_faithfulness_scores.json │
-         └───────────────────────────────────────┘
-                 ↓
-         Dashboard (static React, no backend, no build step)
-              index.html  loads all JSX via Babel standalone
-              public/*.json  served by python3 -m http.server
+**One JSONL line:**
+```json
+{
+  "lb_id": "LB-SEN-MCQ-0001",
+  "format": "mcq",
+  "metric": "accuracy",
+  "domain": "transcriptomics",
+  "messages": [
+    {"role": "system",    "content": "You are an expert computational biologist..."},
+    {"role": "user",      "content": "<question>...</question><options>A. ... B. ...</options>"},
+    {"role": "assistant", "content": "B"}
+  ]
+}
 ```
 
----
+The `assistant` turn is the gold label — what the model should predict.
 
-## Task A — Senescence Perturbation
-
-298 prompts across three formats derived from the Senescent Fibroblast Transcriptome Compendium filtered through CellAge v3.
-
-| Format | N | Task | Gold | Metric |
-|--------|---|------|------|--------|
-| MCQ | 99 | Given experiment metadata, predict direction of gene expression change | A / B / C | `accuracy` (33/33/33 balanced → equals balanced accuracy) |
-| Binary | 100 | Predict whether perturbation produces a significant change (\|LogFC\| > 1.0, p < 0.05) | A / B | `accuracy` (50/50 balanced → equals balanced accuracy) |
-| Pairwise | 99 | Given two genes from same experiment, predict which shows larger \|LogFC\| | A / B | `balanced accuracy` |
-
-Train/test split by GEO accession — 239 train / 59 test, 15 train accessions / 28 test accessions. Zero leaked treatments.
-
-### Regenerate prompts
-
-Download `Total_Data.csv` from https://research.ncl.ac.uk/cellularsenescence/downloadingdata/ and `cellage3.tsv` from https://genomics.senescence.info/cells/ into `data/task_a_senescence/raw/`.
-
-```bash
-cd data/task_a_senescence
-python senescence_benchmark_pipeline.py \
-  --dataset raw/Total_Data.csv \
-  --cellage raw/cellage3.tsv \
-  --output-dir processed
-```
-
-Outputs: `processed/task_a_senescence_{train,test}.parquet`, `…_{train,test}.json`, `task_a_senescence_summary.json`, `task_a_senescence_test_30.parquet` (10/format thinking-trace subset).
-
----
-
-## Task B — Lipidomics
-
-285 prompts across three formats derived from MTBLS4461 plasma lipidomics (1,864 donors × ~497 lipid features after gender balancing).
-
-| Format | N | Task | Gold | Metric |
-|--------|---|------|------|--------|
-| MCQ | 85 | Predict age bracket from lipid profile (A=20–39 / B=40–59 / C=60–79 / D=80+) | A / B / C / D | `off-by-one accuracy` (ordinal: 1.0 exact, 0.5 adjacent, 0.0 else) |
-| Regression | 100 | Predict numeric age in years from lipid profile + diabetes status | integer years | `mae` |
-| Binary | 100 | Predict diabetes status (A=Yes / B=No) from lipid profile + age | A / B | `accuracy` (class prior ≈ 61/39 No/Yes — also report majority baseline) |
-
-Train/test: stratified by format, grouped by `individual_id` — 228 train / 57 test. No donor appears in both splits.
-
-> ⚠️ The default `--min-train-per-task=50` floor only works at `--target-per-task ≥ 80`. At smaller targets the floor swallows the test split; the pipeline prints a per-format `WARNING` and tells you which knob to turn.
-
-### Regenerate prompts
-
-Download from [EBI MetaboLights MTBLS4461](https://www.ebi.ac.uk/metabolights/editor/MTBLS4461/samples) into `data/task_b_lipidomics/raw/`.
-
-```bash
-cd data/task_b_lipidomics
-
-# 1. Join MAF abundance × sample metadata
-python combine_lipidomics.py \
-  --maf    raw/m_MTBLS4461_DI-MS_alternating__metabolite_profiling_v2_maf.tsv \
-  --sample raw/s_MTBLS4461.txt \
-  --out    combined_lipidomics.tsv
-
-# 2. Gender balance (undersample males to female count, stratified on diabetes)
-python balance_gender.py
-
-# 3. Generate prompts + train/test split
-python lipidomics_pipeline.py \
-  --input balanced_lipidomics.tsv \
-  --output-dir . \
-  --target-per-task 100
-```
-
-Outputs: `task_b_lipidomics_{train,test}.parquet`, `…_{train,test}.json`, `task_b_lipidomics_summary.json`.
-
----
-
-## Trace faithfulness scorer (V4)
-
-Scores L-LLM thinking traces for biological grounding. Two components:
-
-**Gene score** — extracts human/mouse gene symbols from trace via regex, verifies against mygene.info API (human/mouse/rat/fly/nematode/yeast namespaces). Cached in `outputs/mygene_cache.json`.
-
-**Keyword consistency** — detects whether trace direction language (up/down/no-change keywords with negation detection) matches the predicted answer label. Returns 0.5 for pairwise/regression (no directional semantics).
-
-```
-faithfulness = 0.60 × gene_score + 0.40 × keyword_consistency
-```
-
-Replaces V3 (DeBERTa NLI) which gave 3.4% consistency — biological traces too long for 1024-token truncation. V4 keyword matching gives 24.1% consistency on same data.
-
-```bash
-# Run scorer
-.venv/bin/python -m src.trace_scorer.trace_scorer
-
-# Validate consistency checker
-.venv/bin/python -m src.trace_scorer.validate
-```
+**JSONL files** (already exported):
+- `data/task_a_senescence/processed/task_a_senescence_test.json`
+- `data/task_a_senescence/processed/task_a_senescence_train.json`
+- `data/task_b_lipidomics/task_b_lipidomics_test.json`
+- `data/task_b_lipidomics/task_b_lipidomics_train.json`
 
 ---
 
@@ -361,23 +370,116 @@ Replaces V3 (DeBERTa NLI) which gave 3.4% consistency — biological traces too 
 | Criterion | Points | How we hit it |
 |-----------|--------|---------------|
 | Utility | 5 | Tasks target failure modes that break real research workflows |
-| Diversity | 5 | Both tasks cover binary, MCQ, regression, and pairwise formats |
+| Diversity | 5 | Both tasks cover MCQ, binary, pairwise, and regression formats |
 | Retrieval resistance | 5 | All questions derived from raw GEO/MetaboLights records, not paper text |
 | Statistical rigor | 5 | Macro F1 + balanced accuracy + off-by-one accuracy + MAE + bootstrap CIs + baselines |
 
 **Total: 20 points.**
 
+Always report majority-class baseline F1 alongside model F1. A model scoring 0.62 F1 where majority-class gets 0.61 is not impressive.
+
 ---
 
-## Key decisions
+## Repository structure
+
+```
+L-LLMBenchmarking/
+├── pipeline.py                      ← main entry point — run this
+├── config/
+│   └── models.yaml                  ← model registry
+├── .env.example                     ← copy to .env, fill in keys
+├── requirements.txt
+│
+├── data/
+│   ├── task_a_senescence/
+│   │   ├── raw/                     ← Total_Data.csv, cellage3.tsv
+│   │   ├── processed/               ← train/test parquets + JSONL
+│   │   └── senescence_benchmark_pipeline.py
+│   └── task_b_lipidomics/
+│       ├── raw/                     ← MTBLS4461 MAF + sample sheet
+│       ├── task_b_lipidomics_{train,test}.parquet
+│       ├── task_b_lipidomics_{train,test}.json
+│       ├── combine_lipidomics.py
+│       ├── balance_gender.py
+│       └── lipidomics_pipeline.py
+│
+├── src/
+│   ├── eval/
+│   │   ├── run_inspect.py           ← CLI: --parquet, --models, --max-tokens
+│   │   ├── inspect_solvers.py       ← litellm_solver + baseline solvers
+│   │   ├── inspect_scorers.py       ← accuracy / balanced_accuracy / off_by_one / mae
+│   │   ├── inspect_tasks/
+│   │   │   └── parquet_task.py      ← Inspect AI @task, builds ChatML samples
+│   │   └── litellm_client.py        ← async LiteLLM wrapper with retry
+│   ├── trace_scorer/
+│   │   ├── trace_scorer.py          ← orchestrator: gene_score + keyword_consistency
+│   │   ├── entity_extractor.py      ← regex gene extraction (multi-species)
+│   │   ├── consistency_checker.py   ← V5 keyword matching with negation detection
+│   │   └── verifiers/
+│   │       └── mygene_verifier.py   ← mygene.info API (cached)
+│   └── analysis/
+│       └── gap_analysis.py          ← reads data.json → gap_analysis_data.json + report.md
+│
+├── tools/
+│   ├── export_inspect_logs.py       ← .eval logs → public/data.json
+│   ├── export_task_data.py          ← parquets → public/task_{a,b}_data.json
+│   └── cache_predictions.py        ← .eval logs → outputs/prediction_cache.json
+│
+├── outputs/
+│   ├── inspect/                     ← .eval logs per model
+│   ├── prediction_cache.json        ← keyed model_name::lb_id
+│   ├── mygene_cache.json
+│   ├── gap_analysis_report.md
+│   └── benchmark_card.md
+│
+└── LongevityBench Design System/
+    └── ui_kits/longevity_bench/
+        ├── index.html               ← dashboard entry point
+        ├── public/
+        │   ├── data.json
+        │   ├── gap_analysis_data.json
+        │   ├── trace_faithfulness_scores.json
+        │   ├── task_a_data.json
+        │   └── task_b_data.json
+        └── *.jsx                    ← React components (Babel, no build step)
+```
+
+---
+
+## Data flow
+
+```
+Task A parquet  ──┐
+Task B parquet  ──┤
+                  ↓
+          run_inspect.py
+               ├── parquet_task (@task)   reads parquet, builds ChatML samples
+               ├── litellm_solver         calls LLMs / baselines via LiteLLM
+               └── longebench_scorer      accuracy / balanced_accuracy / off_by_one / mae
+                  ↓
+          outputs/inspect/<model>/*.eval
+                  ↓
+          export_inspect_logs.py  →  public/data.json
+          export_task_data.py     →  public/task_{a,b}_data.json
+          cache_predictions.py    →  outputs/prediction_cache.json
+                  ↓
+          gap_analysis.py         →  public/gap_analysis_data.json
+          trace_scorer.py         →  public/trace_faithfulness_scores.json
+                  ↓
+          Static React dashboard (python3 -m http.server 8765)
+```
+
+---
+
+## Key design decisions
 
 | Decision | Rationale |
 |----------|-----------|
 | Train/test split for Task A by GEO accession | Comparisons within a study share protocols and batch effects — random split leaks |
-| Task A replaces Log2FC regression with binary significance | Regression on Log2FC was retrieval-vulnerable; binary "significant change?" is harder |
-| Task B MCQ uses 4 brackets (20-39/40-59/60-79/80+) | Exposes high-age failure modes; 80+ bracket caps MCQ at 40 prompts |
-| Task B replaces Pairwise with Binary diabetes | More clinically meaningful; exercises second label dimension already in MTBLS4461 |
-| Keyword consistency (V4) replaces DeBERTa NLI (V3) | DeBERTa truncated at 1024 chars → missed biological conclusions; keywords work on full trace |
-| Regression score = 1/(1+MAE) | Converts MAE to 0–1 ascending scale for unified dashboard display |
-| Report macro F1 + balanced accuracy (not plain accuracy) | Class imbalance in all tasks makes plain accuracy misleading |
-| Task B MCQ uses off-by-one accuracy | Age brackets are ordinal — predicting B when truth is A is much better than predicting D. Plain accuracy treats them identically. Off-by-one credits adjacent-bracket predictions at 0.5 |
+| Task A uses binary significance instead of Log2FC regression | Regression on Log2FC is retrieval-vulnerable; "significant change?" is a harder, cleaner task |
+| Task B MCQ uses 4 age brackets (20-39/40-59/60-79/80+) | Exposes high-age failure modes; off-by-one scoring credits ordinal proximity |
+| Task B replaces pairwise with binary diabetes prediction | More clinically meaningful; exercises a second label dimension already in MTBLS4461 |
+| Keyword consistency (V5) replaces DeBERTa NLI (V3) | DeBERTa truncates at 1024 tokens, missing biological conclusions in long traces |
+| Regression displayed as 1/(1+MAE) in dashboard | Converts MAE to 0–1 ascending scale for unified display alongside accuracy metrics |
+| Prediction cache keyed model_name::lb_id | Re-running evals after partial failures skips already-evaluated samples |
+| Majority baseline computed from training targets | Correct evaluation protocol — test labels never seen at baseline-fitting time |
