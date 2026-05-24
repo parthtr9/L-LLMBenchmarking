@@ -7,9 +7,9 @@ assigns ternary expression labels, subsamples for balance, and generates
 evaluation prompts from metadata only.
 
 The balanced data is split three ways into different task formats:
-  - MCQ (1/3):      Ternary classification (up / down / no change)
-  - Pairwise (1/3): Which of two genes shows a larger absolute expression change?
-  - Regression (1/3): Predict the numeric Log2FC value
+  - MCQ (1/3):          Ternary classification (up / down / no change)
+  - Pairwise (1/3):     Which of two genes shows a larger absolute expression change?
+  - Significance (1/3): Binary classification (significantly dysregulated vs no change)
 
 Inputs:
     - dataset.csv: Gene-level differential expression across senescence comparisons
@@ -131,6 +131,27 @@ def assign_labels(
 
     counts = df['direction'].value_counts()
     print(f"Label distribution:")
+    for label, count in counts.items():
+        print(f"  {label}: {count:,}")
+    return df
+
+
+def assign_significance_labels(
+    df: pd.DataFrame,
+    logfc_threshold: float = 1.0,
+    pvalue_threshold: float = 0.05,
+) -> pd.DataFrame:
+    """
+    Assign binary significance labels (direction-agnostic):
+      - 'significant':     |LogFC| > logfc_threshold AND p < pvalue_threshold
+      - 'not_significant': everything else
+    """
+    abs_logfc = df['LogFC'].abs()
+    sig = (abs_logfc > logfc_threshold) & (df['Pvalues'] < pvalue_threshold)
+    df['sig_label'] = np.where(sig, 'significant', 'not_significant')
+
+    counts = df['sig_label'].value_counts()
+    print(f"Binary significance label distribution:")
     for label, count in counts.items():
         print(f"  {label}: {count:,}")
     return df
@@ -259,9 +280,56 @@ def filter_high_significance(
     return filtered
 
 
-# ---------------------------------------------------------------------------
-# 4c. EDA ON BALANCED SET
-# ---------------------------------------------------------------------------
+def prepare_binary_significance_pool(
+    df: pd.DataFrame,
+    target_per_class: int = 100,
+    logfc_cap: float = 10.0,
+    random_state: int = 42,
+) -> pd.DataFrame:
+    """
+    Prepare a balanced pool for the binary significance task (significant vs not).
+
+    Uses the full balanced dataset (not filtered to high-significance rows),
+    since the task needs a mix of significant and null rows.
+
+    Significant rows: filtered to |LogFC| <= logfc_cap (excludes microarray
+    scaling artifacts), then ranked by p-value ascending with |LogFC| descending
+    as tiebreaker — most statistically confident examples first.
+
+    Not-significant rows: ranked by |LogFC| ascending + p-value descending
+    (most clearly unchanged).
+    """
+    rng = np.random.RandomState(random_state)
+    pool_size = target_per_class * 3
+
+    parts = []
+    for label in ['significant', 'not_significant']:
+        pool = df[df['sig_label'] == label].copy()
+        pool['abs_logfc'] = pool['LogFC'].abs()
+
+        if label == 'significant':
+            pool = pool[pool['abs_logfc'] <= logfc_cap]
+            pool = pool.sort_values(['Pvalues', 'abs_logfc'], ascending=[True, False])
+        else:
+            pool = pool.sort_values(['abs_logfc', 'Pvalues'], ascending=[True, False])
+
+        n_keep = min(len(pool), pool_size)
+        pool = pool.head(n_keep).drop(columns='abs_logfc')
+        parts.append(pool)
+
+    filtered = pd.concat(parts, ignore_index=True)
+    filtered = filtered.sample(frac=1, random_state=rng).reset_index(drop=True)
+
+    min_class = min(len(p) for p in parts)
+    print(f"\nBinary significance pool (target {target_per_class} per class × 3, |LogFC| cap={logfc_cap}):")
+    print(f"  Kept {len(filtered)} rows (min class: {min_class})")
+    for label in ['significant', 'not_significant']:
+        subset = filtered[filtered['sig_label'] == label]
+        print(f"  {label}: {len(subset)} rows, "
+              f"median p={subset['Pvalues'].median():.2e}, "
+              f"median |LogFC|={subset['LogFC'].abs().median():.3f}")
+
+    return filtered
 
 def run_eda(df: pd.DataFrame) -> None:
     """Print detailed summary statistics and stratifications for the balanced set."""
@@ -529,47 +597,47 @@ def format_control(control_type: str) -> str:
 
 def split_three_way(
     df: pd.DataFrame,
+    sig_df: pd.DataFrame,
     random_state: int = 42,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
-    Split balanced data into three partitions for different task formats.
-    Stratifies by direction to maintain class balance within each partition.
+    Split data into three partitions for different task formats.
+
+    MCQ and pairwise come from df (balanced by direction label).
+    Significance comes from sig_df (balanced by sig_label).
 
     Pairwise gets a larger share (50%) because the |LogFC| gap filter drops
-    many candidate pairs. MCQ and regression each get 25%.
+    many candidate pairs. MCQ gets 50%, pairwise gets 50% of df.
 
-    Returns: (mcq_df, pairwise_df, regression_df)
+    Returns: (mcq_df, pairwise_df, significance_df)
     """
     rng = np.random.RandomState(random_state)
-    mcq_parts, pair_parts, reg_parts = [], [], []
+    mcq_parts, pair_parts = [], []
 
     for direction in ['upregulated', 'downregulated', 'no_change']:
         pool = df[df['direction'] == direction].copy()
         pool = pool.sample(frac=1, random_state=rng).reset_index(drop=True)
 
         n = len(pool)
-        split1 = n // 4           # 25% MCQ
-        split2 = split1 + n // 2  # 50% pairwise
-        # remaining ~25% regression
+        split1 = n // 2  # 50% MCQ, 50% pairwise
 
         mcq_parts.append(pool.iloc[:split1])
-        pair_parts.append(pool.iloc[split1:split2])
-        reg_parts.append(pool.iloc[split2:])
+        pair_parts.append(pool.iloc[split1:])
 
     mcq_df = pd.concat(mcq_parts, ignore_index=True).sample(frac=1, random_state=rng).reset_index(drop=True)
     pair_df = pd.concat(pair_parts, ignore_index=True).sample(frac=1, random_state=rng).reset_index(drop=True)
-    reg_df = pd.concat(reg_parts, ignore_index=True).sample(frac=1, random_state=rng).reset_index(drop=True)
 
     print(f"\nThree-way split:")
-    print(f"  MCQ partition:        {len(mcq_df)} rows")
-    print(f"  Pairwise partition:   {len(pair_df)} rows")
-    print(f"  Regression partition: {len(reg_df)} rows")
+    print(f"  MCQ partition:          {len(mcq_df)} rows")
+    print(f"  Pairwise partition:     {len(pair_df)} rows")
+    print(f"  Significance partition: {len(sig_df)} rows")
 
-    for name, part in [('MCQ', mcq_df), ('Pairwise', pair_df), ('Regression', reg_df)]:
-        counts = part['direction'].value_counts()
+    for name, part, col in [('MCQ', mcq_df, 'direction'), ('Pairwise', pair_df, 'direction'),
+                             ('Significance', sig_df, 'sig_label')]:
+        counts = part[col].value_counts()
         print(f"  {name} label balance: { {k: int(v) for k, v in counts.items()} }")
 
-    return mcq_df, pair_df, reg_df
+    return mcq_df, pair_df, sig_df
 
 
 # ---------------------------------------------------------------------------
@@ -879,7 +947,7 @@ def generate_pairwise_prompt(
         'display_name': 'Senescence Perturbation / Pairwise',
         'display_group': 'Senescence Perturbation',
         'domain': 'transcriptomics',
-        'format': 'binary',
+        'format': 'pairwise',
         'metric': 'accuracy',
         'units': 'direction',
         'messages': messages,
@@ -893,29 +961,38 @@ def generate_pairwise_prompt(
 # 5e. REGRESSION PROMPT GENERATOR (predict Log2FC)
 # ---------------------------------------------------------------------------
 
-def generate_regression_prompt(row: pd.Series, lb_id_counter: int, logfc_cap: float = 10.0) -> dict:
+def generate_significance_prompt(row: pd.Series, lb_id_counter: int) -> dict:
     """
-    Generate a regression prompt: predict the Log2FC value for a named gene
-    under a specific perturbation. The model must output a numeric value.
-    Ground truth LogFC is capped to [-logfc_cap, logfc_cap].
+    Generate a binary significance classification prompt.
+    Direction is NOT revealed — the model must predict whether the gene
+    is significantly dysregulated at all.
+
+    Labels:
+      A. Significantly dysregulated  — |LogFC| > 1.0 AND p < 0.05
+      B. No significant change        — |LogFC| <= 1.0 OR p >= 0.05
     """
     cell_desc, sen_desc, treat_desc, control_desc, time_str, assay = _build_experiment_block(row)
     gd = _gene_display(row)
-    logfc_raw = round(float(row['LogFC']), 4)
-    logfc = round(np.clip(logfc_raw, -logfc_cap, logfc_cap), 4)
+
+    sig_label = row['sig_label']
+    answer = 'A' if sig_label == 'significant' else 'B'
 
     question = (
         f"You are presented with a senescence perturbation experiment. "
         f"In {cell_desc} undergoing {sen_desc}{time_str}, "
         f"{treat_desc} is applied. "
-        f"Compared to {control_desc}, predict the Log2 fold-change (Log2FC) "
-        f"in mRNA expression of {gd} measured by {assay}. "
-        f"Respond with only a numeric value rounded to two decimal places "
-        f"(positive = upregulated, negative = downregulated)."
+        f"Compared to {control_desc}, is the mRNA expression of "
+        f"{gd} measured by {assay} significantly dysregulated?"
+    )
+
+    options = (
+        "A. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) "
+        "B. No significant change (|Log2FC| ≤ 1.0 or p ≥ 0.05)"
     )
 
     user_content = (
         f"<question>\n{question}\n</question>\n"
+        f"<options>\n{options}\n</options>\n"
         + _experiment_xml(row, cell_desc, sen_desc, treat_desc, control_desc)
     )
 
@@ -924,22 +1001,25 @@ def generate_regression_prompt(row: pd.Series, lb_id_counter: int, logfc_cap: fl
     messages = [
         {'role': 'system', 'content': SYSTEM_MSG},
         {'role': 'user', 'content': user_content},
-        {'role': 'assistant', 'content': str(round(logfc, 2))},
+        {'role': 'assistant', 'content': answer},
     ]
 
+    metadata = _build_metadata_dict(row, follow_up, assay)
+    metadata['sig_label'] = sig_label
+
     return {
-        'lb_id': f'LB-SEN-REG-{lb_id_counter:04d}',
-        'pool': 'senescence_perturbation_regression',
-        'display_name': 'Senescence Perturbation / Regression',
+        'lb_id': f'LB-SEN-SIG-{lb_id_counter:04d}',
+        'pool': 'senescence_perturbation_significance',
+        'display_name': 'Senescence Perturbation / Binary Significance',
         'display_group': 'Senescence Perturbation',
         'domain': 'transcriptomics',
-        'format': 'regression',
-        'metric': 'mae',
-        'units': 'log2fc',
+        'format': 'binary',
+        'metric': 'accuracy',
+        'units': 'significance',
         'messages': messages,
-        'task': 'senescence_perturbation_regression',
+        'task': 'senescence_perturbation_significance',
         'has_reasoning': False,
-        'metadata': json.dumps({**_build_metadata_dict(row, follow_up, assay)}),
+        'metadata': json.dumps(metadata),
     }
 
 
@@ -1026,10 +1106,9 @@ def _sample_tissue_balanced(
 def generate_all_benchmarks(
     mcq_df: pd.DataFrame,
     pair_df: pd.DataFrame,
-    reg_df: pd.DataFrame,
+    sig_df: pd.DataFrame,
     target_per_task: int = 100,
     min_logfc_gap: float = 0.5,
-    logfc_cap: float = 10.0,
     random_state: int = 42,
 ) -> tuple[list[dict], list[dict], list[dict]]:
     """Generate prompts for all three task formats, capped to target_per_task each,
@@ -1065,11 +1144,7 @@ def generate_all_benchmarks(
     # Soft balance: allocate equally, but let tissues with surplus fill shortfalls
     target_per_tissue = target_per_task // len(tissues)
     allocated = {t: min(target_per_tissue, len(pool)) for t, pool in tissue_pools.items()}
-    shortfall = sum(target_per_tissue - allocated[t] for t in tissues)
-    total_allocated = sum(allocated.values())
-
-    # Distribute shortfall + integer-division remainder to tissues with spare capacity
-    still_needed = target_per_task - total_allocated
+    still_needed = target_per_task - sum(allocated.values())
     for tissue in sorted(tissues, key=lambda t: len(tissue_pools[t]), reverse=True):
         if still_needed <= 0:
             break
@@ -1097,16 +1172,26 @@ def generate_all_benchmarks(
         print(f"    ⚠ Below target — only {len(pairs)} valid pairs survived the "
               f"|LogFC| gap ≥ {min_logfc_gap} filter")
 
-    # --- Regression: tissue + direction balanced sample from input df ---
-    reg_input = _sample_tissue_balanced(reg_df, target_per_task, rng)
-    reg_prompts = []
-    for i, (_, row) in enumerate(reg_input.iterrows()):
-        reg_prompts.append(generate_regression_prompt(row, i + 1, logfc_cap=logfc_cap))
-    tissue_counts = reg_input['Organ'].value_counts().to_dict()
-    label_counts = reg_input['direction'].value_counts().to_dict()
-    print(f"  Regression prompts: {len(reg_prompts)} (target {target_per_task}) | tissues: {tissue_counts} | labels: {label_counts}")
+    # --- Binary significance: tissue + sig_label balanced sample ---
+    sig_input = _sample_tissue_balanced(sig_df, target_per_task, rng, direction_col='sig_label')
+    sig_prompts = []
+    for i, (_, row) in enumerate(sig_input.iterrows()):
+        sig_prompts.append(generate_significance_prompt(row, i + 1))
+    tissue_counts = sig_input['Organ'].value_counts().to_dict()
+    label_counts = sig_input['sig_label'].value_counts().to_dict()
+    print(f"  Significance prompts: {len(sig_prompts)} (target {target_per_task}) | tissues: {tissue_counts} | labels: {label_counts}")
 
-    return mcq_prompts, pair_prompts, reg_prompts
+    # Validate binary label balance
+    sig_labels = [p['messages'][-1]['content'] for p in sig_prompts]
+    sig_label_counts = pd.Series(sig_labels).value_counts().to_dict()
+    counts = [sig_label_counts.get(k, 0) for k in 'AB']
+    max_imbalance = max(counts) - min(counts)
+    if max_imbalance > 5:
+        print(f"    ⚠ Significance label imbalance: {sig_label_counts}")
+    else:
+        print(f"    ✓ Significance label balance OK: {sig_label_counts}")
+
+    return mcq_prompts, pair_prompts, sig_prompts
 
 
 # ---------------------------------------------------------------------------
@@ -1116,7 +1201,7 @@ def generate_all_benchmarks(
 def compute_summary(
     mcq_prompts: list[dict],
     pair_prompts: list[dict],
-    reg_prompts: list[dict],
+    sig_prompts: list[dict],
 ) -> dict:
     """Compute benchmark summary statistics across all task formats."""
 
@@ -1130,8 +1215,7 @@ def compute_summary(
             'total_prompts': len(prompts),
             'format': fmt,
             'label_distribution': {k: int(v) for k, v in pd.Series(labels).value_counts().items()},
-            'unique_genes': int(meta.get('gene', meta.get('gene_a', pd.Series())).nunique())
-                if 'gene' in meta.columns else int(meta['gene_a'].nunique()),
+            'unique_genes': int(meta['gene'].nunique()) if 'gene' in meta.columns else int(meta['gene_a'].nunique()),
             'unique_treatments': int(meta['treatment'].nunique()),
             'unique_accessions': int(meta['accession'].nunique()),
             'unique_cell_lines': int(meta['cell_line'].nunique()),
@@ -1140,18 +1224,19 @@ def compute_summary(
             stats['unique_senescence_types'] = int(meta['senescence_type'].nunique())
         return stats
 
-    all_prompts = mcq_prompts + pair_prompts + reg_prompts
+    all_prompts = mcq_prompts + pair_prompts + sig_prompts
 
     summary = {
         'total_prompts': len(all_prompts),
         'mcq': _pool_stats(mcq_prompts, 'mcq'),
         'pairwise': _pool_stats(pair_prompts, 'pairwise'),
-        'regression': _pool_stats(reg_prompts, 'regression'),
+        'significance': _pool_stats(sig_prompts, 'binary'),
         'thresholds': {
-            'logfc': 1.0,
+            'direction_logfc': 1.0,
             'pvalue': 0.05,
-            'pairwise_min_logfc_gap': 0.5,
+            'significance_logfc': 1.0,
             'logfc_cap': 10.0,
+            'pairwise_min_logfc_gap': 0.5,
             'target_per_task': 100,
         },
         'splitting_recommendation': (
@@ -1337,7 +1422,8 @@ def main():
     parser.add_argument('--min-logfc-gap', type=float, default=0.5,
                         help='Minimum |LogFC| difference between paired genes for pairwise task')
     parser.add_argument('--logfc-cap', type=float, default=10.0,
-                        help='Cap ground-truth |LogFC| to this value for regression prompts')
+                        help='Cap |LogFC| for significant rows in binary significance pool '
+                             '(excludes microarray scaling artifacts)')
     parser.add_argument('--target-per-task', type=int, default=100,
                         help='Target number of prompts per task format')
     parser.add_argument('--test-fraction', type=float, default=0.20,
@@ -1351,7 +1437,7 @@ def main():
 
     print("=" * 60)
     print("SENESCENCE PERTURBATION BENCHMARK PIPELINE")
-    print("  Formats: MCQ + Pairwise + Regression (1/3 each)")
+    print("  Formats: MCQ + Pairwise + Binary Significance (1/3 each)")
     print("  Split:   80/20 train/test by GEO accession")
     print("=" * 60)
 
@@ -1370,8 +1456,11 @@ def main():
     df = intersect_with_cellage(df, cellage)
 
     # Step 3: Assign labels
-    print("\n--- Step 5: Assign ternary labels ---")
+    print("\n--- Step 5: Assign ternary direction labels ---")
     df = assign_labels(df, args.logfc_threshold, args.pvalue_threshold)
+
+    print("\n--- Step 5b: Assign binary significance labels ---")
+    df = assign_significance_labels(df, args.logfc_threshold, args.pvalue_threshold)
 
     # Step 4: Subsample
     print("\n--- Step 6: Subsample for balance ---")
@@ -1391,25 +1480,33 @@ def main():
     print("\n--- Step 7: Exploratory Data Analysis ---")
     run_eda(balanced)
 
-    # Step 6: Filter to high-significance rows
-    print("\n--- Step 8: Filter to high-significance rows ---")
+    # Step 6: Filter high-significance rows (for MCQ + pairwise)
+    print("\n--- Step 8: Filter to high-significance rows (MCQ + Pairwise) ---")
     significant = filter_high_significance(
         balanced,
         target_per_class=args.target_per_task,
         random_state=args.seed,
     )
 
+    # Step 6b: Prepare binary significance pool
+    print("\n--- Step 8b: Prepare binary significance pool ---")
+    sig_pool = prepare_binary_significance_pool(
+        balanced,
+        target_per_class=args.target_per_task,
+        logfc_cap=args.logfc_cap,
+        random_state=args.seed,
+    )
+
     # Step 7: Three-way split into task formats
-    print("\n--- Step 9: Split into MCQ / Pairwise / Regression ---")
-    mcq_df, pair_df, reg_df = split_three_way(significant, random_state=args.seed)
+    print("\n--- Step 9: Split into MCQ / Pairwise / Binary Significance ---")
+    mcq_df, pair_df, sig_df = split_three_way(significant, sig_pool, random_state=args.seed)
 
     # Step 8: Generate prompts for all formats
     print("\n--- Step 10: Generate prompts ---")
-    mcq_prompts, pair_prompts, reg_prompts = generate_all_benchmarks(
-        mcq_df, pair_df, reg_df,
+    mcq_prompts, pair_prompts, sig_prompts = generate_all_benchmarks(
+        mcq_df, pair_df, sig_df,
         target_per_task=args.target_per_task,
         min_logfc_gap=args.min_logfc_gap,
-        logfc_cap=args.logfc_cap,
         random_state=args.seed,
     )
 
@@ -1428,7 +1525,7 @@ def main():
             print(f"  ✓ MCQ label balance OK: {mcq_label_counts}")
 
     # Combine all prompts
-    all_prompts = mcq_prompts + pair_prompts + reg_prompts
+    all_prompts = mcq_prompts + pair_prompts + sig_prompts
 
     # Step 9: Train/test split by accession
     print("\n--- Step 11: Train/Test split by accession ---")
@@ -1453,21 +1550,21 @@ def main():
 
     # Step 11: Summary
     print("\n--- Step 13: Summary ---")
-    summary = compute_summary(mcq_prompts, pair_prompts, reg_prompts)
+    summary = compute_summary(mcq_prompts, pair_prompts, sig_prompts)
     summary['split'] = split_report
     summary_path = output_dir / args.summary_output
     with open(summary_path, 'w') as f:
         json.dump(summary, f, indent=2)
     print(f"Summary saved to: {summary_path}")
-    print(f"  Total prompts:       {summary['total_prompts']}")
-    print(f"  MCQ prompts:         {summary['mcq']['total_prompts']}")
-    print(f"  Pairwise prompts:    {summary['pairwise']['total_prompts']}")
-    print(f"  Regression prompts:  {summary['regression']['total_prompts']}")
-    print(f"  Train prompts:       {split_report['n_train_prompts']}")
-    print(f"  Test prompts:        {split_report['n_test_prompts']}")
+    print(f"  Total prompts:            {summary['total_prompts']}")
+    print(f"  MCQ prompts:              {summary['mcq']['total_prompts']}")
+    print(f"  Pairwise prompts:         {summary['pairwise']['total_prompts']}")
+    print(f"  Significance prompts:     {summary['significance']['total_prompts']}")
+    print(f"  Train prompts:            {split_report['n_train_prompts']}")
+    print(f"  Test prompts:             {split_report['n_test_prompts']}")
 
     # Print example from each format
-    for label, prompts in [('MCQ', mcq_prompts), ('PAIRWISE', pair_prompts), ('REGRESSION', reg_prompts)]:
+    for label, prompts in [('MCQ', mcq_prompts), ('PAIRWISE', pair_prompts), ('SIGNIFICANCE', sig_prompts)]:
         if not prompts:
             continue
         ex = prompts[0]
