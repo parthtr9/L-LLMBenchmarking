@@ -174,6 +174,10 @@ longevity-bench-x/
   experiments in human fibroblasts. Each row = a gene × comparison with LogFC and p-value.
   Filtered to perturbation comparisons only (where the control condition is a senescent state),
   so LogFC isolates the perturbation effect on top of senescence.
+- **Source files (downloaded into `data/task_a_senescence/raw/`):**
+  - `Total_Data.csv` — Senescent Fibroblast Transcriptome Compendium
+    (download from https://research.ncl.ac.uk/cellularsenescence/downloadingdata/)
+  - `cellage3.tsv` — CellAge v3 senescence gene database
 - **Columns we care about:**
   - `Gene` — target gene being measured (filtered to 442 CellAge non-cancer senescence genes)
   - `Treatment`, `Gene_down`, `Gene_up` — perturbation applied (knockdown, overexpression, drug)
@@ -181,39 +185,83 @@ longevity-bench-x/
   - `Cell_line`, `Organ` — cell line and tissue origin (all lung fibroblasts)
   - `LogFC`, `Pvalues` — differential expression results (ground truth)
   - `Acc_no` — GEO accession, used for train/test split
-- **Three task formats (100 prompts each, 300 total):**
-  - **MCQ:** Given metadata only (treatment, senescence type, cell line, timepoint, gene name),
-    predict direction — A. upregulated, B. downregulated, C. no significant change. Metric: accuracy.
-  - **Pairwise:** Given two genes from the same experiment, predict which shows a larger absolute
-    expression change. Binary (A or B), minimum |LogFC| gap ≥ 0.5. Metric: accuracy.
-  - **Regression:** Given metadata only, predict the numeric Log2FC value (capped to ±10).
-    Metric: MAE.
-- **Train/test split:** by GEO accession (`Acc_no`). All prompts from a given study go entirely
-  into train or test. Never split randomly — comparisons within a study share lab protocols,
-  analysis pipelines, and batch effects. 80/20 split (237 train, 63 test).
-- **Minimum N:** 300 prompts total (100 per format). Filtered to high-significance rows:
-  up/downregulated ranked by p-value ascending, no_change ranked by |LogFC| ascending.
-  Ternary label thresholds: |LogFC| > 1.0 and p < 0.05 for significant change.
+- **Pipeline:** `senescence_benchmark_pipeline.py` — loads dataset, filters to perturbation
+  comparisons with senescent controls, intersects with CellAge non-cancer genes, assigns
+  ternary direction labels + binary significance labels, subsamples for class+gene+comparison
+  diversity, filters to high-significance rows, splits into the three task partitions,
+  generates prompts, and writes the accession-grouped train/test split.
+- **Three task formats (target 100 each, 298 total after balance constraints):**
+  - **MCQ (99 prompts):** Given experiment metadata (treatment, senescence type, cell line,
+    timepoint, gene name), predict direction — A. upregulated, B. downregulated,
+    C. no significant change. Balanced 33/33/33 across classes. Metric: accuracy.
+  - **Pairwise (99 prompts):** Given two genes from the same experiment, predict which
+    shows a larger absolute expression change. Binary (A or B), minimum |LogFC| gap ≥ 0.5
+    so there is always a clear winner. Metric: accuracy.
+  - **Binary significance (100 prompts):** Given experiment metadata, predict whether the
+    perturbation produces a significant change at all — A. significant (|LogFC| > 1.0 AND
+    p < 0.05), B. not significant. Direction is NOT revealed in the answer. 50/50 balanced.
+    Metric: accuracy. (Replaces the original "predict numeric Log2FC" regression task.)
+- **Label thresholds:** |LogFC| > 1.0 AND p < 0.05 for significant change. Ternary labels
+  use signed LogFC against the same threshold.
+- **Filtering for prompt quality:**
+  - up/down rows ranked by p-value ascending + |LogFC| descending (most confident first)
+  - no_change rows ranked by |LogFC| ascending + p-value descending (most clearly null)
+  - significant rows for binary task additionally capped at |LogFC| ≤ 10 to exclude
+    microarray scaling artifacts
+- **Train/test split:** by GEO accession (`Acc_no`). All prompts from a given study go
+  entirely into train or test. Never split randomly — comparisons within a study share lab
+  protocols, analysis pipelines, and batch effects. Greedy fill with smallest accessions
+  first to maximize test-set study diversity. Result: 239 train / 59 test (19.8% test),
+  15 train accessions / 28 test accessions, 0 leaked treatments.
+- **lb_id prefixes:** `LB-SEN-MCQ`, `LB-SEN-PAIR`, `LB-SEN-SIG`.
+- **Pools:** `senescence_perturbation_mcq`, `senescence_perturbation_pairwise`,
+  `senescence_perturbation_significance`. **Display group:** `Senescence Perturbation`.
+- **Outputs (in `data/task_a_senescence/processed/`):**
+  `task_a_senescence_{train,test}.parquet`, `…_{train,test}.json`,
+  `task_a_senescence_summary.json` (per-format stats + split report),
+  `task_a_senescence_balanced.csv` (intermediate balanced dataset),
+  `task_a_senescence_test_30.parquet` (10/format thinking-trace subset).
 
 ### Task B — Lipidomics
 
 - **URL:** https://www.ebi.ac.uk/metabolights/editor/MTBLS4461/samples
-- **What it contains:** Lipid profiles from human plasma samples with associated donor age.
-  Each row = a sample with quantified lipid species concentrations and demographic metadata.
-- **Columns we care about:**
-  - Lipid species concentrations (multiple columns per sample)
-  - `Age` — donor age (ground truth for regression tasks)
-  - Demographic metadata (sex, cohort, etc.)
-- **Three task formats (~50 prompts each, ~150 total):**
-  - **MCQ:** Given a lipid profile (subset of lipid species concentrations), predict age bracket —
-    A. young (18–35), B. middle-aged (36–55), C. older (56+). Metric: accuracy.
-  - **Pairwise:** Given lipid profiles from two individuals, predict which is older.
-    Binary (A or B), minimum age gap ≥ 10 years. Metric: accuracy.
-  - **Regression:** Given a lipid profile, predict the numeric age. Metric: MAE.
-- **Train/test split:** by subject ID. All prompts from a given donor go entirely into train or
-  test. Never split randomly — repeated measurements from the same donor leak information.
-  80/20 split.
-- **Minimum N:** 150 prompts total (~50 per format).
+- **What it contains:** Plasma lipidomics from MTBLS4461 (DI-MS alternating polarity).
+  Each row = a donor sample with ~497 lipid species abundances (log-transformed) and
+  metadata: `sample_id`, `individual_id`, `age`, `gender`, `diabetes`. After gender
+  balancing + diabetes-NaN drop, 1,864 donors (Female=Male=932). Each donor contributes
+  exactly one sample.
+- **Source files (downloaded into `data/task_b_lipidomics/raw/`):**
+  - `m_MTBLS4461_DI-MS_alternating__metabolite_profiling_v2_maf.tsv` — MAF abundance file
+  - `s_MTBLS4461.txt` — sample sheet with donor metadata
+- **Preprocessing pipeline:**
+  1. `combine_lipidomics.py` — joins MAF abundance × sample metadata; transposes so rows
+     are samples and columns are lipids; renames lipids by `metabolite_identification`
+     (fallback `mz_<mass>`); drops 3 unmatched MAF columns (LY3227, M151, T82).
+  2. `balance_gender.py` — drops NaN-diabetes rows, undersamples Males down to Female
+     count stratified on diabetes, shuffles.
+  3. `lipidomics_pipeline.py` — partitions samples disjointly across the three task
+     formats, generates prompts, and writes the stratified group split.
+- **Three task formats (target 50 each, 126 total after balance constraints):**
+  - **MCQ (40 prompts):** Given the full lipid profile, predict age bracket —
+    A. 20–39, B. 40–59, C. 60–79, D. 80+. Metric: accuracy. Capped at 10/class by
+    the 80+ bracket (only 10 donors).
+  - **Regression (36 prompts):** Given lipid profile + diabetes status, predict numeric
+    age in years (integer). Stratified across remaining age brackets. Metric: MAE.
+  - **Binary (50 prompts):** Given lipid profile + age, predict diabetes status —
+    A. Yes (diabetic), B. No (non-diabetic). 25 per class. Metric: accuracy.
+  - Disjoint sampling: scarce 80+ bracket goes to MCQ first, then binary, then
+    regression draws from leftovers. No sample appears in more than one task.
+- **Train/test split:** stratified by task format, grouped by `individual_id`. Each
+  task split 80/20 independently then concatenated, so every format hits the test
+  fraction. Group split prevents donor leakage (forward-compatible — MTBLS4461 has
+  1 sample per donor today). Result: 101 train / 25 test.
+- **lb_id prefixes:** `LB-LIP-MCQ`, `LB-LIP-REG`, `LB-LIP-DIAB`.
+- **Pools:** `lipidomics_age_mcq`, `lipidomics_age_regression`,
+  `lipidomics_diabetes_binary`. **Display group:** `Lipidomics Age` for MCQ + regression,
+  `Lipidomics Diabetes` for binary.
+- **Outputs (in `data/task_b_lipidomics/`):** `task_b_lipidomics_{train,test}.parquet`,
+  `…_{train,test}.json`, `task_b_lipidomics_summary.json` (per-format stats + split
+  report under `split.per_format`).
 
 ### Task C — Metabolite
 
@@ -267,25 +315,33 @@ Gene: IGFBP7 (insulin like growth factor binding protein 7). Log2FC=-0.7841, p=1
 </follow_up>
 ```
 
-### Task B — Lipidomics example
+### Task B — Lipidomics example (regression)
+
+Lipid values are log-transformed (no µM units). The full ~497-feature profile is
+included per prompt; the example below truncates with `…` for legibility.
 
 ```xml
 <question>
-You are presented with a plasma lipidomics profile from a human donor. Given the following lipid species concentrations, predict the donor's age in years. Respond with only a numeric value rounded to the nearest integer.
+You are presented with a plasma lipidomics profile from a human donor together with the donor's diabetes status. Given this information, predict the donor's age in years. Respond with only a numeric value rounded to the nearest integer.
 </question>
 <lipid_profile>
-CE(16:0): 1245.3 µM, CE(18:1): 2301.7 µM, SM(d18:1/16:0): 312.4 µM, PC(34:1): 1876.2 µM, LPC(18:0): 45.8 µM, TG(52:2): 567.1 µM.
+cholesterol: 8.533, mz_637.3359: 2.501, lysophosphatidylcholine 15:0: 2.81, lysophosphatidylethanolamine 18:0: 2.81, lysophosphatidylcholine 16:1: 3.285, … (full ~497-feature profile)
 </lipid_profile>
 <sample_context>
-Sex: Female. Cohort: healthy controls. Measurement platform: LC-MS/MS. Study: MTBLS4461.
+Sex: Male. Diabetes status: Yes. Measurement platform: DI-MS (alternating polarity). Study: MTBLS4461.
 </sample_context>
 <answer>
-62
+35
 </answer>
 <follow_up>
-Donor age: 62 years. Notable age-associated lipid shifts: elevated CE(16:0) and reduced LPC(18:0) relative to young-cohort median. Study: MTBLS4461.
+Donor age: 35 years. Sex: Male. Diabetes status: Yes. Sample: <sample_id>. Individual: <individual_id>. Study: MTBLS4461. Correct age: 35 years.
 </follow_up>
 ```
+
+MCQ variant adds `<options>A. 20-39 years B. 40-59 years C. 60-79 years D. 80+ years</options>`
+and removes diabetes from `<sample_context>`. Binary variant asks
+`A. Yes (diabetic) B. No (non-diabetic)` and adds `Age: N years` to `<sample_context>`
+while removing diabetes status from it.
 
 ### Task C — Metabolite example
 
@@ -700,7 +756,11 @@ don't re-litigate them.
 | Decision | Rationale | Who decided | When |
 |----------|-----------|-------------|------|
 | Train/test split for Task A by GEO accession, not random | Random split leaks data — comparisons within a study share protocols and batch effects | — | — |
-| Train/test split for Task B by subject, not random | Repeated measurements from same donor leak information | — | — |
+| Task A test-set greedy fill: smallest accessions first | Maximizes the number of distinct studies in the test set (28 test vs 15 train accessions) so test diversity is high even though prompt count is lower | — | 2026-05-23 |
+| Task A replaces Log2FC regression with binary significance | Regression on Log2FC was retrieval-vulnerable (model could plausibly memorize ranges); binary "is this perturbation significant at all?" is a harder retrieval-resistant variant that still uses the same underlying data | — | 2026-05-23 |
+| Train/test split for Task B stratified by task format, grouped by `individual_id` | Per-format stratification guarantees every task hits the test fraction; group split prevents donor leakage even though MTBLS4461 currently has 1 sample per donor (forward-compatible) | — | 2026-05-23 |
+| Task B MCQ uses 4 brackets (20-39 / 40-59 / 60-79 / 80+) instead of original 3 (young / middle / older) | Matches what user requested; 80+ bracket caps MCQ at 40 prompts (10/class) but exposes high-age failure modes | — | 2026-05-24 |
+| Task B replaces Pairwise with Binary diabetes-from-profile | More clinically meaningful than "which donor is older"; complements the age tasks and exercises a second label dimension already in the data | — | 2026-05-24 |
 | Train/test split for Task C by study/cohort, not random | Samples within a study share sequencing protocols, dietary contexts, and batch effects | — | — |
 | Report macro F1 as primary metric (not accuracy) | Class imbalance in all three tasks makes accuracy misleading | — | — |
 | Use cl100k_base tokenizer for length checks | Required by track spec | — | — |
