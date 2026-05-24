@@ -1,6 +1,6 @@
 ============================================================
 SENESCENCE PERTURBATION BENCHMARK PIPELINE
-  Formats: MCQ + Pairwise + Regression (1/3 each)
+  Formats: MCQ + Pairwise + Binary Significance (1/3 each)
   Split:   80/20 train/test by GEO accession
 ============================================================
 
@@ -19,11 +19,16 @@ After removing cancer lines: 487 entries, 442 unique genes
 --- Step 4: Intersect with CellAge genes ---
 After CellAge intersection: 93,278 rows, 438 genes, 244 comparisons
 
---- Step 5: Assign ternary labels ---
+--- Step 5: Assign ternary direction labels ---
 Label distribution:
   no_change: 83,914
   downregulated: 5,053
   upregulated: 4,311
+
+--- Step 5b: Assign binary significance labels ---
+Binary significance label distribution:
+  not_significant: 83,914
+  significant: 9,364
 
 --- Step 6: Subsample for balance ---
 
@@ -254,7 +259,7 @@ END EDA
 ============================================================
 
 
---- Step 8: Filter to high-significance rows ---
+--- Step 8: Filter to high-significance rows (MCQ + Pairwise) ---
 
 High-significance filter (target 100 per class × 3 formats):
   Kept 900 rows (min class: 300)
@@ -262,50 +267,58 @@ High-significance filter (target 100 per class × 3 formats):
   downregulated: 300 rows, median p=3.46e-07, median |LogFC|=1.404
   no_change: 300 rows, median p=5.68e-01, median |LogFC|=0.098
 
---- Step 9: Split into MCQ / Pairwise / Regression ---
+--- Step 8b: Prepare binary significance pool ---
+
+Binary significance pool (target 100 per class × 3, |LogFC| cap=10.0):
+  Kept 600 rows (min class: 300)
+  significant: 300 rows, median p=1.22e-11, median |LogFC|=1.467
+  not_significant: 300 rows, median p=5.68e-01, median |LogFC|=0.098
+
+--- Step 9: Split into MCQ / Pairwise / Binary Significance ---
 
 Three-way split:
-  MCQ partition:        225 rows
-  Pairwise partition:   450 rows
-  Regression partition: 225 rows
-  MCQ label balance: {'no_change': 75, 'downregulated': 75, 'upregulated': 75}
+  MCQ partition:          450 rows
+  Pairwise partition:     450 rows
+  Significance partition: 600 rows
+  MCQ label balance: {'downregulated': 150, 'upregulated': 150, 'no_change': 150}
   Pairwise label balance: {'downregulated': 150, 'no_change': 150, 'upregulated': 150}
-  Regression label balance: {'downregulated': 75, 'upregulated': 75, 'no_change': 75}
+  Significance label balance: {'significant': 300, 'not_significant': 300}
 
 --- Step 10: Generate prompts ---
-  MCQ prompts: 99 (target 100) | tissues: {'Lung': 65, 'Skin': 34} | labels: {'no_change': 33, 'downregulated': 33, 'upregulated': 33}
-  Built 103 pairwise pairs from 188 comparisons (min |LogFC| gap = 0.5, 66 pairs skipped below threshold)
-  Pairwise prompts: 100 (target 100) | tissues: {'Lung': 86, 'Skin': 14}
-  Regression prompts: 99 (target 100) | tissues: {'Lung': 70, 'Skin': 29} | labels: {'downregulated': 33, 'no_change': 33, 'upregulated': 33}
-  ✓ MCQ label balance OK: {'C': 33, 'B': 33, 'A': 33}
+  MCQ prompts: 99 (target 100) | tissues: {'Lung': 51, 'Skin': 48} | labels: {'downregulated': 33, 'no_change': 33, 'upregulated': 33}
+  Built 99 pairwise pairs from 190 comparisons (min |LogFC| gap = 0.5, 71 pairs skipped below threshold)
+  Pairwise prompts: 99 (target 100) | tissues: {'Lung': 85, 'Skin': 14}
+    ⚠ Below target — only 99 valid pairs survived the |LogFC| gap ≥ 0.5 filter
+  Significance prompts: 100 (target 100) | tissues: {'Lung': 50, 'Skin': 50} | labels: {'not_significant': 50, 'significant': 50}
+    ✓ Significance label balance OK: {'B': 50, 'A': 50}
+  ✓ MCQ label balance OK: {'B': 33, 'C': 33, 'A': 33}
 
 --- Step 11: Train/Test split by accession ---
 
   Train/Test split by accession:
-    Train: 237 prompts from 16 accessions
-    Test:  61 prompts from 32 accessions
-    Actual test fraction: 20.5%
-    Train label balance: {'B': 69, 'A': 67, 'C': 23, '10.0': 5, '0.0': 5, '-10.0': 4, '-1.04': 3, '1.04': 2, '-0.04': 2, '-1.16': 2, '-1.11': 2, '0.14': 1, '0.26': 1, '1.2': 1, '1.23': 1, '-1.57': 1, '-0.09': 1, '1.01': 1, '1.31': 1, '-0.29': 1, '-1.44': 1, '-1.03': 1, '0.28': 1, '-6.25': 1, '1.83': 1, '-1.43': 1, '1.05': 1, '1.73': 1, '0.2': 1, '0.01': 1, '2.12': 1, '2.15': 1, '1.1': 1, '0.05': 1, '1.39': 1, '1.63': 1, '-1.52': 1, '-1.06': 1, '2.71': 1, '-1.31': 1, '0.16': 1, '0.25': 1, '1.08': 1, '-1.92': 1, '-3.6': 1, '-1.27': 1, '-0.21': 1, '0.22': 1, '-3.53': 1, '1.26': 1, '1.19': 1, '1.12': 1, '-1.41': 1, '0.06': 1, '-1.95': 1, '1.15': 1, '-1.51': 1, '1.3': 1, '-0.08': 1, '-1.21': 1, '1.24': 1, '-2.56': 1, '-1.07': 1, '-2.08': 1}
-    Test label balance: {'B': 17, 'A': 13, 'C': 10, '0.14': 2, '1.11': 2, '1.57': 1, '-0.05': 1, '0.03': 1, '-0.32': 1, '0.11': 1, '0.06': 1, '-10.0': 1, '1.04': 1, '1.34': 1, '-0.18': 1, '0.07': 1, '-0.15': 1, '0.09': 1, '0.19': 1, '-1.04': 1, '-1.09': 1, '1.5': 1}
-    Train format balance: {'mcq': 80, 'binary': 79, 'regression': 78}
-    Test format balance: {'binary': 21, 'regression': 21, 'mcq': 19}
-    ⚠ Treatment leakage: 2 treatments appear in both splits
-      Leaked: ['CCCP', 'shp53']
+    Train: 239 prompts from 15 accessions
+    Test:  59 prompts from 28 accessions
+    Actual test fraction: 19.8%
+    Train label balance: {'A': 109, 'B': 108, 'C': 22}
+    Test label balance: {'B': 27, 'A': 21, 'C': 11}
+    Train format balance: {'binary': 83, 'pairwise': 81, 'mcq': 75}
+    Test format balance: {'mcq': 24, 'pairwise': 18, 'binary': 17}
+    ✓ No treatment leakage across splits
 
 --- Step 12: Save outputs ---
-  Parquet saved: processed/task_a_senescence_train.parquet (237 rows)
-  JSON saved:    processed/task_a_senescence_train.json (237 entries)
-  Parquet saved: processed/task_a_senescence_test.parquet (61 rows)
-  JSON saved:    processed/task_a_senescence_test.json (61 entries)
+  Parquet saved: processed/task_a_senescence_train.parquet (239 rows)
+  JSON saved:    processed/task_a_senescence_train.json (239 entries)
+  Parquet saved: processed/task_a_senescence_test.parquet (59 rows)
+  JSON saved:    processed/task_a_senescence_test.json (59 entries)
 
 --- Step 13: Summary ---
 Summary saved to: processed/task_a_senescence_summary.json
-  Total prompts:       298
-  MCQ prompts:         99
-  Pairwise prompts:    100
-  Regression prompts:  99
-  Train prompts:       237
-  Test prompts:        61
+  Total prompts:            298
+  MCQ prompts:              99
+  Pairwise prompts:         99
+  Significance prompts:     100
+  Train prompts:            239
+  Test prompts:             59
 
 --- Example MCQ prompt ---
 lb_id: LB-SEN-MCQ-0001
@@ -318,10 +331,73 @@ You are a biomedical AI specialized in aging biology and cellular senescence, tr
 
 [user]
 <question>
-You are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 12d post-senescence induction, shRNA knockdown of p53_pRb is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of LATS2 (large tumor suppressor kinase 2) measured by RNA-seq:
+You are presented with a senescence perturbation experiment. In BJ skin fibroblasts undergoing oncogene-induced senescence (RAF) at 1d post-senescence induction, treatment with compoundA (targeting RELA) at dose 2uM_2h is applied. Compared to untreated oncogene-induced senescent cells, the mRNA expression of GNG11 (G protein subunit gamma 11) measured by microarray:
 </question>
 <options>
 A. increases (upregulated) B. decreases (downregulated) C. no significant change
+</options>
+<experiment>
+Cell line: BJ skin fibroblasts. Senescence model: oncogene-induced senescence (RAF). Perturbation: treatment with compoundA (targeting RELA) at dose 2uM_2h. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.
+</experiment>
+<gene_context>
+In this experiment, knocked down gene(s): RELA.
+</gene_context>
+
+[assistant]
+B
+
+[follow_up]
+Gene: GNG11 (G protein subunit gamma 11). Log2FC=-536.1259, p=4.60e-07. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE134747. According to CellAge, GNG11 induces cellular senescence (senescence type: Stress-induced). CellAge PMID: 17092487.
+
+--- Example PAIRWISE prompt ---
+lb_id: LB-SEN-PAIR-0001
+pool: senescence_perturbation_pairwise
+format: pairwise
+metric: accuracy
+
+[system]
+You are a biomedical AI specialized in aging biology and cellular senescence, trained on genomic, transcriptomic, and epigenomic data.
+
+[user]
+<question>
+In a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 10d post-senescence induction, shRNA knockdown of COPB2 at dose 1ugml_Doxycycline is applied. Compared to untreated DNA damage-induced senescent cells, consider the following two genes measured by RNA-seq:
+
+Gene A: DIDO1 (death inducer-obliterator 1)
+Gene B: DPY30 (dpy-30 histone methyltransferase complex regulatory subunit)
+
+Which gene shows a larger absolute change in mRNA expression (|Log2FC|)?
+</question>
+<options>
+A. Gene A shows a larger absolute change B. Gene B shows a larger absolute change
+</options>
+<experiment>
+Cell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of COPB2 at dose 1ugml_Doxycycline. Control condition: untreated DNA damage-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.
+</experiment>
+<gene_context>
+In this experiment, knocked down gene(s): COPB2.
+</gene_context>
+
+[assistant]
+A
+
+[follow_up]
+Gene A: DIDO1 (death inducer-obliterator 1), Log2FC=-1.3397, p=3.66e-08. Gene B: DPY30 (dpy-30 histone methyltransferase complex regulatory subunit), Log2FC=0.0287, p=8.53e-01. |Log2FC_A|=1.3397, |Log2FC_B|=0.0287. GEO accession: GSE224070.
+
+--- Example SIGNIFICANCE prompt ---
+lb_id: LB-SEN-SIG-0001
+pool: senescence_perturbation_significance
+format: binary
+metric: accuracy
+
+[system]
+You are a biomedical AI specialized in aging biology and cellular senescence, trained on genomic, transcriptomic, and epigenomic data.
+
+[user]
+<question>
+You are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 12d post-senescence induction, shRNA knockdown of p53_pRb is applied. Compared to untreated oncogene-induced senescent cells, is the mRNA expression of AGT (angiotensinogen) measured by RNA-seq significantly dysregulated?
+</question>
+<options>
+A. Significantly dysregulated (|Log2FC| > 1.0, p < 0.05) B. No significant change (|Log2FC| ≤ 1.0 or p ≥ 0.05)
 </options>
 <experiment>
 Cell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: shRNA knockdown of p53_pRb. Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.
@@ -331,67 +407,7 @@ In this experiment, knocked down gene(s): p53_pRb.
 </gene_context>
 
 [assistant]
-C
-
-[follow_up]
-Gene: LATS2 (large tumor suppressor kinase 2). Log2FC=-0.0693, p=2.19e-01. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE74324. According to CellAge, LATS2 induces cellular senescence (senescence type: Replicative). CellAge PMID: 30755404.
-
---- Example PAIRWISE prompt ---
-lb_id: LB-SEN-PAIR-0001
-pool: senescence_perturbation_pairwise
-format: binary
-metric: accuracy
-
-[system]
-You are a biomedical AI specialized in aging biology and cellular senescence, trained on genomic, transcriptomic, and epigenomic data.
-
-[user]
-<question>
-In a senescence perturbation experiment using IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 7d post-senescence induction, treatment with digoxin (targeting IONpump) is applied. Compared to untreated oncogene-induced senescent cells, consider the following two genes measured by RNA-seq:
-
-Gene A: SIAH1 (siah E3 ubiquitin protein ligase 1)
-Gene B: ITPR2 (inositol 1,4,5-trisphosphate receptor type 2)
-
-Which gene shows a larger absolute change in mRNA expression (|Log2FC|)?
-</question>
-<options>
-A. Gene A shows a larger absolute change B. Gene B shows a larger absolute change
-</options>
-<experiment>
-Cell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: treatment with digoxin (targeting IONpump). Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.
-</experiment>
-<gene_context>
-In this experiment, knocked down gene(s): IONpump.
-</gene_context>
-
-[assistant]
 B
 
 [follow_up]
-Gene A: SIAH1 (siah E3 ubiquitin protein ligase 1), Log2FC=1.014, p=1.57e-08. Gene B: ITPR2 (inositol 1,4,5-trisphosphate receptor type 2), Log2FC=1.8033, p=1.30e-05. |Log2FC_A|=1.0140, |Log2FC_B|=1.8033. GEO accession: GSE122079.
-
---- Example REGRESSION prompt ---
-lb_id: LB-SEN-REG-0001
-pool: senescence_perturbation_regression
-format: regression
-metric: mae
-
-[system]
-You are a biomedical AI specialized in aging biology and cellular senescence, trained on genomic, transcriptomic, and epigenomic data.
-
-[user]
-<question>
-You are presented with a senescence perturbation experiment. In IMR-90 lung fibroblasts undergoing oncogene-induced senescence (RAS) at 7d post-senescence induction, treatment with ouabain (targeting IONpump) is applied. Compared to untreated oncogene-induced senescent cells, predict the Log2 fold-change (Log2FC) in mRNA expression of STN1 (STN1 subunit of CST complex) measured by RNA-seq. Respond with only a numeric value rounded to two decimal places (positive = upregulated, negative = downregulated).
-</question>
-<experiment>
-Cell line: IMR-90 lung fibroblasts. Senescence model: oncogene-induced senescence (RAS). Perturbation: treatment with ouabain (targeting IONpump). Control condition: untreated oncogene-induced senescent cells. Biological replicates: 3. Differential expression analysis: Limma.
-</experiment>
-<gene_context>
-In this experiment, knocked down gene(s): IONpump.
-</gene_context>
-
-[assistant]
--1.04
-
-[follow_up]
-Gene: STN1 (STN1 subunit of CST complex). Log2FC=-1.0362, p=1.04e-05. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE122079. According to CellAge, STN1 inhibits cellular senescence (senescence type: Replicative). CellAge PMID: 22964711.
+Gene: AGT (angiotensinogen). Log2FC=0.0, p=1.00e+00. Significance threshold: |Log2FC| > 1.0, pval < 0.05. GEO accession: GSE74324. According to CellAge, AGT induces cellular senescence (senescence type: Stress-induced). CellAge PMID: 16908765.
