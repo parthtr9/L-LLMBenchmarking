@@ -7,21 +7,23 @@ const FORMAT_LABELS = { mcq: 'MCQ', binary: 'Binary', pairwise: 'Pairwise', regr
 
 // ── Grouped bar chart (SVG) ───────────────────────────────────────────────────
 
-const GroupedBarChart = ({ matrix, models, formats }) => {
-  const W = 680;
-  const LEGEND_COLS = Math.min(models.length, 3);
-  const LEGEND_ROW_H = 16;
+const GroupedBarChart = ({ matrix, models, formats, refValues }) => {
+  const [tooltip, setTooltip] = React.useState(null);
+
+  const W = 1100;
+  const LEGEND_COLS = Math.min(models.length, 4);
+  const LEGEND_ROW_H = 18;
   const legendRows = Math.max(1, Math.ceil(models.length / LEGEND_COLS));
-  const ML = 44, MR = 16, MT = 20;
-  const MB = 44 + legendRows * LEGEND_ROW_H;
-  const H = 240 + legendRows * LEGEND_ROW_H;
+  const ML = 52, MR = 24, MT = 28;
+  const MB = 52 + legendRows * LEGEND_ROW_H;
+  const H = 360 + legendRows * LEGEND_ROW_H;
   const chartW = W - ML - MR;
   const chartH = H - MT - MB;
   const legendSpacing = chartW / LEGEND_COLS;
 
-  const GROUP_GAP = 32;
+  const GROUP_GAP = 80;
   const barAreaW = (chartW - GROUP_GAP * (formats.length - 1)) / formats.length;
-  const barW = Math.min(22, (barAreaW - 12) / models.length);
+  const barW = Math.min(36, (barAreaW - 20) / models.length);
   const barSpacing = 3;
   const groupBarTotalW = barW * models.length + barSpacing * (models.length - 1);
   const barPad = (barAreaW - groupBarTotalW) / 2;
@@ -30,8 +32,11 @@ const GroupedBarChart = ({ matrix, models, formats }) => {
 
   const groupX = (fi) => ML + fi * (barAreaW + GROUP_GAP);
 
+  const TT_W = 140, TT_H = 44, TT_PAD = 7;
+
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', maxWidth: W, display: 'block' }}>
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', maxWidth: '100%', display: 'block' }}
+      onMouseLeave={() => setTooltip(null)}>
       {/* Y grid + labels */}
       {yTicks.map(t => {
         const y = MT + chartH - t * chartH;
@@ -67,15 +72,20 @@ const GroupedBarChart = ({ matrix, models, formats }) => {
               const x = gx + barPad + mi * (barW + barSpacing);
               const y = MT + chartH - barH;
               const isBaseline = BASELINE_IDS.includes(m.id);
+              const ttX = Math.min(x + barW / 2 - TT_W / 2, W - TT_W - 4);
+              const ttY = Math.max(y - TT_H - 6, MT);
               return (
-                <g key={m.id}>
+                <g key={m.id}
+                  onMouseEnter={() => setTooltip({ x: ttX, y: ttY, model: m.name, fmt: FORMAT_LABELS[fmt] || fmt, v, color: m.color })}
+                  onMouseLeave={() => setTooltip(null)}
+                  style={{ cursor: 'default' }}>
                   <rect
                     x={x} y={y} width={barW} height={Math.max(barH, 1)}
                     fill={m.color}
-                    opacity={isBaseline ? 0.4 : 0.88}
+                    opacity={tooltip?.model === m.name && tooltip?.fmt === (FORMAT_LABELS[fmt] || fmt) ? 1 : isBaseline ? 0.4 : 0.88}
                     rx={2}
+                    style={{ transition: 'opacity 0.1s' }}
                   />
-                  <title>{m.name}: {v.toFixed(3)}</title>
                   {barH >= 16 && (
                     <text x={x + barW / 2} y={y - 3} textAnchor="middle"
                       style={{ font: '9px var(--lb-font-mono)', fill: m.color, fontWeight: 600 }}>
@@ -85,6 +95,26 @@ const GroupedBarChart = ({ matrix, models, formats }) => {
                 </g>
               );
             })}
+            {/* Reference line (majority baseline) */}
+            {(() => {
+              const ref = refValues?.[fmt] ?? 0.5;
+              const ry = MT + chartH - ref * chartH;
+              return (
+                <g key="refline">
+                  <line
+                    x1={gx} x2={gx + barAreaW}
+                    y1={ry} y2={ry}
+                    stroke="var(--lb-error)"
+                    strokeWidth={1.5}
+                    strokeDasharray="4 3"
+                  />
+                  <text x={gx + barAreaW + 3} y={ry + 4}
+                    style={{ font: '9px var(--lb-font-mono)', fill: 'var(--lb-fg-4)' }}>
+                    avg {ref.toFixed(2)}
+                  </text>
+                </g>
+              );
+            })()}
           </g>
         );
       })}
@@ -105,6 +135,23 @@ const GroupedBarChart = ({ matrix, models, formats }) => {
           </g>
         );
       })}
+
+      {/* Hover tooltip */}
+      {tooltip && (
+        <g style={{ pointerEvents: 'none' }}>
+          <rect x={tooltip.x} y={tooltip.y} width={TT_W} height={TT_H}
+            rx={4} fill="var(--lb-bg-1, #1a1a1a)" stroke={tooltip.color}
+            strokeWidth={1} opacity={0.97} />
+          <text x={tooltip.x + TT_PAD} y={tooltip.y + TT_PAD + 11}
+            style={{ font: '600 11px var(--lb-font-sans)', fill: tooltip.color }}>
+            {tooltip.model}
+          </text>
+          <text x={tooltip.x + TT_PAD} y={tooltip.y + TT_PAD + 27}
+            style={{ font: '11px var(--lb-font-mono)', fill: 'var(--lb-fg-2)' }}>
+            {tooltip.fmt} · {(tooltip.v * 100).toFixed(1)}%
+          </text>
+        </g>
+      )}
     </svg>
   );
 };
@@ -345,7 +392,17 @@ const CompareView = ({ runs = [], records = [] }) => {
             {showBaselines ? 'Hide baselines' : 'Show baselines'}
           </button>
         </div>
-        <GroupedBarChart matrix={matrix} models={visibleModels} formats={formats} />
+        <GroupedBarChart
+          matrix={matrix}
+          models={visibleModels}
+          formats={formats}
+          refValues={Object.fromEntries(
+            formats.map(f => {
+              const vals = visibleModels.map(m => matrix[f]?.[m.id]).filter(v => v != null);
+              return [f, vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0.5];
+            })
+          )}
+        />
       </div>
 
       {/* Per-model cards */}

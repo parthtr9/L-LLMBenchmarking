@@ -27,6 +27,7 @@
 <script type="text/babel" src="NewRunModal.jsx"></script>
 <script type="text/babel" src="AnswersView.jsx"></script>
 <script type="text/babel" src="GapAnalysisView.jsx"></script>
+<script type="text/babel" src="HomeView.jsx"></script>
 
 <script type="text/babel" data-presets="env,react">
 function TaskSwitcher({ tasks, active, onSelect }) {
@@ -49,7 +50,7 @@ function TaskSwitcher({ tasks, active, onSelect }) {
 }
 
 function App() {
-  const [view, setView] = React.useState('matrix');
+  const [view, setView] = React.useState('home');
   const [runs, setRuns] = React.useState(SEED_RUNS);
   const [records, setRecords] = React.useState(SEED_RECORDS);
   const [activeTask, setActiveTask] = React.useState(null);
@@ -132,14 +133,16 @@ function App() {
     ];
   } else {
     const labels = {
-      trust: 'Trust & reasoning',
+      home: 'Home',
+      trust: 'Trust & traces',
       matrix: 'Eval matrix',
       compare: 'Model comparison',
       answers: 'Answers',
       runs: 'Live runs',
       gap: 'Gap analysis',
       tasks: 'Tasks', models: 'Models', traces: 'Traces',
-      synergyage: 'SynergyAge', mgi: 'MGI',
+      senescence: 'Senescence · Task A',
+      lipidomics: 'Lipidomics · Task B',
       settings: 'Settings',
     };
     crumbs = [{ label: labels[view] || 'Dashboard' }];
@@ -147,7 +150,9 @@ function App() {
 
   // Body
   let content;
-  if (view === 'run-detail' && openRun) {
+  if (view === 'home') {
+    content = <HomeView runs={runs} records={visibleRecords} setView={setView} />;
+  } else if (view === 'run-detail' && openRun) {
     content = <RunDetail run={openRun} records={visibleRecords} onOpenRecord={setOpenRecord} />;
   } else if (view === 'trust') {
     content = <TrustView records={visibleRecords} activeTask={activeTask} onOpenRecord={setOpenRecord} />;
@@ -184,7 +189,7 @@ function App() {
           onNewRun={() => setShowModal(true)}
           onRefresh={() => { setToast({ msg: 'Refreshed', kind: 'info' }); setTimeout(() => setToast(null), 1600); }}
         />
-        {!['senescence', 'lipidomics'].includes(view) && (
+        {!['home', 'senescence', 'lipidomics'].includes(view) && (
           <TaskSwitcher
             tasks={allTaskGroups}
             active={activeTask}

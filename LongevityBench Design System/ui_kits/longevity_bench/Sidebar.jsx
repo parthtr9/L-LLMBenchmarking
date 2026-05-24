@@ -1,5 +1,4 @@
-// Sidebar — reordered: Trust → Compare → Live runs → Tasks → Datasets → Settings.
-// Brand shows team (SD hackers) + product (LongevityBench).
+// Sidebar — Overview → Results → Data & Prompts → Reasoning → System
 
 const Sidebar = ({ view, setView, runsCount, liveCount }) => {
   const item = (id, icon, label, count, isLive) => (
@@ -27,25 +26,32 @@ const Sidebar = ({ view, setView, runsCount, liveCount }) => {
       </div>
 
       <div className="nav-section">
-        <p className="heading">Evaluate</p>
-        {item('matrix',  'table',  'Eval matrix')}
-        {item('compare', 'chart',  'Compare models')}
-        {item('answers', 'table',  'Answers')}
-        {item('gap',     'chart',  'Gap analysis')}
-        {item('runs',    'play',   'Live runs', liveCount, true)}
-        {item('trust',   'target', 'Trust & reasoning')}
+        <p className="heading">Overview</p>
+        {item('home',    'chart',  'Home')}
       </div>
 
       <div className="nav-section">
-        <p className="heading">Library</p>
-        {item('tasks',   'flask',  'Tasks', 2)}
-        {item('models',  'layers', 'Models', 5)}
-        {item('senescence', 'flask', 'Senescence', '298')}
-        {item('lipidomics', 'flask', 'Lipidomics', '285')}
+        <p className="heading">Results</p>
+        {item('compare', 'chart',  'Compare models')}
+        {item('gap',     'chart',  'Gap analysis')}
+        {item('matrix',  'table',  'Eval matrix')}
+        {item('answers', 'table',  'Answers')}
+      </div>
+
+      <div className="nav-section">
+        <p className="heading">Data &amp; Prompts</p>
+        {item('lipidomics', 'flask', 'Lipidomics',  '285')}
+        {item('senescence', 'flask', 'Senescence',  '298')}
+      </div>
+
+      <div className="nav-section">
+        <p className="heading">Reasoning</p>
+        {item('trust',   'target', 'Trust & traces')}
       </div>
 
       <div className="nav-section">
         <p className="heading">System</p>
+        {item('runs',     'play',     'Live runs', liveCount, true)}
         {item('settings', 'settings', 'Settings')}
       </div>
 
