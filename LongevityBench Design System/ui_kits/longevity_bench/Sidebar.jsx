@@ -31,6 +31,7 @@ const Sidebar = ({ view, setView, runsCount, liveCount }) => {
         {item('trust',   'target', 'Trust & reasoning')}
         {item('matrix',  'table',  'Eval matrix')}
         {item('compare', 'chart',  'Compare models')}
+        {item('answers', 'table',  'Answers')}
         {item('runs',    'play',   'Live runs', liveCount, true)}
       </div>
 

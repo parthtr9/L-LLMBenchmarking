@@ -73,8 +73,6 @@ logger = logging.getLogger(__name__)
 MODEL_DISPLAY = {
     "longevity_llm":          {"name": "L-LLM",        "color": "#4ca045"},
     "longevity_llm_thinking": {"name": "L-LLM (think)","color": "#3d8838"},
-    "gemini_flash":           {"name": "Gemini Flash", "color": "#1f9bd6"},
-    "deepseek_chat":          {"name": "DeepSeek",     "color": "#6b3fa0"},
     "claude_sonnet":          {"name": "Claude 4.5",   "color": "#c98b1c"},
     "majority_baseline":      {"name": "Majority",     "color": "#8c948c"},
     "random_baseline":        {"name": "Random",       "color": "#b3b8b3"},
@@ -157,7 +155,11 @@ def _gather(log_dir: Path) -> dict[str, Any]:
         if model_id not in models:
             models[model_id] = _model_meta(model_id)
 
-        lb_id = (log.eval.task_args or {}).get("lb_id", "unknown")
+        task_name = log.eval.task or ""
+        if task_name in ("senescence_task", "parquet_task"):
+            lb_id = "task_a_senescence"
+        else:
+            lb_id = (log.eval.task_args or {}).get("lb_id", "unknown")
         if lb_id not in tasks:
             tasks[lb_id] = {"id": lb_id, "name": lb_id, "format": None,
                             "n": 0, "metric": None}
@@ -178,13 +180,39 @@ def _gather(log_dir: Path) -> dict[str, Any]:
 
         for sample in (log.samples or []):
             sid = sample.id
+            # prefer per-sample lb_id from metadata (senescence task has it there)
+            sample_lb_id = (sample.metadata or {}).get("lb_id") or lb_id
             if sid not in samples:
+                # Extract question text from the last user message in input
+                question_text = None
+                if sample.input:
+                    for msg in reversed(sample.input):
+                        role = getattr(msg, "role", None)
+                        if role == "user":
+                            content = getattr(msg, "content", None)
+                            if isinstance(content, str):
+                                question_text = content
+                            elif isinstance(content, list):
+                                question_text = " ".join(
+                                    p.get("text", "") if isinstance(p, dict) else str(p)
+                                    for p in content
+                                )
+                            break
+                # Extract system prompt
+                system_text = None
+                if sample.input:
+                    for msg in sample.input:
+                        if getattr(msg, "role", None) == "system":
+                            system_text = getattr(msg, "content", None)
+                            break
                 samples[sid] = {
                     "id": sid,
-                    "lb_id": lb_id,
+                    "lb_id": sample_lb_id,
                     "format": (sample.metadata or {}).get("format"),
                     "metadata": sample.metadata or {},
                     "gold": str(sample.target).strip() if sample.target else None,
+                    "question": question_text,
+                    "system": system_text,
                     "cells": {},
                 }
             samples[sid]["cells"][model_id] = _extract_cell(sample)

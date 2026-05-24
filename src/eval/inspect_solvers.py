@@ -115,13 +115,21 @@ def litellm_solver(
     return solve
 
 
+_FORMAT_RANDOM_CHOICES: dict[str, list[str]] = {
+    "mcq":      ["A", "B", "C"],
+    "binary":   ["A", "B"],
+    "pairwise": ["A", "B"],
+}
+
+
 @solver
 def random_baseline_solver(seed: int = 42):
-    """Return a random element from state.choices, or 'yes'/'no' if no choices."""
+    """Emit a random valid label sampled uniformly from the format's label set."""
     rng = random.Random(seed)
 
     async def solve(state: TaskState, generate: Generate) -> TaskState:
-        choices = state.choices or ["yes", "no"]
+        fmt = str((state.metadata or {}).get("format", "")).lower()
+        choices = _FORMAT_RANDOM_CHOICES.get(fmt, ["A", "B"])
         answer = rng.choice(choices)
         state.output = ModelOutput.from_content(model="random_baseline", content=answer)
         state.completed = True
@@ -131,16 +139,18 @@ def random_baseline_solver(seed: int = 42):
 
 
 @solver
-def majority_baseline_solver(majority_label: str):
-    """Always predict the pre-computed majority label.
+def majority_baseline_solver(fmt_majority: dict[str, str]):
+    """Always predict the majority label for the sample's format.
 
     Args:
-        majority_label: Most frequent target in the dataset split.
+        fmt_majority: Map of format → most-frequent label in the training split.
     """
 
     async def solve(state: TaskState, generate: Generate) -> TaskState:
+        fmt = str((state.metadata or {}).get("format", "")).lower()
+        label = fmt_majority.get(fmt, fmt_majority.get("default", "A"))
         state.output = ModelOutput.from_content(
-            model="majority_baseline", content=majority_label
+            model="majority_baseline", content=label
         )
         state.completed = True
         return state

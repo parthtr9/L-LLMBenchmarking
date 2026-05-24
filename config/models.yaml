@@ -17,15 +17,6 @@ models:
         enable_thinking: true
     max_concurrency: 4
 
-  gemini_flash:
-    litellm_model: "gemini/gemini-3.5-flash"
-    api_key_env: "GEMINI_API_KEY"
-    max_concurrency: 2
-
-  deepseek_chat:
-    litellm_model: "deepseek/deepseek-chat"
-    api_key_env: "DEEPSEEK_API_KEY"
-
   claude_sonnet:
     litellm_model: "anthropic/claude-sonnet-4-6"
     api_key_env: "ANTHROPIC_API_KEY"

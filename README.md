@@ -24,10 +24,7 @@ cp .env.example .env
 |-----|----------|-------|
 | `HF_TOKEN` | Yes | Token needs **"Read access to public gated repositories"** enabled at huggingface.co/settings/tokens |
 | `HF_ENDPOINT_URL` | Yes for L-LLM | Hosted vLLM endpoint from organizers |
-| `GEMINI_API_KEY` | For gemini_flash | Google AI Studio key |
-| `DEEPSEEK_API_KEY` | For deepseek_chat | DeepSeek platform key |
 | `ANTHROPIC_API_KEY` | For claude_sonnet | Anthropic Console key |
-| `OPENAI_API_KEY` | Optional | Only needed for direct OpenAI calls |
 
 Never commit `.env`.
 
@@ -56,9 +53,8 @@ Never commit `.env`.
 
 ```bash
 .venv/bin/python -m src.eval.run_inspect \
-  --lb-id LB-0038 \
-  --limit 20 \
-  --models longevity_llm,gemini_flash,deepseek_chat,claude_sonnet,random_baseline,majority_baseline
+  --parquet data/task_a_senescence/processed/task_a_senescence_test.parquet \
+  --models longevity_llm,claude_sonnet,random_baseline,majority_baseline
 ```
 
 Each model gets its own subdirectory under `outputs/inspect/<model_name>/`.
@@ -76,7 +72,7 @@ my_new_model:
   api_key_env: "MY_API_KEY"
 ```
 
-Available out of the box: `longevity_llm`, `longevity_llm_thinking`, `gemini_flash`, `deepseek_chat`, `claude_sonnet`, `random_baseline`, `majority_baseline`.
+Available: `longevity_llm`, `longevity_llm_thinking`, `claude_sonnet`, `random_baseline`, `majority_baseline`.
 
 ---
 
@@ -118,12 +114,11 @@ Logs include raw response, parsed answer, gold answer, usage, latency, and score
 
 ── STEP 1 — Choose models to evaluate ──────────────
    1) longevity_llm        (openai/longevity-llm)
-   2) gemini_flash         (gemini/gemini-3.5-flash)
-   3) claude_sonnet        (anthropic/claude-sonnet-4-6)
-   4) random_baseline      (baseline:random)  [baseline]
-   5) majority_baseline    (baseline:majority) [baseline]
+   2) claude_sonnet        (anthropic/claude-sonnet-4-6)
+   3) random_baseline      (baseline:random)  [baseline]
+   4) majority_baseline    (baseline:majority) [baseline]
 
-  models: 1,3,4,5
+  models: 1,2,3,4
 
 ── STEP 2 — Choose task and sample limit ───────────
   Task: LB-0038  |  Limit: 50
@@ -145,7 +140,7 @@ Logs include raw response, parsed answer, gold answer, usage, latency, and score
 - Run from repo root with the `.venv` Python.
 - All env vars are loaded from `.env` automatically.
 - The pipeline skips steps you decline — e.g. say `n` to serve if you already have a server running.
-- Concurrency per model is controlled by `max_concurrency` in `config/models.yaml`. Gemini free tier is set to 2; Anthropic to 4; L-LLM to 8.
+- Concurrency per model is controlled by `max_concurrency` in `config/models.yaml`. Anthropic: 4, L-LLM: 8.
 
 ---
 
@@ -218,12 +213,10 @@ run_inspect.py  →  longebench_task (@task)
 
 litellm_client.py   async acomplete()  →  litellm.acompletion()
                                               ├── openai/longevity-llm  (HF vLLM)
-                                              ├── gemini/gemini-2.0-flash
-                                              ├── deepseek/deepseek-chat
-                                              └── anthropic/claude-sonnet-4-5
+                                              └── anthropic/claude-sonnet-4-6
 ```
 
-Scorers: regression MAE · MCQ letter extraction · set Jaccard · normalized exact match.
+Scorers: MCQ letter extraction · normalized exact match (binary, pairwise).
 
 ## Generating + Using Task A (Senescence)
 

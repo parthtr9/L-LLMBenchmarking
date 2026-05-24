@@ -24,6 +24,7 @@
 <script type="text/babel" src="RunDetail.jsx"></script>
 <script type="text/babel" src="RecordDrawer.jsx"></script>
 <script type="text/babel" src="NewRunModal.jsx"></script>
+<script type="text/babel" src="AnswersView.jsx"></script>
 
 <script type="text/babel" data-presets="env,react">
 function App() {
@@ -91,6 +92,7 @@ function App() {
       trust: 'Trust & reasoning',
       matrix: 'Eval matrix',
       compare: 'Model comparison',
+      answers: 'Answers',
       runs: 'Live runs',
       tasks: 'Tasks', models: 'Models', traces: 'Traces',
       synergyage: 'SynergyAge', mgi: 'MGI',
@@ -106,9 +108,11 @@ function App() {
   } else if (view === 'trust') {
     content = <TrustView records={records} onOpenRecord={setOpenRecord} />;
   } else if (view === 'matrix') {
-    content = <ResultsMatrix onOpenRecord={setOpenRecord} />;
+    content = <ResultsMatrix records={records} onOpenRecord={setOpenRecord} />;
   } else if (view === 'compare') {
-    content = <CompareView />;
+    content = <CompareView runs={runs} />;
+  } else if (view === 'answers') {
+    content = <AnswersView records={records} onOpenRecord={setOpenRecord} />;
   } else if (view === 'runs') {
     content = <LiveRunsView runs={runs} onOpenRun={handleOpenRun} />;
   } else if (view === 'tasks') {
