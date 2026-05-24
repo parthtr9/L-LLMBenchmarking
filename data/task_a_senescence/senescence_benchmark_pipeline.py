@@ -952,46 +952,72 @@ def _sample_tissue_balanced(
     n: int,
     rng: np.random.RandomState,
     organ_col: str = 'Organ',
+    direction_col: str = 'direction',
 ) -> pd.DataFrame:
     """
-    Sample n rows from df with equal representation across tissue types.
-    If a tissue has fewer rows than its equal share, takes all of them and
-    redistributes the remainder to tissues with capacity.
+    Sample n rows from df balancing across both tissue type and direction label.
+
+    Strategy: for each (tissue, direction) stratum, compute a fair allocation
+    so that:
+      - Each direction class ends up with n // n_directions rows total
+      - Within each direction, rows are split as evenly as possible across tissues
+      - Strata that can't fill their allocation have their shortfall redistributed
+        to other strata within the same direction that have spare capacity
+
+    This ensures that tissue-balancing never breaks the direction balance.
     """
+    directions = df[direction_col].unique() if direction_col in df.columns else [None]
     tissues = df[organ_col].unique()
+    n_directions = len(directions)
     n_tissues = len(tissues)
-    if n_tissues <= 1:
+
+    # If no direction column or only one tissue, fall back to simple sampling
+    if n_directions <= 1 or n_tissues <= 1:
         return df.sample(min(n, len(df)), random_state=rng)
 
-    target_per_tissue = n // n_tissues
-    remainder = n - target_per_tissue * n_tissues
-
+    target_per_direction = n // n_directions
     parts = []
-    shortfall = 0
-    capacity = []  # (tissue, surplus_rows)
 
-    for tissue in tissues:
-        pool = df[df[organ_col] == tissue]
-        alloc = target_per_tissue
-        if len(pool) >= alloc:
-            parts.append(pool.sample(alloc, random_state=rng))
-            if len(pool) > alloc:
-                capacity.append((tissue, pool, len(pool) - alloc))
-        else:
-            parts.append(pool)
-            shortfall += alloc - len(pool)
+    for direction in directions:
+        dir_pool = df[df[direction_col] == direction] if direction else df
+        target_per_tissue = target_per_direction // n_tissues
+        remainder = target_per_direction - target_per_tissue * n_tissues
 
-    # Distribute remainder + shortfall from tissues with capacity
-    extra_needed = remainder + shortfall
-    for tissue, pool, surplus in capacity:
-        if extra_needed <= 0:
-            break
-        already_sampled = next(p for p in parts if (p[organ_col] == tissue).all())
-        extra = min(extra_needed, surplus)
-        already_used = set(already_sampled.index)
-        pool_remaining = pool[~pool.index.isin(already_used)]
-        parts.append(pool_remaining.sample(extra, random_state=rng))
-        extra_needed -= extra
+        # First pass: allocate target_per_tissue per tissue, track shortfalls
+        dir_parts = []
+        shortfall = 0
+        capacity = []  # (tissue, remaining_pool, spare_count)
+
+        for tissue in tissues:
+            pool = dir_pool[dir_pool[organ_col] == tissue]
+            alloc = target_per_tissue
+            if len(pool) >= alloc:
+                dir_parts.append(pool.sample(alloc, random_state=rng))
+                spare = len(pool) - alloc
+                if spare > 0:
+                    capacity.append((tissue, pool, spare, alloc))
+            else:
+                dir_parts.append(pool)
+                shortfall += alloc - len(pool)
+
+        # Second pass: fill shortfall + remainder from tissues with capacity
+        extra_needed = shortfall + remainder
+        for tissue, pool, spare, already_taken in capacity:
+            if extra_needed <= 0:
+                break
+            already_used = set(dir_parts[
+                next(i for i, p in enumerate(dir_parts)
+                     if len(p) > 0 and (p[organ_col] == tissue).all())
+            ].index) if any(
+                len(p) > 0 and (p[organ_col] == tissue).all() for p in dir_parts
+            ) else set()
+            pool_remaining = pool[~pool.index.isin(already_used)]
+            take = min(extra_needed, len(pool_remaining))
+            if take > 0:
+                dir_parts.append(pool_remaining.sample(take, random_state=rng))
+                extra_needed -= take
+
+        parts.extend(dir_parts)
 
     result = pd.concat(parts).sample(frac=1, random_state=rng)
     return result
@@ -1010,13 +1036,14 @@ def generate_all_benchmarks(
     with tissue-balanced sampling across Organ types."""
     rng = np.random.RandomState(random_state)
 
-    # --- MCQ: tissue-balanced sample from input df before generating ---
+    # --- MCQ: tissue + direction balanced sample from input df ---
     mcq_input = _sample_tissue_balanced(mcq_df, target_per_task, rng)
     mcq_prompts = []
     for i, (_, row) in enumerate(mcq_input.iterrows()):
         mcq_prompts.append(generate_mcq_prompt(row, i + 1))
     tissue_counts = mcq_input['Organ'].value_counts().to_dict()
-    print(f"  MCQ prompts: {len(mcq_prompts)} (target {target_per_task}) | tissues: {tissue_counts}")
+    label_counts = mcq_input['direction'].value_counts().to_dict()
+    print(f"  MCQ prompts: {len(mcq_prompts)} (target {target_per_task}) | tissues: {tissue_counts} | labels: {label_counts}")
 
     # --- Pairwise: build all pairs, then tissue-balance at selection ---
     pairs = build_pairwise_pairs(pair_df, min_logfc_gap=min_logfc_gap, random_state=random_state)
@@ -1070,13 +1097,14 @@ def generate_all_benchmarks(
         print(f"    ⚠ Below target — only {len(pairs)} valid pairs survived the "
               f"|LogFC| gap ≥ {min_logfc_gap} filter")
 
-    # --- Regression: tissue-balanced sample from input df before generating ---
+    # --- Regression: tissue + direction balanced sample from input df ---
     reg_input = _sample_tissue_balanced(reg_df, target_per_task, rng)
     reg_prompts = []
     for i, (_, row) in enumerate(reg_input.iterrows()):
         reg_prompts.append(generate_regression_prompt(row, i + 1, logfc_cap=logfc_cap))
     tissue_counts = reg_input['Organ'].value_counts().to_dict()
-    print(f"  Regression prompts: {len(reg_prompts)} (target {target_per_task}) | tissues: {tissue_counts}")
+    label_counts = reg_input['direction'].value_counts().to_dict()
+    print(f"  Regression prompts: {len(reg_prompts)} (target {target_per_task}) | tissues: {tissue_counts} | labels: {label_counts}")
 
     return mcq_prompts, pair_prompts, reg_prompts
 
@@ -1384,6 +1412,20 @@ def main():
         logfc_cap=args.logfc_cap,
         random_state=args.seed,
     )
+
+    # Validate MCQ label balance
+    mcq_labels = [p['messages'][-1]['content'] for p in mcq_prompts]
+    mcq_label_counts = pd.Series(mcq_labels).value_counts().to_dict()
+    expected = {'A', 'B', 'C'}
+    if set(mcq_label_counts.keys()) != expected:
+        print(f"  ⚠ MCQ label encoding issue: found {set(mcq_label_counts.keys())}, expected {expected}")
+    else:
+        counts = [mcq_label_counts.get(k, 0) for k in 'ABC']
+        max_imbalance = max(counts) - min(counts)
+        if max_imbalance > 5:
+            print(f"  ⚠ MCQ label imbalance: {mcq_label_counts} (max skew: {max_imbalance})")
+        else:
+            print(f"  ✓ MCQ label balance OK: {mcq_label_counts}")
 
     # Combine all prompts
     all_prompts = mcq_prompts + pair_prompts + reg_prompts
