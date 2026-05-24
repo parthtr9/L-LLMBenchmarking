@@ -92,8 +92,35 @@ def _bootstrap_ci(
 
 # ── per-format metrics ────────────────────────────────────────────────────────
 
+_LETTER_TO_INDEX = {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 5}
+
+
+def _off_by_one_accuracy_score(gold: list[str], pred: list[str]) -> float | None:
+    """Graded ordinal accuracy for letter-coded MCQ: 1.0 exact, 0.5 adjacent, 0.0 else.
+
+    Returns None if no letters can be parsed. Parse failures contribute 0.0
+    (consistent with the inspect scorer).
+    """
+    if not gold:
+        return None
+    total = 0.0
+    for g, p in zip(gold, pred):
+        gi = _LETTER_TO_INDEX.get(str(g).strip().upper()[:1])
+        pi = _LETTER_TO_INDEX.get(str(p).strip().upper()[:1])
+        if gi is None or pi is None:
+            continue
+        d = abs(gi - pi)
+        if d == 0:
+            total += 1.0
+        elif d == 1:
+            total += 0.5
+    return round(total / len(gold), 4)
+
+
 def _mcq_metrics(
-    gold: list[str], pred: list[str]
+    gold: list[str],
+    pred: list[str],
+    sample_metrics: list[str] | None = None,
 ) -> dict[str, Any]:
     labels = sorted(set(gold) | set(pred))
     acc = accuracy_score(gold, pred)
@@ -104,7 +131,7 @@ def _mcq_metrics(
                            lambda t, p: f1_score(t, p, average="macro",
                                                  labels=labels, zero_division=0))
     cm = confusion_matrix(gold, pred, labels=labels).tolist()
-    return {
+    out: dict[str, Any] = {
         "n": len(gold), "labels": labels,
         "accuracy": round(acc, 4), "macro_f1": round(f1, 4),
         "balanced_accuracy": round(bal, 4),
@@ -112,6 +139,29 @@ def _mcq_metrics(
         "ci_macro_f1": [round(x, 4) for x in ci_f1],
         "confusion_matrix": {"labels": labels, "matrix": cm},
     }
+
+    # Off-by-one accuracy — only for the subset of samples whose metric field
+    # is 'off-by-one accuracy' (ordinal MCQ like Lipidomics age brackets). Task A
+    # MCQ labels are categorical (up/down/no-change), so off-by-one is undefined
+    # and intentionally omitted.
+    if sample_metrics:
+        obo_pairs = [
+            (g, p) for g, p, m in zip(gold, pred, sample_metrics)
+            if str(m or "").lower() == "off-by-one accuracy"
+        ]
+        if obo_pairs:
+            g_obo, p_obo = zip(*obo_pairs)
+            obo_score = _off_by_one_accuracy_score(list(g_obo), list(p_obo))
+            if obo_score is not None:
+                out["off_by_one_accuracy"] = obo_score
+                out["off_by_one_n"] = len(obo_pairs)
+                # Bootstrap CI on the off-by-one subset
+                ci_obo = _bootstrap_ci(
+                    list(g_obo), list(p_obo),
+                    lambda t, p: _off_by_one_accuracy_score(list(t), list(p)) or 0.0,
+                )
+                out["ci_off_by_one"] = [round(x, 4) for x in ci_obo]
+    return out
 
 
 def _binary_metrics(gold: list[str], pred: list[str]) -> dict[str, Any]:
@@ -194,32 +244,44 @@ def _normalize_task_group(display_group: str | None, lb_id: str | None = None) -
 # ── collect predictions from data.json ───────────────────────────────────────
 
 def _collect(data: dict) -> dict[str, dict[str, dict]]:
-    """Return nested: {model_id: {format: {gold:[], pred:[]}}}"""
-    bucket: dict[str, dict[str, dict]] = defaultdict(lambda: defaultdict(lambda: {"gold": [], "pred": []}))
+    """Return nested: {model_id: {format: {gold:[], pred:[], metrics:[]}}}
+
+    `metrics` is the per-sample `metric` field from sample.metadata, used to
+    branch on off-by-one accuracy vs plain accuracy inside `_mcq_metrics`.
+    """
+    bucket: dict[str, dict[str, dict]] = defaultdict(
+        lambda: defaultdict(lambda: {"gold": [], "pred": [], "metrics": []})
+    )
     for sample in data["samples"]:
         fmt = (sample.get("format") or "unknown").lower()
         gold_raw = sample.get("gold") or ""
+        sample_metric = ((sample.get("metadata") or {}).get("metric") or "").lower()
         for model_id, cell in (sample.get("cells") or {}).items():
             pred_raw = cell.get("pred") or ""
             bucket[model_id][fmt]["gold"].append(gold_raw)
             bucket[model_id][fmt]["pred"].append(pred_raw)
+            bucket[model_id][fmt]["metrics"].append(sample_metric)
     return bucket
 
 
 def _collect_by_task(data: dict) -> dict[str, dict[str, dict[str, dict]]]:
-    """Return nested: {task_group: {model_id: {format: {gold:[], pred:[]}}}}"""
+    """Return nested: {task_group: {model_id: {format: {gold, pred, metrics}}}}"""
     outer: dict[str, Any] = defaultdict(
-        lambda: defaultdict(lambda: defaultdict(lambda: {"gold": [], "pred": []}))
+        lambda: defaultdict(lambda: defaultdict(
+            lambda: {"gold": [], "pred": [], "metrics": []}
+        ))
     )
     for sample in data["samples"]:
         meta = sample.get("metadata") or {}
         task_group = _normalize_task_group(meta.get("display_group"), sample.get("lb_id"))
         fmt = (sample.get("format") or "unknown").lower()
         gold_raw = sample.get("gold") or ""
+        sample_metric = (meta.get("metric") or "").lower()
         for model_id, cell in (sample.get("cells") or {}).items():
             pred_raw = cell.get("pred") or ""
             outer[task_group][model_id][fmt]["gold"].append(gold_raw)
             outer[task_group][model_id][fmt]["pred"].append(pred_raw)
+            outer[task_group][model_id][fmt]["metrics"].append(sample_metric)
     return outer
 
 
@@ -235,11 +297,14 @@ def compute_all_metrics(data: dict) -> dict[str, dict[str, dict]]:
         for fmt, pairs in fmt_data.items():
             gold_raw = pairs["gold"]
             pred_raw = pairs["pred"]
+            sample_metrics = pairs.get("metrics") or []
 
             if fmt in ("mcq",):
                 gold = [_extract_letter(g) or g for g in gold_raw]
                 pred = [_extract_letter(p) or p for p in pred_raw]
-                results[model_id][fmt] = _mcq_metrics(gold, pred)
+                results[model_id][fmt] = _mcq_metrics(
+                    gold, pred, sample_metrics=sample_metrics,
+                )
 
             elif fmt in ("binary", "pairwise"):
                 gold = [_extract_letter(g) or g for g in gold_raw]
@@ -393,15 +458,32 @@ def render_report(
     for fmt in formats_present:
         a(f"### Format: `{_format_label(fmt)}`\n")
         if fmt in ("mcq",):
-            a("| Model | N | Accuracy | Macro F1 | Balanced Acc | CI (F1) |")
-            a("|---|---|---|---|---|---|")
-            for mid in _ordered_models(metrics):
-                if mid not in metrics or fmt not in metrics[mid]:
-                    continue
-                m = metrics[mid][fmt]
-                name = MODEL_DISPLAY.get(mid, mid)
-                ci = _fmt_ci(m.get("ci_macro_f1"))
-                a(f"| {name} | {m['n']} | {m['accuracy']:.3f} | {m['macro_f1']:.3f} | {m['balanced_accuracy']:.3f} | {ci} |")
+            has_obo = any(
+                metrics[mid].get(fmt, {}).get("off_by_one_accuracy") is not None
+                for mid in metrics if fmt in metrics.get(mid, {})
+            )
+            if has_obo:
+                a("| Model | N | Accuracy | Macro F1 | Balanced Acc | Off-by-one | CI (Off-by-one) |")
+                a("|---|---|---|---|---|---|---|")
+                for mid in _ordered_models(metrics):
+                    if mid not in metrics or fmt not in metrics[mid]:
+                        continue
+                    m = metrics[mid][fmt]
+                    name = MODEL_DISPLAY.get(mid, mid)
+                    obo = m.get("off_by_one_accuracy")
+                    obo_str = f"{obo:.3f}" if obo is not None else "—"
+                    ci_obo = _fmt_ci(m.get("ci_off_by_one"))
+                    a(f"| {name} | {m['n']} | {m['accuracy']:.3f} | {m['macro_f1']:.3f} | {m['balanced_accuracy']:.3f} | {obo_str} | {ci_obo} |")
+            else:
+                a("| Model | N | Accuracy | Macro F1 | Balanced Acc | CI (F1) |")
+                a("|---|---|---|---|---|---|")
+                for mid in _ordered_models(metrics):
+                    if mid not in metrics or fmt not in metrics[mid]:
+                        continue
+                    m = metrics[mid][fmt]
+                    name = MODEL_DISPLAY.get(mid, mid)
+                    ci = _fmt_ci(m.get("ci_macro_f1"))
+                    a(f"| {name} | {m['n']} | {m['accuracy']:.3f} | {m['macro_f1']:.3f} | {m['balanced_accuracy']:.3f} | {ci} |")
             a("")
             # confusion matrices
             a("**Confusion matrices:**\n")
@@ -590,10 +672,13 @@ def main() -> None:
             for fmt, pairs in fmt_data.items():
                 gold_raw = pairs["gold"]
                 pred_raw = pairs["pred"]
+                sample_metrics = pairs.get("metrics") or []
                 if fmt in ("mcq",):
                     gold = [_extract_letter(g) or g for g in gold_raw]
                     pred = [_extract_letter(p) or p for p in pred_raw]
-                    task_metrics[model_id][fmt] = _mcq_metrics(gold, pred)
+                    task_metrics[model_id][fmt] = _mcq_metrics(
+                        gold, pred, sample_metrics=sample_metrics,
+                    )
                 elif fmt in ("binary", "pairwise"):
                     gold = [_extract_letter(g) or g for g in gold_raw]
                     pred = [_extract_letter(p) or p for p in pred_raw]
@@ -641,7 +726,9 @@ def main() -> None:
             if fmt == "regression":
                 val = f"MAE={m.get('mae','?')}"
             elif fmt == "mcq":
-                val = f"acc={m.get('accuracy','?')} macro_f1={m.get('macro_f1','?')} bal_acc={m.get('balanced_accuracy','?')}"
+                obo = m.get("off_by_one_accuracy")
+                obo_str = f" off-by-one={obo}" if obo is not None else ""
+                val = f"acc={m.get('accuracy','?')} macro_f1={m.get('macro_f1','?')} bal_acc={m.get('balanced_accuracy','?')}{obo_str}"
             elif fmt == "pairwise":
                 val = f"acc={m.get('accuracy','?')} bal_acc={m.get('balanced_accuracy','?')} a_bias={m.get('a_bias','?')}"
             else:

@@ -14,7 +14,16 @@ function _primaryScore(fmtMetrics, fmt) {
     const mae = fmtMetrics.mae;
     return mae != null ? 1 / (1 + mae) : null;
   }
+  // Ordinal MCQ (e.g. Lipidomics age brackets) reports off-by-one accuracy;
+  // when present it is the task's headline metric.
+  if (fmtMetrics.off_by_one_accuracy != null) return fmtMetrics.off_by_one_accuracy;
   return fmtMetrics.balanced_accuracy ?? fmtMetrics.accuracy ?? null;
+}
+
+function _primaryLabel(fmt, fmtMetrics) {
+  if (fmt === 'regression') return '1/(1+MAE) score';
+  if (fmtMetrics?.off_by_one_accuracy != null) return 'off-by-one accuracy';
+  return 'balanced accuracy';
 }
 
 function _fmtPct(v, decimals = 1) {
@@ -101,7 +110,6 @@ const GapBaselineBadge = ({ value, baseline, isMAE = false }) => {
 
 const GapLeaderboard = ({ metrics, modelDisplay, modelOrder, activeFormat }) => {
   const isSingleFmt = activeFormat && activeFormat !== 'all';
-  const isMAE = activeFormat === 'regression';
 
   const scoreFor = (mid) => isSingleFmt
     ? _primaryScore(metrics[mid]?.[activeFormat], activeFormat)
@@ -123,9 +131,14 @@ const GapLeaderboard = ({ metrics, modelDisplay, modelOrder, activeFormat }) => 
   const majorityScore = scoreFor('majority_baseline');
   const bestScore = nonBaselines[0]?.score;
 
+  // Pick a representative model to read the metric label (any non-baseline first)
+  const _labelModel = isSingleFmt
+    ? (nonBaselines[0]?.id || modelOrder.find(mid => metrics[mid]?.[activeFormat]))
+    : null;
   const subLabel = isSingleFmt
-    ? (_GAP_FORMAT_LABELS[activeFormat] || activeFormat) + (isMAE ? ' · 1/(1+MAE) score' : ' · balanced accuracy')
-    : 'avg balanced accuracy across MCQ · Binary · Pairwise';
+    ? (_GAP_FORMAT_LABELS[activeFormat] || activeFormat)
+      + ' · ' + _primaryLabel(activeFormat, _labelModel ? metrics[_labelModel]?.[activeFormat] : null)
+    : 'avg primary score across MCQ · Binary · Pairwise';
 
   return (
     <div className="card" style={{ marginBottom: 20, padding: '18px 24px' }}>
@@ -276,8 +289,15 @@ const GapFormatPanel = ({ fmt, metrics, modelDisplay, modelOrder }) => {
   const label = _GAP_FORMAT_LABELS[fmt] || fmt;
   const majorityScore = _primaryScore(metrics['majority_baseline']?.[fmt], fmt);
 
+  // Surface off-by-one accuracy as an extra MCQ column when any model has it
+  const hasOffByOne = fmt === 'mcq' && ordered.some(
+    mid => metrics[mid]?.[fmt]?.off_by_one_accuracy != null,
+  );
+
   const subLabels = {
-    mcq: 'balanced accuracy · macro F1 · CI · confusion matrix',
+    mcq: hasOffByOne
+      ? 'off-by-one accuracy (ordinal) · balanced accuracy · macro F1 · confusion matrix'
+      : 'balanced accuracy · macro F1 · CI · confusion matrix',
     binary: 'balanced accuracy · class-level · prediction distribution',
     pairwise: 'accuracy · A/B distribution · position bias',
     regression: 'MAE · median AE · Spearman r · sign accuracy · CI',
@@ -297,6 +317,7 @@ const GapFormatPanel = ({ fmt, metrics, modelDisplay, modelOrder }) => {
               <th>Model</th>
               <th style={{ textAlign: 'right' }}>N</th>
               {fmt === 'mcq' && <>
+                {hasOffByOne && <th style={{ textAlign: 'right' }}>Off-by-one</th>}
                 <th style={{ textAlign: 'right' }}>Bal Acc</th>
                 <th style={{ textAlign: 'right' }}>Macro F1</th>
                 <th style={{ textAlign: 'right' }}>CI (F1)</th>
@@ -343,7 +364,20 @@ const GapFormatPanel = ({ fmt, metrics, modelDisplay, modelOrder }) => {
                   <td className="mono" style={{ textAlign: 'right' }}>{m.n}</td>
 
                   {fmt === 'mcq' && <>
-                    <td className="mono" style={{ textAlign: 'right', fontWeight: 600, color }}>
+                    {hasOffByOne && (
+                      <td className="mono" style={{
+                        textAlign: 'right',
+                        fontWeight: 600,
+                        color: m.off_by_one_accuracy != null ? color : 'var(--lb-fg-4)',
+                      }}>
+                        {m.off_by_one_accuracy != null ? _fmtPct(m.off_by_one_accuracy) : '—'}
+                      </td>
+                    )}
+                    <td className="mono" style={{
+                      textAlign: 'right',
+                      fontWeight: hasOffByOne ? 400 : 600,
+                      color: hasOffByOne ? 'var(--lb-fg-3)' : color,
+                    }}>
                       {_fmtPct(m.balanced_accuracy)}
                     </td>
                     <td className="mono" style={{ textAlign: 'right' }}>{_fmtNum(m.macro_f1)}</td>
