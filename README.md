@@ -1,7 +1,7 @@
 # LongevityBench-X
 
 **Caltech Longevity Hackathon — Track 01: LongevityLLM Benchmarking**  
-Sponsored by Insilico Medicine · Prize: $1,000 + co-authorship
+Sponsored by Insilico Medicine 
 
 Structured evaluation of L-LLM (Insilico Medicine's fine-tuned Qwen3.5-9B) against Claude Sonnet 4.6 across two novel biology benchmark tasks: senescence perturbation transcriptomics and plasma lipidomics. Includes an automated reasoning-trace faithfulness scorer and a static React dashboard for interactive result exploration.
 
